@@ -1,0 +1,6 @@
+id: connector-delete-reconciliation
+name: Connector delete reconciliation
+critical: true
+pytest_selector: tests/test_diff_engine.py::test_compute_diffs_detects_updates_and_deletes
+acceptance:
+  - Missing records are emitted as DELETE ops when deletePolicy=auto_delete_missing.

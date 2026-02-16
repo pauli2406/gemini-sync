@@ -38,6 +38,8 @@ dev = [
   "pytest-cov>=5.0.0",
   "jsonschema>=4.23.0",
   "ruff>=0.7.1",
+  "diff-cover>=9.4.1",
+  "pip-audit>=2.9.0",
 ]
 
 [project.scripts]

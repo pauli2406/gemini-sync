@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 from gemini_sync_bridge.db import get_session
 from gemini_sync_bridge.models import IdempotencyKey, PushBatch, PushEvent
 from gemini_sync_bridge.schemas import CanonicalDocument, PushResponse
+from gemini_sync_bridge.security import PromptInjectionDetectedError, validate_prompt_injection_safe
 from gemini_sync_bridge.settings import get_settings
 from gemini_sync_bridge.utils.logging import configure_logging
 
@@ -107,8 +108,12 @@ async def push_events(
 
     for raw in events:
         try:
-            valid_docs.append(CanonicalDocument.model_validate(raw))
+            document = CanonicalDocument.model_validate(raw)
+            validate_prompt_injection_safe(document.title, document.content)
+            valid_docs.append(document)
             accepted += 1
+        except PromptInjectionDetectedError:
+            rejected += 1
         except Exception:
             rejected += 1
 

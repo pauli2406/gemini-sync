@@ -1,0 +1,7 @@
+id: checkpoint-not-advanced-on-ingestion-failure
+name: Checkpoint not advanced when ingestion fails
+critical: true
+pytest_selector: tests/test_pipeline_checkpoint_failure.py::test_checkpoint_not_advanced_when_ingestion_fails
+acceptance:
+  - Connector run fails when ingestion errors.
+  - Checkpoint remains unchanged after failure.

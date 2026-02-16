@@ -2,6 +2,8 @@
 
 Gemini Sync Bridge is an open-source, GitOps-managed integration layer for syncing on-prem SQL/REST data into Google Cloud Storage (single cloud handoff) and ingesting it into Gemini Enterprise data stores.
 
+Agentic development is governed by `/Users/marcelpochert/Programming/ai/gemini-sync/AGENTS.md` and roadmap outcomes are tracked in `/Users/marcelpochert/Programming/ai/gemini-sync/docs/roadmap.md`.
+
 ## What v1 Includes
 
 - Connector definitions in Git (`connectors/*.yaml`) validated by JSON Schema.
@@ -114,17 +116,34 @@ Process queued push events:
 gemini-sync-bridge run --connector connectors/support-push.yaml
 ```
 
+### 8) Run local governance gates
+
+```bash
+python scripts/check_tdd_guardrails.py
+python scripts/check_docs_drift.py
+python scripts/check_security_policy.py
+python scripts/run_dependency_audit.py
+python scripts/run_scenario_evals.py --registry evals/eval_registry.yaml --baseline evals/baseline.json
+```
+
 ## CI Checks
 
 - Connector schema validation
 - Pytest suite
 - Ruff linting
+- TDD/EDD changed-files guardrails
+- Docs drift and docs consistency checks
+- Diff coverage enforcement
+- Security policy validation, secret scanning, and dependency audit
 
 ## Production Notes
 
 - Keep `GEMINI_INGESTION_DRY_RUN=false` only in environments with valid Google credentials and quota controls.
 - Use Kubernetes Secrets to provide `SECRET_<SECRETREF>` values.
 - Run this service in a private network segment with access to on-prem systems and controlled egress to GCP.
+- Canonical runtime command: `gemini-sync-bridge run --connector connectors/hr-employees.yaml`
+- Canonical API command: `gemini-sync-bridge serve --host 0.0.0.0 --port 8080`
+- Governance gate commands: `python scripts/check_tdd_guardrails.py` and `python scripts/check_docs_drift.py`
 
 ## License
 

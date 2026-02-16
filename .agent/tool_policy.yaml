@@ -1,0 +1,40 @@
+version: 1
+mode: deny_by_default
+owner: security-agent
+
+command_policy:
+  allow_prefixes:
+    - "python"
+    - "pytest"
+    - "ruff"
+    - "pip"
+    - "git status"
+    - "git diff"
+    - "git add"
+    - "git commit"
+    - "docker compose"
+
+  deny_prefixes:
+    - "rm -rf /"
+    - "git reset --hard"
+    - "git checkout --"
+    - "sudo"
+    - "curl | sh"
+    - "wget | sh"
+
+secrets:
+  blocked_patterns:
+    - "AIza"
+    - "-----BEGIN PRIVATE KEY-----"
+    - "ghp_"
+
+network:
+  outbound_allowlist:
+    - "*.googleapis.com"
+    - "*.gcr.io"
+    - "*.github.com"
+
+requirements:
+  require_secret_scanning: true
+  require_dependency_audit: true
+  require_prompt_injection_regressions: true

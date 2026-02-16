@@ -8,6 +8,7 @@ from typing import Any
 from jinja2 import StrictUndefined, Template
 
 from gemini_sync_bridge.schemas import CanonicalDocument, MappingConfig
+from gemini_sync_bridge.security import validate_prompt_injection_safe
 
 
 class NormalizationError(RuntimeError):
@@ -85,6 +86,10 @@ def normalize_records(
                 else []
             ),
         }
+        validate_prompt_injection_safe(
+            payload_for_hash["title"],
+            payload_for_hash["content"],
+        )
 
         doc = CanonicalDocument(
             doc_id=doc_id,

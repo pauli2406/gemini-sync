@@ -1,0 +1,7 @@
+id: push-idempotency-and-replay
+name: Push idempotency and replay
+critical: true
+pytest_selector: tests/test_push_api.py::test_push_events_idempotency
+acceptance:
+  - Same idempotency key + same payload returns same response.
+  - Same idempotency key + different payload returns HTTP 409.

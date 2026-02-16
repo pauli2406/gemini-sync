@@ -1,0 +1,54 @@
+version: 1
+owner: security-agent
+
+tiers:
+  tier_0:
+    description: docs/chore/tests only
+    patterns:
+      - "docs/**"
+      - "README.md"
+      - "CONTRIBUTING.md"
+      - "tests/**"
+      - ".github/**"
+      - "*.md"
+    merge:
+      auto_merge: true
+      requires_reviewer_bot: false
+      requires_human_reviewers: 0
+
+  tier_1:
+    description: connector and non-runtime configuration changes
+    patterns:
+      - "connectors/**"
+      - "schemas/**"
+      - "flows/**"
+    merge:
+      auto_merge: true
+      requires_reviewer_bot: false
+      requires_human_reviewers: 0
+
+  tier_2:
+    description: runtime, API, and operational logic
+    patterns:
+      - "gemini_sync_bridge/**"
+      - "scripts/**"
+    merge:
+      auto_merge: true
+      requires_reviewer_bot: true
+      requires_human_reviewers: 1
+
+  tier_3:
+    description: security, release, and critical infrastructure changes
+    patterns:
+      - ".agent/**"
+      - "infra/**"
+      - ".github/workflows/release-canary.yaml"
+      - ".github/workflows/nightly-evals.yaml"
+    merge:
+      auto_merge: false
+      requires_reviewer_bot: true
+      requires_human_reviewers: 1
+
+policy:
+  default_tier: tier_2
+  conservative_escalation: true

@@ -30,3 +30,12 @@ When a run fails:
 - Success rate over 7 days (`run_state.status`).
 - Freshness lag (`now - connector_checkpoints.updated_at`).
 - MTTR (`failure time` to next successful run).
+
+## Canonical Commands
+
+```bash
+gemini-sync-bridge run --connector connectors/hr-employees.yaml
+gemini-sync-bridge serve --host 0.0.0.0 --port 8080
+python scripts/check_tdd_guardrails.py
+python scripts/check_docs_drift.py
+```

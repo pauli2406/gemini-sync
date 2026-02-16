@@ -1,0 +1,42 @@
+name: Nightly Evals
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  nightly:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev]
+
+      - name: Full scenario eval suite
+        run: python scripts/run_scenario_evals.py --registry evals/eval_registry.yaml --baseline evals/baseline.json
+
+      - name: Flaky test detector
+        run: python scripts/detect_flaky_tests.py --runs 3
+
+      - name: Prompt-injection regression checks
+        run: pytest -q tests/test_security_prompt_injection.py
+
+      - name: Performance regression smoke suite
+        run: python scripts/performance_smoke.py --records 1000 --max-seconds 2.0
+
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2

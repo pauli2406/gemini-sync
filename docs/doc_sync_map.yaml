@@ -1,0 +1,59 @@
+version: 1
+
+exempt_sources:
+  - "tests/**"
+  - ".github/**"
+  - ".gitignore"
+  - "LICENSE"
+  - "CONTRIBUTING.md"
+
+rules:
+  - name: runtime_and_api
+    sources:
+      - "gemini_sync_bridge/**"
+    docs_any_of:
+      - "README.md"
+      - "docs/architecture.md"
+      - "docs/operations-runbook.md"
+
+  - name: connector_contract
+    sources:
+      - "connectors/**"
+      - "schemas/connector.schema.json"
+    docs_any_of:
+      - "README.md"
+      - "docs/connector-authoring.md"
+
+  - name: orchestrator_and_deploy
+    sources:
+      - "flows/**"
+      - "infra/**"
+      - "docker-compose.yml"
+      - "Dockerfile"
+    docs_any_of:
+      - "README.md"
+      - "docs/architecture.md"
+      - "docs/operations-runbook.md"
+
+  - name: governance_and_quality
+    sources:
+      - "scripts/check_*.py"
+      - ".agent/**"
+      - "schemas/agent-task.schema.json"
+      - "AGENTS.md"
+      - "evals/**"
+    docs_any_of:
+      - "README.md"
+      - "AGENTS.md"
+      - "docs/roadmap.md"
+
+consistency:
+  required_files:
+    - "README.md"
+    - "docs/architecture.md"
+    - "docs/operations-runbook.md"
+  required_tokens:
+    - "gemini-sync-bridge run --connector"
+    - "gemini-sync-bridge serve --host 0.0.0.0 --port 8080"
+    - "python scripts/check_tdd_guardrails.py"
+    - "python scripts/check_docs_drift.py"

@@ -1,0 +1,6 @@
+id: prompt-injection-rest-push
+name: Prompt-injection hardening for rest_push
+critical: true
+pytest_selector: tests/test_security_prompt_injection.py::test_push_events_reject_prompt_injection_payload
+acceptance:
+  - rest_push payload with prompt-injection markers is rejected.

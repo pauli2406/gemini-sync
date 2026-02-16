@@ -1,0 +1,6 @@
+id: prompt-injection-rest-pull
+name: Prompt-injection hardening for rest_pull normalization
+critical: true
+pytest_selector: tests/test_security_prompt_injection.py::test_normalizer_rejects_prompt_injection_content
+acceptance:
+  - Normalizer fails fast when rendered content contains prompt-injection markers.

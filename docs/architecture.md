@@ -45,3 +45,14 @@
 7. Commit checkpoint + record state only on success.
 
 This ordering guarantees that failed ingestion does not advance source checkpoints.
+
+## Canonical Commands
+
+Use these same commands across README, operations runbook, and automation:
+
+```bash
+gemini-sync-bridge run --connector connectors/hr-employees.yaml
+gemini-sync-bridge serve --host 0.0.0.0 --port 8080
+python scripts/check_tdd_guardrails.py
+python scripts/check_docs_drift.py
+```

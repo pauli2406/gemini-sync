@@ -1,0 +1,25 @@
+version: 1
+
+thresholds:
+  min_pass_rate_percent: 95
+  min_critical_pass_rate_percent: 100
+
+scenarios:
+  - id: connector-delete-reconciliation
+    path: evals/scenarios/connector-delete-reconciliation.yaml
+    critical: true
+  - id: push-idempotency-and-replay
+    path: evals/scenarios/push-idempotency-and-replay.yaml
+    critical: true
+  - id: retry-backoff-429-5xx
+    path: evals/scenarios/retry-backoff-429-5xx.yaml
+    critical: false
+  - id: checkpoint-not-advanced-on-ingestion-failure
+    path: evals/scenarios/checkpoint-not-advanced-on-ingestion-failure.yaml
+    critical: true
+  - id: prompt-injection-rest-push
+    path: evals/scenarios/prompt-injection-rest-push.yaml
+    critical: true
+  - id: prompt-injection-rest-pull
+    path: evals/scenarios/prompt-injection-rest-pull.yaml
+    critical: true

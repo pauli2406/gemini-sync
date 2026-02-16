@@ -4,22 +4,50 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -e .[dev]
+
       - name: Validate connector schemas
         run: python scripts/validate_connectors.py
+
       - name: Lint
         run: ruff check .
-      - name: Test
-        run: pytest
+
+      - name: TDD + EDD guardrails
+        run: python scripts/check_tdd_guardrails.py
+
+      - name: Docs drift + consistency
+        run: python scripts/check_docs_drift.py
+
+      - name: Unit and integration tests with coverage
+        run: pytest --cov=gemini_sync_bridge --cov-report=xml --cov-fail-under=60
+
+      - name: Diff coverage
+        run: diff-cover coverage.xml --compare-branch=origin/main --fail-under=92
+
+      - name: Security policy check
+        run: python scripts/check_security_policy.py
+
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2
+
+      - name: Dependency vulnerability audit
+        run: python scripts/run_dependency_audit.py

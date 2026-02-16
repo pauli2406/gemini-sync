@@ -1,0 +1,103 @@
+name: Release Canary
+
+on:
+  workflow_dispatch:
+    inputs:
+      metrics_json:
+        description: "Canary metrics payload as JSON"
+        required: true
+        default: '{"error_budget_burn":0.05,"failed_run_rate_delta":0.0,"freshness_lag_breach":false}'
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+
+jobs:
+  canary-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev]
+          pip install build
+
+      - name: Validate quality gates
+        run: |
+          python scripts/validate_connectors.py
+          ruff check .
+          python scripts/check_tdd_guardrails.py
+          python scripts/check_docs_drift.py
+          python scripts/check_security_policy.py
+          pytest --cov=gemini_sync_bridge --cov-report=xml --cov-fail-under=60
+
+      - name: Build release artifacts
+        run: python -m build
+
+      - name: Generate immutable release metadata
+        run: |
+          sha256sum dist/* > release-metadata.sha256
+          python - <<'PY'
+          import json
+          import hashlib
+          from pathlib import Path
+
+          payload = {
+              "artifacts": [],
+          }
+          for path in sorted(Path("dist").glob("*")):
+              payload["artifacts"].append(
+                  {
+                      "name": path.name,
+                      "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                  }
+              )
+          Path("release-metadata.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
+          PY
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: "dist/*"
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts
+          path: |
+            dist/*
+            release-metadata.json
+            release-metadata.sha256
+
+      - name: Evaluate canary gate
+        id: canary
+        run: |
+          echo '${{ github.event.inputs.metrics_json }}' > canary-metrics.json
+          python scripts/canary_gate.py --metrics canary-metrics.json
+
+      - name: Canary rollout placeholder
+        if: success()
+        run: echo "Canary SLO gate passed. Proceed with staged rollout automation here."
+
+      - name: Automatic rollback placeholder
+        if: failure()
+        run: |
+          echo "Canary SLO gate failed. Triggering rollback automation."
+          echo "rollback_triggered=true" > rollback-status.txt
+
+      - name: Notify Teams on rollback
+        if: failure() && env.TEAMS_WEBHOOK_URL != ''
+        env:
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+        run: |
+          curl -X POST -H "Content-Type: application/json" \
+            -d '{"text":"Gemini Sync Bridge canary failed and rollback was triggered."}' \
+            "$TEAMS_WEBHOOK_URL"

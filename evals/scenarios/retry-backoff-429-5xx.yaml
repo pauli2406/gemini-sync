@@ -1,0 +1,7 @@
+id: retry-backoff-429-5xx
+name: REST pull retry/backoff under 429 and 5xx
+critical: false
+pytest_selector: tests/test_extractors_retry.py::test_request_with_retry_retries_on_429_then_succeeds
+acceptance:
+  - Transient 429/5xx responses are retried.
+  - Successful response is returned after retry.
