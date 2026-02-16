@@ -1,0 +1,37 @@
+apiVersion: sync.gemini.io/v1alpha1
+kind: Connector
+metadata:
+  name: kb-rest
+spec:
+  mode: rest_pull
+  schedule: "*/30 * * * *"
+  source:
+    type: http
+    secretRef: kb-api-token
+    url: https://kb.internal/api/v1/articles
+    method: GET
+    watermarkField: updated_at
+    paginationCursorField: cursor
+    paginationNextCursorJsonPath: paging.next_cursor
+    headers:
+      X-Tenant: internal
+  mapping:
+    idField: article_id
+    titleField: title
+    contentTemplate: "{{ title }}\n{{ body }}"
+    uriTemplate: "https://kb.internal/article/{{ article_id }}"
+    aclUsersField: allowed_users
+    aclGroupsField: allowed_groups
+    metadataFields:
+      - category
+      - owner
+  output:
+    bucket: gs://company-gemini-sync
+    prefix: kb-rest
+    format: ndjson
+  gemini:
+    projectId: my-project
+    location: global
+    dataStoreId: kb-ds
+  reconciliation:
+    deletePolicy: auto_delete_missing

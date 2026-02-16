@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/example/gemini-sync-bridge/schemas/connector.schema.json",
+  "title": "Gemini Sync Bridge Connector",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "apiVersion": {"type": "string", "const": "sync.gemini.io/v1alpha1"},
+    "kind": {"type": "string", "const": "Connector"},
+    "metadata": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9]([a-z0-9-]{0,62}[a-z0-9])?$"
+        }
+      }
+    },
+    "spec": {
+      "type": "object",
+      "required": ["mode", "source", "mapping", "output", "gemini", "reconciliation"],
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["sql_pull", "rest_pull", "rest_push"]
+        },
+        "schedule": {"type": ["string", "null"]},
+        "source": {
+          "type": "object",
+          "required": ["type", "secretRef"],
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["postgres", "mssql", "mysql", "http"]
+            },
+            "secretRef": {"type": "string", "minLength": 1},
+            "query": {"type": ["string", "null"]},
+            "watermarkField": {"type": ["string", "null"]},
+            "url": {"type": ["string", "null"]},
+            "method": {"type": "string"},
+            "payload": {"type": ["object", "null"]},
+            "paginationCursorField": {"type": ["string", "null"]},
+            "paginationNextCursorJsonPath": {"type": ["string", "null"]},
+            "headers": {
+              "type": "object",
+              "additionalProperties": {"type": "string"}
+            }
+          }
+        },
+        "mapping": {
+          "type": "object",
+          "required": ["idField", "titleField", "contentTemplate"],
+          "additionalProperties": false,
+          "properties": {
+            "idField": {"type": "string"},
+            "titleField": {"type": "string"},
+            "contentTemplate": {"type": "string"},
+            "uriTemplate": {"type": ["string", "null"]},
+            "mimeType": {"type": "string"},
+            "aclUsersField": {"type": ["string", "null"]},
+            "aclGroupsField": {"type": ["string", "null"]},
+            "metadataFields": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          }
+        },
+        "output": {
+          "type": "object",
+          "required": ["bucket", "prefix", "format"],
+          "additionalProperties": false,
+          "properties": {
+            "bucket": {
+              "type": "string",
+              "pattern": "^(gs|file)://"
+            },
+            "prefix": {"type": "string"},
+            "format": {"type": "string", "const": "ndjson"}
+          }
+        },
+        "gemini": {
+          "type": "object",
+          "required": ["projectId", "location", "dataStoreId"],
+          "additionalProperties": false,
+          "properties": {
+            "projectId": {"type": "string"},
+            "location": {"type": "string"},
+            "dataStoreId": {"type": "string"}
+          }
+        },
+        "reconciliation": {
+          "type": "object",
+          "required": ["deletePolicy"],
+          "additionalProperties": false,
+          "properties": {
+            "deletePolicy": {
+              "type": "string",
+              "enum": ["auto_delete_missing", "soft_delete_only", "never_delete"]
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {"enum": ["sql_pull", "rest_pull"]}
+            }
+          },
+          "then": {
+            "required": ["schedule"]
+          }
+        }
+      ]
+    }
+  }
+}

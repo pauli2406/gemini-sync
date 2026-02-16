@@ -1,0 +1,47 @@
+# Architecture
+
+## Components
+
+1. **Connector Runtime (Python)**
+- Executes connector jobs in `sql_pull`, `rest_pull`, or `rest_push` mode.
+- Produces canonical documents and reconciliation results.
+
+2. **State Store (Postgres)**
+- `connector_checkpoints`: per-connector watermark.
+- `record_state`: doc checksum/index for diffing.
+- `run_state`: run status/metrics/errors.
+- `push_batches` + `push_events`: queued push ingestion with idempotency.
+
+3. **Publisher**
+- Writes `upserts.ndjson`, `deletes.ndjson`, and `manifest.json` to object storage.
+- Supports both `gs://` (prod) and `file://` (local dev).
+
+4. **Gemini Ingestion Client**
+- Imports upsert artifacts into Gemini data stores.
+- Applies explicit document deletes.
+- Supports dry-run mode.
+
+5. **Push API**
+- Receives canonical documents.
+- Validates idempotency key and payload shape.
+- Persists pending batches for pipeline processing.
+
+6. **Orchestrator (Kestra)**
+- Triggers scheduled runs.
+- Provides built-in run visibility and retries.
+
+7. **Observability**
+- Splunk HEC events for run telemetry.
+- Teams webhook alerts for failed runs.
+
+## Data Lifecycle
+
+1. Extract source records.
+2. Normalize records to canonical NDJSON.
+3. For pull connectors, compare against prior state to compute upserts/deletes.
+4. For push connectors, process explicit delta operations from incoming events.
+5. Publish artifacts to object storage.
+6. Import upserts and apply deletes in Gemini.
+7. Commit checkpoint + record state only on success.
+
+This ordering guarantees that failed ingestion does not advance source checkpoints.

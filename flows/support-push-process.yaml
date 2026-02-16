@@ -1,0 +1,17 @@
+id: support_push_process
+namespace: gemini.sync
+
+triggers:
+  - id: every_5_minutes
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "*/5 * * * *"
+
+tasks:
+  - id: run_connector
+    type: io.kestra.plugin.scripts.shell.Commands
+    commands:
+      - gemini-sync-bridge run --connector connectors/support-push.yaml
+    retry:
+      type: constant
+      interval: PT1M
+      maxAttempt: 3

@@ -1,0 +1,17 @@
+id: hr_employees_sync
+namespace: gemini.sync
+
+triggers:
+  - id: every_3_hours
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "0 */3 * * *"
+
+tasks:
+  - id: run_connector
+    type: io.kestra.plugin.scripts.shell.Commands
+    commands:
+      - gemini-sync-bridge run --connector connectors/hr-employees.yaml
+    retry:
+      type: constant
+      interval: PT2M
+      maxAttempt: 3

@@ -1,0 +1,103 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gemini-sync
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-credentials
+  namespace: gemini-sync
+type: Opaque
+stringData:
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: postgres
+  POSTGRES_DB: gemini_sync_bridge
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: gemini-sync
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16
+          envFrom:
+            - secretRef:
+                name: postgres-credentials
+          ports:
+            - containerPort: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: gemini-sync
+spec:
+  selector:
+    app: postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kestra
+  namespace: gemini-sync
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kestra
+  template:
+    metadata:
+      labels:
+        app: kestra
+    spec:
+      containers:
+        - name: kestra
+          image: kestra/kestra:latest
+          args: ["server", "standalone"]
+          env:
+            - name: KESTRA_CONFIGURATION
+              value: |
+                kestra:
+                  queue:
+                    type: memory
+                  repository:
+                    type: postgres
+                  storage:
+                    type: local
+                    local:
+                      base-path: /app/storage
+                datasources:
+                  postgres:
+                    url: jdbc:postgresql://postgres:5432/gemini_sync_bridge
+                    driverClassName: org.postgresql.Driver
+                    username: postgres
+                    password: postgres
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kestra
+  namespace: gemini-sync
+spec:
+  selector:
+    app: kestra
+  ports:
+    - port: 8080
+      targetPort: 8080

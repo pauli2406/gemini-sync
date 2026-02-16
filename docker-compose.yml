@@ -1,0 +1,56 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: gemini_sync_bridge
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  kestra:
+    image: kestra/kestra:latest
+    command: server standalone
+    environment:
+      KESTRA_CONFIGURATION: |
+        kestra:
+          queue:
+            type: memory
+          repository:
+            type: postgres
+          storage:
+            type: local
+            local:
+              base-path: /app/storage
+        datasources:
+          postgres:
+            url: jdbc:postgresql://postgres:5432/gemini_sync_bridge
+            driverClassName: org.postgresql.Driver
+            username: postgres
+            password: postgres
+    depends_on:
+      - postgres
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./:/workspace
+
+  api:
+    build: .
+    env_file:
+      - .env.example
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@postgres:5432/gemini_sync_bridge
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./:/app
+
+volumes:
+  postgres-data:

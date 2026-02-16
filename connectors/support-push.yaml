@@ -1,0 +1,26 @@
+apiVersion: sync.gemini.io/v1alpha1
+kind: Connector
+metadata:
+  name: support-push
+spec:
+  mode: rest_push
+  source:
+    type: http
+    secretRef: support-push-token
+  mapping:
+    idField: ticket_id
+    titleField: title
+    contentTemplate: "{{ subject }} {{ body }}"
+    uriTemplate: "https://support.internal/tickets/{{ ticket_id }}"
+    aclUsersField: allowed_users
+    aclGroupsField: allowed_groups
+  output:
+    bucket: gs://company-gemini-sync
+    prefix: support-push
+    format: ndjson
+  gemini:
+    projectId: my-project
+    location: global
+    dataStoreId: support-ds
+  reconciliation:
+    deletePolicy: auto_delete_missing
