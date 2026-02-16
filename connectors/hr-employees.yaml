@@ -4,29 +4,30 @@ metadata:
   name: hr-employees
 spec:
   mode: sql_pull
-  schedule: "0 */3 * * *"
+  schedule: 0 */3 * * *
   source:
     type: postgres
     secretRef: hr-db-credentials
-    query: "SELECT employee_id, full_name, department, role, bio, allowed_users, allowed_groups, updated_at FROM employees WHERE updated_at > :watermark"
+    query: SELECT employee_id, full_name, department, role, bio, allowed_users, allowed_groups,
+      updated_at FROM employees WHERE updated_at > :watermark
     watermarkField: updated_at
   mapping:
     idField: employee_id
     titleField: full_name
-    contentTemplate: "{{ department }} {{ role }} {{ bio }}"
-    uriTemplate: "https://hr.internal/employees/{{ employee_id }}"
+    contentTemplate: '{{ department }} {{ role }} {{ bio }}'
+    uriTemplate: https://hr.internal/employees/{{ employee_id }}
     aclUsersField: allowed_users
     aclGroupsField: allowed_groups
     metadataFields:
-      - department
-      - role
+    - department
+    - role
   output:
-    bucket: gs://company-gemini-sync
+    bucket: gs://pochert-test-bucket
     prefix: hr-employees
     format: ndjson
   gemini:
-    projectId: my-project
-    location: global
+    projectId: gemini-enterprise-test-487620
+    location: eu
     dataStoreId: hr-ds
   reconciliation:
     deletePolicy: auto_delete_missing
