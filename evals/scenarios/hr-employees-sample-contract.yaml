@@ -1,0 +1,8 @@
+id: hr-employees-sample-contract
+name: HR employees sample connector contract
+description: Ensures the sample SQL connector keeps incremental query and mapping contract fields.
+pytest_selector: tests/test_connector_samples.py::test_hr_employees_sample_connector_sql_contract
+expected_behavior:
+  - Query remains incremental with :watermark.
+  - Placeholder query is not committed.
+  - ACL mapping and output prefix remain defined.

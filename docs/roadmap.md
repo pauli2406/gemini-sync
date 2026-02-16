@@ -42,6 +42,7 @@ This roadmap is intentionally horizon-based and continuously updated. It is opti
 - Added SLO report generation and threshold gate with canary/nightly workflow integration.
 - Added a read-only FastAPI + Jinja Ops UI (`/ops`) with JSON polling endpoints for connector/run visibility.
 - Added ops run filtering/pagination and optional Splunk/Kestra run deep links by `run_id`.
+- Added `hr-employees` connector contract regression coverage (test + scenario eval).
 
 **Exit Criteria**
 

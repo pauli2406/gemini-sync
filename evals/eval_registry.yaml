@@ -32,3 +32,6 @@ scenarios:
   - id: ops-visibility-read-only
     path: evals/scenarios/ops-visibility-read-only.yaml
     critical: true
+  - id: hr-employees-sample-contract
+    path: evals/scenarios/hr-employees-sample-contract.yaml
+    critical: false

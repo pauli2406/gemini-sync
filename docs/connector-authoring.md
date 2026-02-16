@@ -48,3 +48,6 @@ See:
 - `connectors/hr-employees.yaml`
 - `connectors/kb-rest.yaml`
 - `connectors/support-push.yaml`
+
+For `hr-employees`, keep the SQL query incremental (`:watermark`) and avoid
+placeholder query text (for example `SELECT * FROM source_table ...`).
