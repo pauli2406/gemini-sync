@@ -48,6 +48,8 @@ jobs:
 
       - name: Secret scan
         uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Dependency vulnerability audit
         run: python scripts/run_dependency_audit.py
