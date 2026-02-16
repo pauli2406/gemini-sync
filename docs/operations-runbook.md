@@ -14,6 +14,12 @@
 - Database: verify connectivity and row growth in `run_state`
 - Scheduler: verify Kestra trigger executions
 
+## Discovery Engine Onboarding
+
+For the complete CLI workflow to onboard additional data stores/connectors, use:
+
+- `/Users/marcelpochert/Programming/ai/gemini-sync/docs/discovery-engine-cli-playbook.md`
+
 ## Failure Handling
 
 When a run fails:

@@ -104,6 +104,7 @@ class RunManifest(BaseModel):
     completed_at: datetime
     manifest_path: str
     upserts_path: str
+    import_upserts_path: str | None = None
     deletes_path: str
     upserts_count: int
     deletes_count: int

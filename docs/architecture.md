@@ -13,7 +13,8 @@
 - `push_batches` + `push_events`: queued push ingestion with idempotency.
 
 3. **Publisher**
-- Writes `upserts.ndjson`, `deletes.ndjson`, and `manifest.json` to object storage.
+- Writes canonical `upserts.ndjson`, Discovery import `upserts.discovery.ndjson`,
+  `deletes.ndjson`, and `manifest.json` to object storage.
 - Supports both `gs://` (prod) and `file://` (local dev).
 
 4. **Gemini Ingestion Client**

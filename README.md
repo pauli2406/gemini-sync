@@ -14,6 +14,8 @@ Agentic development is governed by `/Users/marcelpochert/Programming/ai/gemini-s
 - Canonical NDJSON document envelope with deterministic checksums.
 - Reconciliation engine that computes upserts and deletes (`auto_delete_missing`).
 - Artifact publishing to GCS (`gs://`) or local filesystem (`file://`) for development.
+- Discovery import artifact generation (`upserts.discovery.ndjson`) for
+  `CONTENT_REQUIRED` data stores.
 - Gemini ingestion worker using Discovery Engine APIs (or dry-run mode).
 - Push API with idempotency semantics:
   - `POST /v1/connectors/{connector_id}/events`
@@ -51,6 +53,13 @@ Agentic development is governed by `/Users/marcelpochert/Programming/ai/gemini-s
 - `infra/`: Helm chart and Kubernetes manifests.
 - `tests/`: unit and API tests.
 - `docs/`: architecture, operations, and connector authoring docs.
+
+## Discovery Engine CLI Setup
+
+For a full end-to-end CLI onboarding flow (create datastore, grant bucket IAM,
+configure connector, run first import, troubleshoot common errors), use:
+
+- `/Users/marcelpochert/Programming/ai/gemini-sync/docs/discovery-engine-cli-playbook.md`
 
 ## Quickstart (Local)
 

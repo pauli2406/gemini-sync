@@ -8,8 +8,9 @@ spec:
   source:
     type: postgres
     secretRef: hr-db-credentials
-    query: SELECT employee_id, full_name, department, role, bio, allowed_users, allowed_groups,
-      updated_at FROM employees WHERE updated_at > :watermark
+    query: >
+      SELECT employee_id, full_name, department, role, bio, allowed_users, allowed_groups, updated_at
+      FROM employees
     watermarkField: updated_at
   mapping:
     idField: employee_id

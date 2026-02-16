@@ -9,6 +9,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 
 from gemini_sync_bridge.schemas import CanonicalDocument, GeminiConfig, RunManifest
 from gemini_sync_bridge.settings import Settings
+from gemini_sync_bridge.utils.doc_ids import to_discovery_doc_id
 
 
 class GeminiIngestionError(RuntimeError):
@@ -27,9 +28,16 @@ class GeminiIngestionClient:
         self._session = AuthorizedSession(credentials)
         return self._session
 
+    @staticmethod
+    def _api_host(location: str) -> str:
+        if location == "global":
+            return "discoveryengine.googleapis.com"
+        return f"{location}-discoveryengine.googleapis.com"
+
     def _documents_base(self, gemini: GeminiConfig) -> str:
+        host = self._api_host(gemini.location)
         return (
-            f"https://discoveryengine.googleapis.com/v1/projects/{gemini.project_id}"
+            f"https://{host}/v1/projects/{gemini.project_id}"
             f"/locations/{gemini.location}/collections/default_collection"
             f"/dataStores/{gemini.data_store_id}/branches/default_branch/documents"
         )
@@ -47,19 +55,27 @@ class GeminiIngestionClient:
     def import_documents(self, gemini: GeminiConfig, manifest: RunManifest) -> None:
         if self.settings.gemini_ingestion_dry_run:
             return
-        if manifest.upserts_path.startswith("file://"):
+        import_uri = manifest.import_upserts_path or manifest.upserts_path
+        if import_uri.startswith("file://"):
             return
 
         endpoint = f"{self._documents_base(gemini)}:import"
-        payload = {
-            "gcsSource": {"inputUris": [manifest.upserts_path], "dataSchema": "custom"},
-            "reconciliationMode": "INCREMENTAL",
-        }
+        if manifest.import_upserts_path:
+            payload = {
+                "gcsSource": {"inputUris": [import_uri], "dataSchema": "document"},
+                "reconciliationMode": "INCREMENTAL",
+            }
+        else:
+            payload = {
+                "gcsSource": {"inputUris": [import_uri], "dataSchema": "custom"},
+                "idField": "_id",
+                "reconciliationMode": "INCREMENTAL",
+            }
         operation = self._request("POST", endpoint, json=payload).json()
 
         operation_name = operation.get("name")
         if operation_name:
-            self._wait_for_operation(operation_name)
+            self._wait_for_operation(operation_name, gemini.location)
 
     def delete_documents(self, gemini: GeminiConfig, deletes: list[CanonicalDocument]) -> None:
         if self.settings.gemini_ingestion_dry_run:
@@ -67,7 +83,7 @@ class GeminiIngestionClient:
 
         base = self._documents_base(gemini)
         for doc in deletes:
-            doc_id = quote(doc.doc_id, safe="")
+            doc_id = quote(to_discovery_doc_id(doc.doc_id), safe="")
             url = f"{base}/{doc_id}"
             # Discovery Engine can return 404 if already deleted; treat as successful.
             try:
@@ -77,13 +93,19 @@ class GeminiIngestionClient:
                     raise
             time.sleep(0.05)
 
-    def _wait_for_operation(self, operation_name: str, timeout_seconds: int = 600) -> None:
+    def _wait_for_operation(
+        self,
+        operation_name: str,
+        location: str = "global",
+        timeout_seconds: int = 600,
+    ) -> None:
         if self.settings.gemini_ingestion_dry_run:
             return
 
         session = self._ensure_session()
         deadline = time.time() + timeout_seconds
-        url = f"https://discoveryengine.googleapis.com/v1/{operation_name}"
+        host = self._api_host(location)
+        url = f"https://{host}/v1/{operation_name}"
 
         while time.time() < deadline:
             response = session.get(url, timeout=30)

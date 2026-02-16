@@ -15,6 +15,7 @@ rules:
       - "README.md"
       - "docs/architecture.md"
       - "docs/operations-runbook.md"
+      - "docs/discovery-engine-cli-playbook.md"
 
   - name: connector_contract
     sources:
@@ -23,6 +24,7 @@ rules:
     docs_any_of:
       - "README.md"
       - "docs/connector-authoring.md"
+      - "docs/discovery-engine-cli-playbook.md"
 
   - name: orchestrator_and_deploy
     sources:
@@ -34,6 +36,7 @@ rules:
       - "README.md"
       - "docs/architecture.md"
       - "docs/operations-runbook.md"
+      - "docs/discovery-engine-cli-playbook.md"
 
   - name: governance_and_quality
     sources:

@@ -1,14 +1,50 @@
 from __future__ import annotations
 
+import base64
 import json
 from datetime import UTC, datetime
 
 from gemini_sync_bridge.adapters.object_store import GCSObjectStore, LocalObjectStore, ObjectStore
 from gemini_sync_bridge.schemas import CanonicalDocument, OutputConfig, RunManifest
+from gemini_sync_bridge.utils.doc_ids import to_discovery_doc_id
 
 
-def _ndjson(docs: list[CanonicalDocument]) -> str:
+def _canonical_ndjson(docs: list[CanonicalDocument]) -> str:
     return "\n".join(doc.model_dump_json() for doc in docs)
+
+
+def _non_empty_content(doc: CanonicalDocument) -> str:
+    if doc.content and doc.content.strip():
+        return doc.content
+    if doc.title and doc.title.strip():
+        return doc.title
+    return doc.doc_id
+
+
+def _discovery_document_ndjson(docs: list[CanonicalDocument]) -> str:
+    lines: list[str] = []
+    for doc in docs:
+        discovery_doc = {
+            "id": to_discovery_doc_id(doc.doc_id),
+            "structData": {
+                "doc_id": doc.doc_id,
+                "title": doc.title,
+                "uri": doc.uri,
+                "updated_at": doc.updated_at.isoformat(),
+                "acl_users": doc.acl_users,
+                "acl_groups": doc.acl_groups,
+                "metadata": doc.metadata,
+                "checksum": doc.checksum,
+            },
+            "content": {
+                "mimeType": doc.mime_type,
+                "rawBytes": base64.b64encode(
+                    _non_empty_content(doc).encode("utf-8")
+                ).decode("ascii"),
+            },
+        }
+        lines.append(json.dumps(discovery_doc, sort_keys=True, ensure_ascii=True))
+    return "\n".join(lines)
 
 
 def _build_uri(bucket: str, relative_path: str) -> str:
@@ -41,12 +77,18 @@ def publish_artifacts(
     connector_prefix = output.prefix.strip("/") or connector_id
     run_prefix = f"connectors/{connector_prefix}/runs/{run_id}"
     upserts_uri = _build_uri(output.bucket, f"{run_prefix}/upserts.ndjson")
+    import_upserts_uri = _build_uri(output.bucket, f"{run_prefix}/upserts.discovery.ndjson")
     deletes_uri = _build_uri(output.bucket, f"{run_prefix}/deletes.ndjson")
     manifest_uri = _build_uri(output.bucket, f"{run_prefix}/manifest.json")
 
     store = _build_store(output.bucket)
-    store.upload_text(upserts_uri, _ndjson(upserts), content_type="application/x-ndjson")
-    store.upload_text(deletes_uri, _ndjson(deletes), content_type="application/x-ndjson")
+    store.upload_text(upserts_uri, _canonical_ndjson(upserts), content_type="application/x-ndjson")
+    store.upload_text(
+        import_upserts_uri,
+        _discovery_document_ndjson(upserts),
+        content_type="application/x-ndjson",
+    )
+    store.upload_text(deletes_uri, _canonical_ndjson(deletes), content_type="application/x-ndjson")
 
     manifest = RunManifest(
         run_id=run_id,
@@ -55,6 +97,7 @@ def publish_artifacts(
         completed_at=datetime.now(tz=UTC),
         manifest_path=manifest_uri,
         upserts_path=upserts_uri,
+        import_upserts_path=import_upserts_uri,
         deletes_path=deletes_uri,
         upserts_count=len(upserts),
         deletes_count=len(deletes),

@@ -49,5 +49,10 @@ See:
 - `connectors/kb-rest.yaml`
 - `connectors/support-push.yaml`
 
-For `hr-employees`, keep the SQL query incremental (`:watermark`) and avoid
-placeholder query text (for example `SELECT * FROM source_table ...`).
+## SQL + Reconciliation Strategy
+
+- If `deletePolicy: auto_delete_missing`, treat extraction as full snapshot for each run
+  (do not filter query by `:watermark`), so delete reconciliation has a complete view.
+- If query is incremental (`WHERE updated_at > :watermark`), use a non-destructive delete
+  policy (`never_delete` or `soft_delete_only`) unless your source explicitly emits deletes.
+- Avoid placeholder SQL (`SELECT * FROM source_table ...`) in committed connector files.
