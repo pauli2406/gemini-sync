@@ -1,0 +1,7 @@
+id: studio-delete-clean-removal
+name: Studio delete removes connector and schedule entry
+critical: true
+pytest_selector: tests/test_studio_proposal_generation.py::test_build_proposed_file_changes_for_delete_removes_connector_and_schedule
+acceptance:
+  - Delete action marks connector file for removal.
+  - Helm schedule entry for connector is removed.

@@ -18,6 +18,13 @@ class Settings(BaseSettings):
     splunk_hec_token: str = Field(default="", alias="SPLUNK_HEC_TOKEN")
     splunk_run_url_template: str = Field(default="", alias="SPLUNK_RUN_URL_TEMPLATE")
     kestra_run_url_template: str = Field(default="", alias="KESTRA_RUN_URL_TEMPLATE")
+    managed_secret_encryption_key: str = Field(
+        default="dev-only-change-me",
+        alias="MANAGED_SECRET_ENCRYPTION_KEY",
+    )
+    github_token: str = Field(default="", alias="GITHUB_TOKEN")
+    github_repo: str = Field(default="", alias="GITHUB_REPO")
+    github_base_branch: str = Field(default="main", alias="GITHUB_BASE_BRANCH")
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
     max_retries: int = Field(default=3, alias="MAX_RETRIES")
     retry_backoff_seconds: float = Field(default=2.0, alias="RETRY_BACKOFF_SECONDS")

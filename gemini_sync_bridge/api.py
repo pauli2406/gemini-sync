@@ -4,18 +4,29 @@ import hashlib
 import json
 import uuid
 from contextlib import asynccontextmanager
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated, Any
 
 import yaml
-from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, Response, status
+from fastapi import (
+    BackgroundTasks,
+    Depends,
+    FastAPI,
+    Header,
+    HTTPException,
+    Query,
+    Request,
+    Response,
+    status,
+)
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
-from gemini_sync_bridge.db import get_session
-from gemini_sync_bridge.models import IdempotencyKey, PushBatch, PushEvent
+from gemini_sync_bridge.db import SessionLocal, get_session
+from gemini_sync_bridge.models import IdempotencyKey, ManualRunRequest, PushBatch, PushEvent
 from gemini_sync_bridge.ops_schemas import ConnectorDetail, OpsSnapshot, RunDetail
 from gemini_sync_bridge.schemas import CanonicalDocument, PushResponse
 from gemini_sync_bridge.security import PromptInjectionDetectedError, validate_prompt_injection_safe
@@ -24,7 +35,32 @@ from gemini_sync_bridge.services.ops import (
     build_ops_snapshot,
     build_run_detail,
 )
+from gemini_sync_bridge.services.pipeline import run_connector
+from gemini_sync_bridge.services.studio import (
+    build_catalog,
+    enqueue_manual_run,
+    get_connector_editor,
+    list_secrets,
+    preview_connector_draft,
+    propose_connector_change,
+    upsert_secret,
+    validate_connector_draft,
+)
 from gemini_sync_bridge.settings import get_settings
+from gemini_sync_bridge.studio_schemas import (
+    CatalogResponse,
+    ConnectorEditorResponse,
+    DraftValidationResponse,
+    ManagedSecretMetadata,
+    PreviewDraftRequest,
+    PreviewResponse,
+    ProposalRequest,
+    ProposalResponse,
+    RunNowResponse,
+    SecretsListResponse,
+    UpsertSecretRequest,
+    ValidateDraftRequest,
+)
 from gemini_sync_bridge.utils.logging import configure_logging
 
 
@@ -54,6 +90,37 @@ def _load_connector_mode(connector_id: str) -> str:
     raise HTTPException(status_code=404, detail=f"Connector '{connector_id}' not found")
 
 
+def _find_connector_path(connector_id: str) -> str:
+    for path in _connectors_dir().glob("*.yaml"):
+        raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+        if raw.get("metadata", {}).get("name") == connector_id:
+            return str(path)
+    raise HTTPException(status_code=404, detail=f"Connector '{connector_id}' not found")
+
+
+def _execute_manual_run(request_id: str) -> None:
+    with SessionLocal() as session:
+        request = session.get(ManualRunRequest, request_id)
+        if request is None:
+            return
+
+        request.status = "RUNNING"
+        session.commit()
+
+        try:
+            connector_path = _find_connector_path(request.connector_id)
+            result = run_connector(connector_path)
+            request.status = "SUCCESS"
+            request.run_id = result.run_id
+            request.finished_at = datetime.now(tz=UTC)
+        except Exception as exc:  # noqa: BLE001
+            request.status = "FAILED"
+            request.error_message = str(exc)
+            request.finished_at = datetime.now(tz=UTC)
+        finally:
+            session.commit()
+
+
 def _parse_events(content_type: str | None, body: bytes) -> list[dict[str, Any]]:
     if not body:
         return []
@@ -79,6 +146,173 @@ def _parse_events(content_type: str | None, body: bytes) -> list[dict[str, Any]]
 @app.get("/healthz")
 def healthz() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/studio/connectors", response_class=HTMLResponse)
+def studio_connector_index(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse(
+        request=request,
+        name="studio/connectors.html",
+        context={"catalog_endpoint": "/v1/studio/catalog"},
+    )
+
+
+@app.get("/studio/connectors/new", response_class=HTMLResponse)
+def studio_connector_new(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse(
+        request=request,
+        name="studio/wizard.html",
+        context={
+            "title": "Create Connection Profile",
+            "connector_id": "",
+            "mode": "create",
+            "draft_endpoint": "",
+            "validate_endpoint": "/v1/studio/connectors/validate",
+            "preview_endpoint": "/v1/studio/connectors/preview",
+            "propose_endpoint": "/v1/studio/connectors/propose",
+        },
+    )
+
+
+def _studio_connector_page(
+    request: Request,
+    connector_id: str,
+    page_mode: str,
+    title: str,
+) -> HTMLResponse:
+    _find_connector_path(connector_id)
+    return templates.TemplateResponse(
+        request=request,
+        name="studio/wizard.html",
+        context={
+            "title": title,
+            "connector_id": connector_id,
+            "mode": page_mode,
+            "draft_endpoint": f"/v1/studio/connectors/{connector_id}",
+            "validate_endpoint": "/v1/studio/connectors/validate",
+            "preview_endpoint": "/v1/studio/connectors/preview",
+            "propose_endpoint": "/v1/studio/connectors/propose",
+        },
+    )
+
+
+@app.get("/studio/connectors/{connector_id}/edit", response_class=HTMLResponse)
+def studio_connector_edit(request: Request, connector_id: str) -> HTMLResponse:
+    return _studio_connector_page(request, connector_id, "edit", "Edit Connection Profile")
+
+
+@app.get("/studio/connectors/{connector_id}/clone", response_class=HTMLResponse)
+def studio_connector_clone(request: Request, connector_id: str) -> HTMLResponse:
+    return _studio_connector_page(request, connector_id, "clone", "Clone Connection Profile")
+
+
+@app.get("/studio/connectors/{connector_id}/delete", response_class=HTMLResponse)
+def studio_connector_delete(request: Request, connector_id: str) -> HTMLResponse:
+    return _studio_connector_page(request, connector_id, "delete", "Delete Connection Profile")
+
+
+@app.get("/studio/connectors/{connector_id}/pause", response_class=HTMLResponse)
+def studio_connector_pause(request: Request, connector_id: str) -> HTMLResponse:
+    return _studio_connector_page(request, connector_id, "pause", "Pause Connection Profile")
+
+
+@app.get("/studio/connectors/{connector_id}/resume", response_class=HTMLResponse)
+def studio_connector_resume(request: Request, connector_id: str) -> HTMLResponse:
+    return _studio_connector_page(request, connector_id, "resume", "Resume Connection Profile")
+
+
+@app.get("/studio/connectors/{connector_id}/run", response_class=HTMLResponse)
+def studio_connector_run(request: Request, connector_id: str) -> HTMLResponse:
+    return _studio_connector_page(request, connector_id, "run", "Run Connection Profile")
+
+
+@app.get("/v1/studio/catalog", response_model=CatalogResponse)
+def studio_catalog(
+    response: Response,
+    session: SessionDep,
+    status: str | None = Query(default=None),
+    mode: str | None = Query(default=None),
+    q: str | None = Query(default=None),
+    limit: int = Query(default=50, ge=1, le=500),
+    offset: int = Query(default=0, ge=0, le=100000),
+) -> CatalogResponse:
+    response.headers["Cache-Control"] = "no-store"
+    return build_catalog(
+        session,
+        status=status,
+        mode=mode,
+        q=q,
+        limit=limit,
+        offset=offset,
+    )
+
+
+@app.get("/v1/studio/connectors/{connector_id}", response_model=ConnectorEditorResponse)
+def studio_connector_editor(connector_id: str) -> ConnectorEditorResponse:
+    try:
+        return get_connector_editor(connector_id)
+    except KeyError as exc:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Connector '{connector_id}' not found",
+        ) from exc
+
+
+@app.post("/v1/studio/connectors/validate", response_model=DraftValidationResponse)
+def studio_validate_draft(request: ValidateDraftRequest) -> DraftValidationResponse:
+    return validate_connector_draft(request.draft)
+
+
+@app.post("/v1/studio/connectors/preview", response_model=PreviewResponse)
+def studio_preview_draft(request: PreviewDraftRequest) -> PreviewResponse:
+    try:
+        return preview_connector_draft(draft=request.draft, sample_record=request.sample_record)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.post("/v1/studio/connectors/propose", response_model=ProposalResponse)
+def studio_propose_connector_change(
+    request: ProposalRequest,
+    session: SessionDep,
+) -> ProposalResponse:
+    try:
+        return propose_connector_change(session, request)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.post(
+    "/v1/studio/connectors/{connector_id}/run-now",
+    response_model=RunNowResponse,
+    status_code=202,
+)
+def studio_run_now(
+    connector_id: str,
+    session: SessionDep,
+    background_tasks: BackgroundTasks,
+) -> RunNowResponse:
+    _find_connector_path(connector_id)
+    response = enqueue_manual_run(session, connector_id)
+    background_tasks.add_task(_execute_manual_run, response.request_id)
+    return response
+
+
+@app.get("/v1/studio/secrets", response_model=SecretsListResponse)
+def studio_list_secrets(session: SessionDep) -> SecretsListResponse:
+    return SecretsListResponse(items=list_secrets(session))
+
+
+@app.post("/v1/studio/secrets", response_model=ManagedSecretMetadata)
+def studio_upsert_secret(
+    payload: UpsertSecretRequest,
+    session: SessionDep,
+) -> ManagedSecretMetadata:
+    return upsert_secret(
+        session,
+        secret_ref=payload.secret_ref,
+        secret_value=payload.secret_value,
+    )
 
 
 @app.get("/ops", response_class=HTMLResponse)

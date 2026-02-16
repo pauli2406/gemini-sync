@@ -1,4 +1,5 @@
 {{- range .Values.scheduleJobs }}
+{{- if (default true .enabled) }}
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -33,4 +34,5 @@ spec:
               resources:
                 {{- toYaml $.Values.resources.cronjob | nindent 16 }}
 ---
+{{- end }}
 {{- end }}

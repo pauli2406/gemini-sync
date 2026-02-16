@@ -25,6 +25,13 @@ Agentic development is governed by `/Users/marcelpochert/Programming/ai/gemini-s
   - `GET /ops/runs/{run_id}`
   - JSON polling endpoints under `/v1/ops/*` with run filters and pagination
   - Optional run log deep links to Splunk and Kestra (`SPLUNK_RUN_URL_TEMPLATE`, `KESTRA_RUN_URL_TEMPLATE`)
+- Connector Studio (guided authoring and lifecycle management):
+  - `GET /studio/connectors`
+  - `GET /studio/connectors/new`
+  - `GET /v1/studio/*` JSON APIs for validate/preview/propose/secrets/run-now
+  - `POST /v1/studio/connectors/propose` creates a GitHub branch + PR when
+    `GITHUB_TOKEN` and `GITHUB_REPO` are configured; otherwise it returns a
+    local proposal URL for offline workflows
 - Postgres-backed state store:
   - checkpoints
   - run status
@@ -98,6 +105,7 @@ Open the operations UI:
 - Dashboard: `http://localhost:8080/ops`
 - Connector detail: `http://localhost:8080/ops/connectors/support-push`
 - Example filtered dashboard URL: `http://localhost:8080/ops?status=FAILED&connector_id=support-push&window_hours=168`
+- Connector Studio: `http://localhost:8080/studio/connectors`
 
 Submit events:
 

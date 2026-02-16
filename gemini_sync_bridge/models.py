@@ -89,3 +89,37 @@ class PushEvent(Base):
     payload: Mapped[dict] = mapped_column(JSON, nullable=False)
     processed: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class ManagedSecret(Base):
+    __tablename__ = "managed_secrets"
+
+    secret_ref: Mapped[str] = mapped_column(String(255), primary_key=True)
+    encrypted_value: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class ProposalHistory(Base):
+    __tablename__ = "proposal_history"
+
+    proposal_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    action: Mapped[str] = mapped_column(String(32), index=True)
+    connector_id: Mapped[str] = mapped_column(String(255), index=True)
+    branch_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    pr_url: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[str] = mapped_column(String(32), default="PROPOSED", index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+
+class ManualRunRequest(Base):
+    __tablename__ = "manual_run_requests"
+
+    request_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    connector_id: Mapped[str] = mapped_column(String(255), index=True)
+    status: Mapped[str] = mapped_column(String(32), default="QUEUED", index=True)
+    run_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)

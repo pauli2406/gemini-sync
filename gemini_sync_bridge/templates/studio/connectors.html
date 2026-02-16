@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Connector Studio</title>
+    <link rel="stylesheet" href="/static/studio.css" />
+  </head>
+  <body>
+    <main id="studio-root" data-endpoint="{{ catalog_endpoint }}">
+      <header class="studio-header">
+        <h1>Connector Studio</h1>
+        <p>Build and manage connection profiles without editing YAML.</p>
+        <a class="btn" href="/studio/connectors/new">New Connection Profile</a>
+      </header>
+      <section class="studio-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Connection Profile</th>
+              <th>Mode</th>
+              <th>Schedule</th>
+              <th>Enabled</th>
+              <th>Last Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="studio-catalog-body"></tbody>
+        </table>
+      </section>
+    </main>
+    <script src="/static/studio.js" defer></script>
+  </body>
+</html>

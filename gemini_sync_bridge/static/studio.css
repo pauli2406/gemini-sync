@@ -1,0 +1,138 @@
+:root {
+  --bg: #f7fbff;
+  --surface: #ffffff;
+  --text: #1b2b39;
+  --muted: #607489;
+  --border: #d3e0ec;
+  --accent: #0f6e8b;
+  --danger: #a53b35;
+  --font: "IBM Plex Sans", "Avenir Next", "Segoe UI", sans-serif;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--text);
+  background: linear-gradient(180deg, #eef6ff, var(--bg));
+}
+
+main {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.studio-header {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  padding: 16px;
+  box-shadow: 0 10px 24px rgba(15, 40, 66, 0.08);
+}
+
+.studio-header h1 {
+  margin: 0 0 6px;
+}
+
+.studio-header p {
+  margin: 0 0 10px;
+  color: var(--muted);
+}
+
+.btn,
+button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9rem;
+  padding: 8px 12px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn:hover,
+button:hover {
+  border-color: var(--accent);
+}
+
+.studio-card {
+  margin-top: 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  padding: 14px;
+  box-shadow: 0 10px 24px rgba(15, 40, 66, 0.08);
+}
+
+.studio-grid {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0;
+  font-size: 0.9rem;
+}
+
+input,
+select,
+textarea {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 0.9rem;
+  padding: 8px 10px;
+}
+
+textarea {
+  min-height: 84px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--border);
+  padding: 10px;
+  font-size: 0.88rem;
+  text-align: left;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+pre {
+  margin-top: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+  background: #f8fbff;
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-height: 80px;
+}
+
+.error {
+  color: var(--danger);
+}
+
+@media (max-width: 900px) {
+  .studio-grid {
+    grid-template-columns: 1fr;
+  }
+}

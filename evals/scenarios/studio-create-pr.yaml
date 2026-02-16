@@ -1,0 +1,7 @@
+id: studio-create-pr
+name: Studio create connector proposal to PR
+critical: true
+pytest_selector: tests/test_studio_proposal_generation.py::test_build_proposed_file_changes_for_create_and_pause_resume
+acceptance:
+  - Studio create action generates connector file plus Helm schedule entry changes.
+  - Proposal response includes deterministic branch metadata.

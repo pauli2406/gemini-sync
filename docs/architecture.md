@@ -41,6 +41,14 @@
 - Supports optional run deep links to Splunk and Kestra by `run_id`.
 - Uses `run_state`, `connector_checkpoints`, and `push_batches` without mutating data.
 
+9. **Connector Studio**
+- FastAPI + Jinja guided UI for connection profile creation and lifecycle management.
+- Proposes GitHub PR changes for create/edit/clone/delete/pause/resume actions.
+- Uses GitHub API (PAT-based) to create branch commits and open pull requests
+  when credentials are configured.
+- Manages Helm `scheduleJobs` entries (including `enabled` pause/resume).
+- Supports managed secrets with encrypted-at-rest storage plus env secret fallback.
+
 ## Data Lifecycle
 
 1. Extract source records.

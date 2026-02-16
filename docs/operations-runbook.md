@@ -6,6 +6,11 @@
 - Ops UI: `GET /ops` (dashboard), `GET /ops/connectors/{connector_id}`, `GET /ops/runs/{run_id}`
 - Ops API: `GET /v1/ops/snapshot`, `GET /v1/ops/connectors/{connector_id}`, `GET /v1/ops/runs/{run_id}`
 - Snapshot API filters/pagination: `status`, `connector_id`, `window_hours`, `limit_runs`, `offset_runs`
+- Connector Studio UI: `GET /studio/connectors`
+- Connector Studio APIs: `GET /v1/studio/catalog`, `POST /v1/studio/connectors/propose`, `POST /v1/studio/connectors/{connector_id}/run-now`
+- Proposal endpoint behavior:
+  - With `GITHUB_TOKEN` + `GITHUB_REPO`: creates branch commits and opens a PR.
+  - Without GitHub credentials: returns a local proposal URL (`local://proposal/...`).
 - Database: verify connectivity and row growth in `run_state`
 - Scheduler: verify Kestra trigger executions
 
@@ -22,6 +27,10 @@ Configure optional deep links in `.env`:
 
 - `SPLUNK_RUN_URL_TEMPLATE=https://splunk.example/search?q={run_id}`
 - `KESTRA_RUN_URL_TEMPLATE=https://kestra.example/executions/{run_id}`
+- `MANAGED_SECRET_ENCRYPTION_KEY=<strong-random-key>`
+- `GITHUB_TOKEN=<github-pat>`
+- `GITHUB_REPO=org/repo`
+- `GITHUB_BASE_BRANCH=main`
 
 ## Replay and Recovery
 

@@ -1,0 +1,7 @@
+id: studio-pause-resume-helm
+name: Studio pause and resume toggles Helm schedule enabled flag
+critical: true
+pytest_selector: tests/test_studio_proposal_generation.py::test_build_proposed_file_changes_for_create_and_pause_resume
+acceptance:
+  - Pause action sets scheduleJobs[].enabled=false.
+  - Resume action sets scheduleJobs[].enabled=true.

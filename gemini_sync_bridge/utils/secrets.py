@@ -2,6 +2,10 @@ from __future__ import annotations
 
 import os
 
+from gemini_sync_bridge.db import SessionLocal
+from gemini_sync_bridge.services.secrets_registry import ManagedSecretsRegistry
+from gemini_sync_bridge.settings import get_settings
+
 
 class SecretResolutionError(RuntimeError):
     pass
@@ -13,6 +17,13 @@ def secret_env_var_name(secret_ref: str) -> str:
 
 
 def resolve_secret(secret_ref: str) -> str:
+    settings = get_settings()
+    registry = ManagedSecretsRegistry(settings.managed_secret_encryption_key)
+    with SessionLocal() as session:
+        managed = registry.get_secret_value(session, secret_ref=secret_ref)
+    if managed:
+        return managed
+
     env_key = secret_env_var_name(secret_ref)
     value = os.getenv(env_key)
     if not value:

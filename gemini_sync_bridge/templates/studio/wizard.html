@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="/static/studio.css" />
+  </head>
+  <body>
+    <main
+      id="studio-wizard"
+      data-mode="{{ mode }}"
+      data-connector-id="{{ connector_id }}"
+      data-draft-endpoint="{{ draft_endpoint }}"
+      data-validate-endpoint="{{ validate_endpoint }}"
+      data-preview-endpoint="{{ preview_endpoint }}"
+      data-propose-endpoint="{{ propose_endpoint }}"
+    >
+      <header class="studio-header">
+        <h1>{{ title }}</h1>
+        <p>Guided workflow for creating and managing Connection Profiles.</p>
+        <a href="/studio/connectors">Back to Connector Studio</a>
+      </header>
+
+      <section class="studio-grid">
+        <article class="studio-card">
+          <h2>Step 1: Basics</h2>
+          <label>Name <input id="draft-name" type="text" /></label>
+          <label>Mode
+            <select id="draft-mode">
+              <option value="sql_pull">SQL Pull</option>
+              <option value="rest_pull">REST Pull</option>
+              <option value="rest_push">REST Push</option>
+            </select>
+          </label>
+          <label>Schedule (cron) <input id="draft-schedule" type="text" value="*/30 * * * *" /></label>
+          <label><input id="draft-enabled" type="checkbox" checked /> Schedule Enabled</label>
+        </article>
+
+        <article class="studio-card">
+          <h2>Step 2: Source + Mapping</h2>
+          <label>Source Type
+            <select id="draft-source-type">
+              <option value="postgres">postgres</option>
+              <option value="mssql">mssql</option>
+              <option value="mysql">mysql</option>
+              <option value="http">http</option>
+            </select>
+          </label>
+          <label>Secret Ref <input id="draft-secret-ref" type="text" value="source-secret" /></label>
+          <label>ID Field <input id="draft-id-field" type="text" value="id" /></label>
+          <label>Title Field <input id="draft-title-field" type="text" value="title" /></label>
+          <label>Content Template <textarea id="draft-content-template">{{ title }}</textarea></label>
+        </article>
+
+        <article class="studio-card">
+          <h2>Step 3: Target</h2>
+          <label>Output Bucket <input id="draft-output-bucket" type="text" value="file://./local-bucket" /></label>
+          <label>Output Prefix <input id="draft-output-prefix" type="text" value="profile" /></label>
+          <label>Project Id <input id="draft-project" type="text" value="my-project" /></label>
+          <label>Location <input id="draft-location" type="text" value="global" /></label>
+          <label>Data Store Id <input id="draft-datastore" type="text" value="default-ds" /></label>
+        </article>
+
+        <article class="studio-card">
+          <h2>Step 4: Validate + Propose</h2>
+          <div class="actions">
+            <button id="draft-validate" type="button">Validate</button>
+            <button id="draft-preview" type="button">Preview</button>
+            <button id="draft-propose" type="button">Create PR Proposal</button>
+          </div>
+          <pre id="studio-output"></pre>
+        </article>
+      </section>
+    </main>
+    <script src="/static/studio.js" defer></script>
+  </body>
+</html>

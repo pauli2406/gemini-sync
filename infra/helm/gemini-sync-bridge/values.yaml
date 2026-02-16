@@ -17,12 +17,15 @@ scheduleJobs:
   - name: hr-employees
     schedule: "0 */3 * * *"
     connectorPath: connectors/hr-employees.yaml
+    enabled: true
   - name: kb-rest
     schedule: "*/30 * * * *"
     connectorPath: connectors/kb-rest.yaml
+    enabled: true
   - name: support-push
     schedule: "*/5 * * * *"
     connectorPath: connectors/support-push.yaml
+    enabled: true
 
 resources:
   api: {}
