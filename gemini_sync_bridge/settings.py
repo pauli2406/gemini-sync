@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     teams_webhook_url: str = Field(default="", alias="TEAMS_WEBHOOK_URL")
     splunk_hec_url: str = Field(default="", alias="SPLUNK_HEC_URL")
     splunk_hec_token: str = Field(default="", alias="SPLUNK_HEC_TOKEN")
+    splunk_run_url_template: str = Field(default="", alias="SPLUNK_RUN_URL_TEMPLATE")
+    kestra_run_url_template: str = Field(default="", alias="KESTRA_RUN_URL_TEMPLATE")
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
     max_retries: int = Field(default=3, alias="MAX_RETRIES")
     retry_backoff_seconds: float = Field(default=2.0, alias="RETRY_BACKOFF_SECONDS")

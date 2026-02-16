@@ -47,6 +47,10 @@ gemini-sync-bridge = "gemini_sync_bridge.cli:app"
 
 [tool.hatch.build.targets.wheel]
 packages = ["gemini_sync_bridge"]
+include = [
+  "gemini_sync_bridge/templates/**",
+  "gemini_sync_bridge/static/**",
+]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]

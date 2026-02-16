@@ -34,6 +34,13 @@
 - Splunk HEC events for run telemetry.
 - Teams webhook alerts for failed runs.
 
+8. **Ops UI (Read-Only)**
+- FastAPI + Jinja pages for operator visibility.
+- JSON APIs under `/v1/ops/*` for dashboard polling every 15 seconds.
+- Supports run filtering (`status`, `connector_id`, `window_hours`) and pagination (`limit_runs`, `offset_runs`).
+- Supports optional run deep links to Splunk and Kestra by `run_id`.
+- Uses `run_state`, `connector_checkpoints`, and `push_batches` without mutating data.
+
 ## Data Lifecycle
 
 1. Extract source records.

@@ -35,6 +35,14 @@ This roadmap is intentionally horizon-based and continuously updated. It is opti
 - Deterministic replay and fault-injection harness for ingestion flows.
 - Operational SLO dashboards tied to merge and release health gates.
 
+**Progress**
+
+- Implemented adapter matrix tests for SQL pull and REST pull pagination.
+- Added replay artifact determinism and fault-injection tooling.
+- Added SLO report generation and threshold gate with canary/nightly workflow integration.
+- Added a read-only FastAPI + Jinja Ops UI (`/ops`) with JSON polling endpoints for connector/run visibility.
+- Added ops run filtering/pagination and optional Splunk/Kestra run deep links by `run_id`.
+
 **Exit Criteria**
 
 - Critical scenario pass rate sustained at 100% for 30 consecutive days.

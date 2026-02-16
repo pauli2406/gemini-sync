@@ -1,0 +1,7 @@
+id: slo-gate-thresholds
+name: SLO gate thresholds
+critical: true
+pytest_selector: tests/test_slo_gate.py::test_slo_gate_passes
+acceptance:
+  - SLO gate accepts metrics that meet thresholds.
+  - SLO gate rejects metrics that breach thresholds.

@@ -1,0 +1,8 @@
+id: ops-visibility-read-only
+name: Read-only ops visibility via API and UI routes
+critical: true
+pytest_selector: tests/test_ops_api.py::test_ops_snapshot_filters_paginates_and_returns_linkouts
+acceptance:
+  - Ops snapshot endpoint supports run filters and pagination controls.
+  - Run records include Splunk and Kestra linkouts by run_id.
+  - Ops JSON endpoints return no-store cache headers.

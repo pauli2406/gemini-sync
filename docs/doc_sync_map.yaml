@@ -38,6 +38,8 @@ rules:
   - name: governance_and_quality
     sources:
       - "scripts/check_*.py"
+      - "scripts/generate_slo_report.py"
+      - "scripts/replay_run_artifacts.py"
       - ".agent/**"
       - "schemas/agent-task.schema.json"
       - "AGENTS.md"
@@ -46,6 +48,7 @@ rules:
       - "README.md"
       - "AGENTS.md"
       - "docs/roadmap.md"
+      - "docs/reliability-phase.md"
 
 consistency:
   required_files:

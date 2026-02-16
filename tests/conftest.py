@@ -21,7 +21,10 @@ def db_session_factory():
     )
     SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
     Base.metadata.create_all(bind=engine)
-    return SessionLocal
+    try:
+        yield SessionLocal
+    finally:
+        engine.dispose()
 
 
 @pytest.fixture()

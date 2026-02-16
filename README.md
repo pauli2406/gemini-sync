@@ -19,6 +19,12 @@ Agentic development is governed by `/Users/marcelpochert/Programming/ai/gemini-s
   - `POST /v1/connectors/{connector_id}/events`
   - Required header: `Idempotency-Key`
   - Push events are treated as delta operations (`op=UPSERT` or `op=DELETE`)
+- Read-only operations UI for run visibility:
+  - `GET /ops`
+  - `GET /ops/connectors/{connector_id}`
+  - `GET /ops/runs/{run_id}`
+  - JSON polling endpoints under `/v1/ops/*` with run filters and pagination
+  - Optional run log deep links to Splunk and Kestra (`SPLUNK_RUN_URL_TEMPLATE`, `KESTRA_RUN_URL_TEMPLATE`)
 - Postgres-backed state store:
   - checkpoints
   - run status
@@ -87,6 +93,12 @@ gemini-sync-bridge run --connector connectors/hr-employees.yaml
 gemini-sync-bridge serve --host 0.0.0.0 --port 8080
 ```
 
+Open the operations UI:
+
+- Dashboard: `http://localhost:8080/ops`
+- Connector detail: `http://localhost:8080/ops/connectors/support-push`
+- Example filtered dashboard URL: `http://localhost:8080/ops?status=FAILED&connector_id=support-push&window_hours=168`
+
 Submit events:
 
 ```bash
@@ -124,6 +136,15 @@ python scripts/check_docs_drift.py
 python scripts/check_security_policy.py
 python scripts/run_dependency_audit.py
 python scripts/run_scenario_evals.py --registry evals/eval_registry.yaml --baseline evals/baseline.json
+python scripts/performance_smoke.py --records 1000 --max-seconds 2.0
+```
+
+### 9) Reliability phase commands
+
+```bash
+python scripts/replay_run_artifacts.py --upserts file://./local-bucket/connectors/hr-employees/runs/<run_id>/upserts.ndjson --deletes file://./local-bucket/connectors/hr-employees/runs/<run_id>/deletes.ndjson
+python scripts/generate_slo_report.py --database-url \"$DATABASE_URL\" --output slo-metrics.json
+python scripts/check_slo_gate.py --metrics slo-metrics.json
 ```
 
 ## CI Checks

@@ -38,5 +38,16 @@ jobs:
       - name: Performance regression smoke suite
         run: python scripts/performance_smoke.py --records 1000 --max-seconds 2.0
 
+      - name: Generate SLO report and evaluate SLO gate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "DATABASE_URL not set; skipping SLO report generation and gate."
+            exit 0
+          fi
+          python scripts/generate_slo_report.py --database-url "$DATABASE_URL" --output slo-metrics.json
+          python scripts/check_slo_gate.py --metrics slo-metrics.json
+
       - name: Secret scan
         uses: gitleaks/gitleaks-action@v2

@@ -1,0 +1,6 @@
+id: deterministic-replay-artifacts
+name: Deterministic replay artifacts digest
+critical: false
+pytest_selector: tests/test_replay_artifacts.py::test_replay_artifacts_is_deterministic
+acceptance:
+  - Replaying the same artifacts yields identical digest output.

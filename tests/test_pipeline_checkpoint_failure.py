@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 
 import pytest
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import close_all_sessions, sessionmaker
 
 from gemini_sync_bridge.adapters.extractors import PullResult
 from gemini_sync_bridge.models import Base, ConnectorCheckpoint
@@ -67,67 +67,71 @@ def test_checkpoint_not_advanced_when_ingestion_fails(monkeypatch, tmp_path) -> 
     session_local = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
     Base.metadata.create_all(bind=engine)
 
-    with session_local() as session:
-        session.add(
-            ConnectorCheckpoint(
-                connector_id="hr-employees",
-                watermark="2026-02-01T00:00:00+00:00",
-                updated_at=datetime.now(tz=UTC),
+    try:
+        with session_local() as session:
+            session.add(
+                ConnectorCheckpoint(
+                    connector_id="hr-employees",
+                    watermark="2026-02-01T00:00:00+00:00",
+                    updated_at=datetime.now(tz=UTC),
+                )
             )
+            session.commit()
+
+        doc = CanonicalDocument(
+            doc_id="hr-employees:1",
+            title="Jane Doe",
+            content="Jane Doe",
+            uri=None,
+            mime_type="text/plain",
+            updated_at=datetime.now(tz=UTC),
+            acl_users=[],
+            acl_groups=[],
+            metadata={"connector_id": "hr-employees"},
+            checksum="sha256:test",
+            op="UPSERT",
         )
-        session.commit()
 
-    doc = CanonicalDocument(
-        doc_id="hr-employees:1",
-        title="Jane Doe",
-        content="Jane Doe",
-        uri=None,
-        mime_type="text/plain",
-        updated_at=datetime.now(tz=UTC),
-        acl_users=[],
-        acl_groups=[],
-        metadata={"connector_id": "hr-employees"},
-        checksum="sha256:test",
-        op="UPSERT",
-    )
-
-    manifest = RunManifest(
-        run_id="run-1",
-        connector_id="hr-employees",
-        started_at=datetime.now(tz=UTC),
-        completed_at=datetime.now(tz=UTC),
-        manifest_path="file://manifest.json",
-        upserts_path="file://upserts.ndjson",
-        deletes_path="file://deletes.ndjson",
-        upserts_count=1,
-        deletes_count=0,
-        watermark="2026-02-16T00:00:00+00:00",
-    )
-
-    monkeypatch.setattr(pipeline, "SessionLocal", session_local)
-    monkeypatch.setattr(pipeline, "load_connector_config", lambda _: _connector_config())
-    monkeypatch.setattr(
-        pipeline,
-        "extract_sql_rows",
-        lambda source, checkpoint: PullResult(
-            rows=[
-                {
-                    "employee_id": 1,
-                    "full_name": "Jane Doe",
-                    "updated_at": "2026-02-16T00:00:00+00:00",
-                }
-            ],
+        manifest = RunManifest(
+            run_id="run-1",
+            connector_id="hr-employees",
+            started_at=datetime.now(tz=UTC),
+            completed_at=datetime.now(tz=UTC),
+            manifest_path="file://manifest.json",
+            upserts_path="file://upserts.ndjson",
+            deletes_path="file://deletes.ndjson",
+            upserts_count=1,
+            deletes_count=0,
             watermark="2026-02-16T00:00:00+00:00",
-        ),
-    )
-    monkeypatch.setattr(pipeline, "normalize_records", lambda *args, **kwargs: [doc])
-    monkeypatch.setattr(pipeline, "publish_artifacts", lambda **kwargs: manifest)
-    monkeypatch.setattr(pipeline, "GeminiIngestionClient", FailingGeminiIngestionClient)
+        )
 
-    with pytest.raises(RuntimeError):
-        pipeline.run_connector("connectors/hr-employees.yaml")
+        monkeypatch.setattr(pipeline, "SessionLocal", session_local)
+        monkeypatch.setattr(pipeline, "load_connector_config", lambda _: _connector_config())
+        monkeypatch.setattr(
+            pipeline,
+            "extract_sql_rows",
+            lambda source, checkpoint: PullResult(
+                rows=[
+                    {
+                        "employee_id": 1,
+                        "full_name": "Jane Doe",
+                        "updated_at": "2026-02-16T00:00:00+00:00",
+                    }
+                ],
+                watermark="2026-02-16T00:00:00+00:00",
+            ),
+        )
+        monkeypatch.setattr(pipeline, "normalize_records", lambda *args, **kwargs: [doc])
+        monkeypatch.setattr(pipeline, "publish_artifacts", lambda **kwargs: manifest)
+        monkeypatch.setattr(pipeline, "GeminiIngestionClient", FailingGeminiIngestionClient)
 
-    with session_local() as session:
-        checkpoint = session.get(ConnectorCheckpoint, "hr-employees")
-        assert checkpoint is not None
-        assert checkpoint.watermark == "2026-02-01T00:00:00+00:00"
+        with pytest.raises(RuntimeError):
+            pipeline.run_connector("connectors/hr-employees.yaml")
+
+        with session_local() as session:
+            checkpoint = session.get(ConnectorCheckpoint, "hr-employees")
+            assert checkpoint is not None
+            assert checkpoint.watermark == "2026-02-01T00:00:00+00:00"
+    finally:
+        close_all_sessions()
+        engine.dispose()

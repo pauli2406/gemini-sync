@@ -2,9 +2,11 @@
   "results": {
     "checkpoint-not-advanced-on-ingestion-failure": true,
     "connector-delete-reconciliation": true,
+    "deterministic-replay-artifacts": true,
     "prompt-injection-rest-pull": true,
     "prompt-injection-rest-push": true,
     "push-idempotency-and-replay": true,
-    "retry-backoff-429-5xx": true
+    "retry-backoff-429-5xx": true,
+    "slo-gate-thresholds": true
   }
 }

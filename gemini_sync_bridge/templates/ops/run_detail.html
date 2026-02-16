@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Run Ops · {{ run_id }}</title>
+    <link rel="stylesheet" href="/static/ops.css" />
+  </head>
+  <body>
+    <main
+      id="ops-root"
+      class="ops-shell"
+      data-ops-view="run-detail"
+      data-endpoint="{{ detail_endpoint }}"
+      data-refresh-ms="{{ refresh_ms }}"
+    >
+      <header class="ops-header">
+        <p class="eyebrow"><a href="/ops">Back to dashboard</a></p>
+        <h1>Run: {{ run_id }}</h1>
+        <p class="subtitle">Run status and failure context.</p>
+      </header>
+
+      <section class="kpi-grid" aria-label="run metrics">
+        <article class="kpi-card">
+          <h2>Status</h2>
+          <p id="run-status">--</p>
+        </article>
+        <article class="kpi-card">
+          <h2>Connector</h2>
+          <p id="run-connector">--</p>
+        </article>
+        <article class="kpi-card">
+          <h2>Duration</h2>
+          <p id="run-duration">--</p>
+        </article>
+        <article class="kpi-card">
+          <h2>Started (UTC)</h2>
+          <p id="run-started">--</p>
+        </article>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Failure Context</h2>
+        </div>
+        <dl class="detail-grid">
+          <div>
+            <dt>Error Class</dt>
+            <dd id="run-error-class">--</dd>
+          </div>
+          <div>
+            <dt>Error Message</dt>
+            <dd id="run-error-message">--</dd>
+          </div>
+          <div>
+            <dt>Finished (UTC)</dt>
+            <dd id="run-finished">--</dd>
+          </div>
+          <div>
+            <dt>Mutations</dt>
+            <dd id="run-mut-counts">--</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>External Links</h2>
+        </div>
+        <div class="linkout-row">
+          <a id="run-link-splunk" href="#" target="_blank" rel="noopener noreferrer">Splunk</a>
+          <a id="run-link-kestra" href="#" target="_blank" rel="noopener noreferrer">Kestra</a>
+        </div>
+      </section>
+
+      <p id="ops-error" class="error-banner" hidden></p>
+    </main>
+
+    <script src="/static/ops.js" defer></script>
+  </body>
+</html>

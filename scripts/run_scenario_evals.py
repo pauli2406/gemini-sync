@@ -16,7 +16,7 @@ def _load_yaml(path: str | Path) -> dict[str, Any]:
 
 
 def _run_selector(selector: str) -> tuple[bool, str]:
-    cmd = ["pytest", "-q", selector]
+    cmd = [sys.executable, "-m", "pytest", "-q", selector]
     result = subprocess.run(cmd, capture_output=True, text=True)
     output = (result.stdout + "\n" + result.stderr).strip()
     return result.returncode == 0, output

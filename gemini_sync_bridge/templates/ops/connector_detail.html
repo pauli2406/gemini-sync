@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Connector Ops · {{ connector_id }}</title>
+    <link rel="stylesheet" href="/static/ops.css" />
+  </head>
+  <body>
+    <main
+      id="ops-root"
+      class="ops-shell"
+      data-ops-view="connector-detail"
+      data-endpoint="{{ detail_endpoint }}"
+      data-refresh-ms="{{ refresh_ms }}"
+      data-default-limit-runs="{{ default_limit_runs }}"
+    >
+      <header class="ops-header">
+        <p class="eyebrow"><a href="/ops">Back to dashboard</a></p>
+        <h1>Connector: {{ connector_id }}</h1>
+        <p class="subtitle">Live health and recent run history.</p>
+      </header>
+
+      <section class="kpi-grid" aria-label="connector metrics">
+        <article class="kpi-card">
+          <h2>Mode</h2>
+          <p id="connector-mode">--</p>
+        </article>
+        <article class="kpi-card">
+          <h2>Last Status</h2>
+          <p id="connector-status">--</p>
+        </article>
+        <article class="kpi-card">
+          <h2>Freshness Lag</h2>
+          <p id="connector-freshness">--</p>
+        </article>
+        <article class="kpi-card">
+          <h2>Pending Push</h2>
+          <p id="connector-pending">--</p>
+        </article>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Recent Runs</h2>
+          <p id="connector-updated-at" class="panel-meta"></p>
+        </div>
+        <div class="filters-grid">
+          <label for="connector-status-filter">Status</label>
+          <select id="connector-status-filter">
+            <option value="">All</option>
+            <option value="SUCCESS">SUCCESS</option>
+            <option value="FAILED">FAILED</option>
+            <option value="RUNNING">RUNNING</option>
+          </select>
+          <div class="filter-actions">
+            <button id="connector-apply-filters" type="button">Apply</button>
+            <button id="connector-reset-filters" type="button">Reset</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Run ID</th>
+                <th>Status</th>
+                <th>Started (UTC)</th>
+                <th>Finished (UTC)</th>
+                <th>Duration</th>
+                <th>Error</th>
+                <th>Logs</th>
+              </tr>
+            </thead>
+            <tbody id="connector-runs-body"></tbody>
+          </table>
+        </div>
+        <div class="pager">
+          <button id="connector-runs-prev" type="button">Previous</button>
+          <span id="connector-runs-page" class="panel-meta">Page --</span>
+          <button id="connector-runs-next" type="button">Next</button>
+        </div>
+      </section>
+
+      <p id="ops-error" class="error-banner" hidden></p>
+    </main>
+
+    <script src="/static/ops.js" defer></script>
+  </body>
+</html>

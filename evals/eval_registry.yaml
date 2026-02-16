@@ -23,3 +23,12 @@ scenarios:
   - id: prompt-injection-rest-pull
     path: evals/scenarios/prompt-injection-rest-pull.yaml
     critical: true
+  - id: deterministic-replay-artifacts
+    path: evals/scenarios/deterministic-replay-artifacts.yaml
+    critical: false
+  - id: slo-gate-thresholds
+    path: evals/scenarios/slo-gate-thresholds.yaml
+    critical: true
+  - id: ops-visibility-read-only
+    path: evals/scenarios/ops-visibility-read-only.yaml
+    critical: true
