@@ -95,6 +95,87 @@ spec:
 | `spec.mapping.*` | Maps source rows into canonical documents. | Required: `idField`, `titleField`, `contentTemplate`; optional URI/ACL/metadata fields. |
 | `spec.reconciliation.deletePolicy` | Delete handling strategy. | `auto_delete_missing`, `soft_delete_only`, `never_delete` |
 
+## How SQL query connects to mapping
+
+Think of each SQL result row as the input object for mapping and templates.
+
+1. `spec.source.query` selects columns.
+2. `spec.mapping.idField` and `spec.mapping.titleField` must match selected column names.
+3. `spec.mapping.contentTemplate` and `spec.mapping.uriTemplate` use Jinja placeholders from those same column names.
+4. Optional mapping fields (`aclUsersField`, `aclGroupsField`, `metadataFields`) also reference selected column names.
+5. `spec.source.watermarkField` should be a selected column so checkpointing can advance.
+
+If your table column names are not what you want in mapping, use SQL aliases.
+
+Example:
+
+```sql
+SELECT
+  employee_id AS id,
+  full_name AS title,
+  department,
+  role,
+  profile_text AS bio,
+  profile_url,
+  updated_at
+FROM employees;
+```
+
+Then map against the aliased names:
+
+```yaml
+mapping:
+  idField: id
+  titleField: title
+  contentTemplate: "{{ department }} {{ role }} {{ bio }}"
+  uriTemplate: "{{ profile_url }}"
+source:
+  watermarkField: updated_at
+```
+
+### Worked example: one row to one canonical document
+
+Given SQL row:
+
+```json
+{
+  "employee_id": "42",
+  "full_name": "Ada Lovelace",
+  "department": "Engineering",
+  "role": "Architect",
+  "bio": "Builds platform systems",
+  "allowed_users": ["ada@example.com"],
+  "allowed_groups": ["eng"],
+  "updated_at": "2026-02-16T08:30:00Z"
+}
+```
+
+With mapping:
+
+```yaml
+mapping:
+  idField: employee_id
+  titleField: full_name
+  contentTemplate: "{{ department }} {{ role }} {{ bio }}"
+  aclUsersField: allowed_users
+  aclGroupsField: allowed_groups
+  metadataFields:
+    - department
+    - role
+source:
+  watermarkField: updated_at
+```
+
+Resulting canonical values:
+
+- `doc_id`: `hr-employees:42`
+- `title`: `Ada Lovelace`
+- `content`: `Engineering Architect Builds platform systems`
+- `acl_users`: `["ada@example.com"]`
+- `acl_groups`: `["eng"]`
+- `metadata`: includes `connector_id`, `department`, `role`
+- `updated_at` and next checkpoint watermark: `2026-02-16T08:30:00Z`
+
 ## Mode-specific decision matrix
 
 | Query style | `deletePolicy` | Use? | Why |

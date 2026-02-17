@@ -35,6 +35,7 @@ Set this for managed secrets:
    - `sql_pull` exposes SQL query + watermark controls.
    - `rest_pull` exposes URL/method/payload/pagination/headers controls.
    - `rest_push` narrows source controls to push-compatible settings.
+   - For SQL connectors, ensure selected query columns line up with mapping fields/templates (`idField`, `titleField`, `contentTemplate`, optional URI/ACL/metadata fields).
 3. Run `Validate` and `Preview`.
 4. Click `Create PR Proposal`.
 5. Review and merge the PR.
