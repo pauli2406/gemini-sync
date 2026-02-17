@@ -5,6 +5,7 @@ import argparse
 import fnmatch
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any
@@ -25,8 +26,27 @@ def _load_yaml(path: str | Path) -> dict[str, Any]:
 
 
 def _iter_files(root: Path) -> list[Path]:
-    files: list[Path] = []
-    ignored = {".git", ".venv", "__pycache__", ".ruff_cache", ".pytest_cache"}
+    # Scan only git-tracked files so dependency/build artifacts created during CI
+    # (for example node_modules) do not trigger false positives.
+    result = subprocess.run(
+        ["git", "-C", str(root), "ls-files"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode == 0:
+        files: list[Path] = []
+        for line in result.stdout.splitlines():
+            relative = line.strip()
+            if not relative:
+                continue
+            file_path = root / relative
+            if file_path.is_file():
+                files.append(file_path)
+        return files
+
+    files = []
+    ignored = {".git", ".venv", "__pycache__", ".ruff_cache", ".pytest_cache", "node_modules"}
     for path in root.rglob("*"):
         if not path.is_file():
             continue
