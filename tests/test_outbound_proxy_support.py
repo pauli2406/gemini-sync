@@ -167,7 +167,7 @@ def test_github_pr_service_uses_shared_httpx_client_factory(monkeypatch) -> None
 
     service = github_pr.GitHubPRService(
         github_repo="acme/gemini-sync",
-        github_token="ghp_test",
+        github_token="github-token-test",
         github_base_branch="main",
     )
 
