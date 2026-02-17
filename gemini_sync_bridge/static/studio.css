@@ -131,6 +131,10 @@ pre {
   color: var(--danger);
 }
 
+[hidden] {
+  display: none !important;
+}
+
 @media (max-width: 900px) {
   .studio-grid {
     grid-template-columns: 1fr;

@@ -1,0 +1,7 @@
+id: studio-mode-switch-configurability
+name: Studio mode switch updates source configuration
+critical: false
+pytest_selector: tests/test_studio_proposal_generation.py::test_edit_mode_switch_prunes_incompatible_source_fields
+acceptance:
+  - Switching a connector draft mode from SQL pull to REST push removes stale SQL source fields.
+  - Studio-generated sparse drafts still result in mode-consistent connector source configuration.
