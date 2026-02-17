@@ -243,3 +243,490 @@ def test_edit_preserves_existing_advanced_fields_and_avoids_schedule_noise() -> 
         assert rendered["spec"]["mapping"]["metadataFields"] == ["department", "role"]
         assert rendered["spec"]["output"]["bucket"] == "gs://pochert-test-bucket"
         assert rendered["spec"]["gemini"]["projectId"] == "gemini-enterprise-test-487620"
+
+
+def test_edit_mode_switch_prunes_incompatible_source_fields() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        connectors_dir = root / "connectors"
+        connectors_dir.mkdir(parents=True)
+        connector_path = connectors_dir / "hr-employees.yaml"
+        connector_path.write_text(
+            yaml.safe_dump(
+                {
+                    "apiVersion": "sync.gemini.io/v1alpha1",
+                    "kind": "Connector",
+                    "metadata": {"name": "hr-employees"},
+                    "spec": {
+                        "mode": "sql_pull",
+                        "schedule": "0 */3 * * *",
+                        "source": {
+                            "type": "postgres",
+                            "secretRef": "hr-db-credentials",
+                            "query": (
+                                "SELECT employee_id FROM employees "
+                                "WHERE updated_at > :watermark"
+                            ),
+                            "watermarkField": "updated_at",
+                        },
+                        "mapping": {
+                            "idField": "employee_id",
+                            "titleField": "full_name",
+                            "contentTemplate": "{{ full_name }}",
+                        },
+                        "output": {
+                            "bucket": "gs://company-gemini-sync",
+                            "prefix": "hr-employees",
+                            "format": "ndjson",
+                        },
+                        "gemini": {
+                            "projectId": "my-project",
+                            "location": "global",
+                            "dataStoreId": "hr-ds",
+                        },
+                        "reconciliation": {"deletePolicy": "auto_delete_missing"},
+                    },
+                },
+                sort_keys=False,
+            ),
+            encoding="utf-8",
+        )
+
+        helm_values = root / "values.yaml"
+        helm_values.write_text(
+            yaml.safe_dump(
+                {
+                    "scheduleJobs": [
+                        {
+                            "name": "hr-employees",
+                            "schedule": "0 */3 * * *",
+                            "connectorPath": "connectors/hr-employees.yaml",
+                            "enabled": True,
+                        }
+                    ]
+                },
+                sort_keys=False,
+            ),
+            encoding="utf-8",
+        )
+
+        # Sparse draft mirrors old UI behavior where mode could change
+        # without sending explicit nulls for source fields.
+        mode_switch_draft = {
+            "metadata": {"name": "hr-employees"},
+            "spec": {
+                "mode": "rest_push",
+                "source": {
+                    "type": "http",
+                    "secretRef": "support-push-token",
+                },
+                "mapping": {
+                    "idField": "employee_id",
+                    "titleField": "full_name",
+                    "contentTemplate": "{{ full_name }}",
+                },
+                "output": {
+                    "bucket": "gs://company-gemini-sync",
+                    "prefix": "hr-employees",
+                    "format": "ndjson",
+                },
+                "gemini": {
+                    "projectId": "my-project",
+                    "location": "global",
+                    "dataStoreId": "hr-ds",
+                },
+                "reconciliation": {"deletePolicy": "auto_delete_missing"},
+            },
+            "schedule": {"cron": "*/5 * * * *", "enabled": True},
+        }
+
+        changes = build_proposed_file_changes(
+            action="edit",
+            connector_id="hr-employees",
+            draft=mode_switch_draft,
+            connectors_dir=connectors_dir,
+            helm_values_path=helm_values,
+        )
+
+        rendered = yaml.safe_load(changes["connectors/hr-employees.yaml"])
+        assert rendered["spec"]["mode"] == "rest_push"
+        assert rendered["spec"]["source"]["type"] == "http"
+        assert rendered["spec"]["source"]["secretRef"] == "support-push-token"
+        assert "query" not in rendered["spec"]["source"]
+        assert "watermarkField" not in rendered["spec"]["source"]
+        assert "url" not in rendered["spec"]["source"]
+
+
+def test_edit_sql_pull_prunes_rest_only_source_fields() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        connectors_dir = root / "connectors"
+        connectors_dir.mkdir(parents=True)
+        connector_path = connectors_dir / "kb-rest.yaml"
+        connector_path.write_text(
+            yaml.safe_dump(
+                {
+                    "apiVersion": "sync.gemini.io/v1alpha1",
+                    "kind": "Connector",
+                    "metadata": {"name": "kb-rest"},
+                    "spec": {
+                        "mode": "rest_pull",
+                        "schedule": "*/30 * * * *",
+                        "source": {
+                            "type": "http",
+                            "secretRef": "kb-api-token",
+                            "url": "https://kb.local/articles",
+                            "method": "GET",
+                            "payload": {"scope": "internal"},
+                            "watermarkField": "updated_at",
+                            "paginationCursorField": "cursor",
+                            "paginationNextCursorJsonPath": "paging.next_cursor",
+                            "headers": {"X-Tenant": "internal"},
+                            "oauth": {
+                                "grantType": "client_credentials",
+                                "tokenUrl": (
+                                    "https://auth.local/realms/acme/"
+                                    "protocol/openid-connect/token"
+                                ),
+                                "clientId": "bridge-client",
+                                "clientSecretRef": "oauth-client-secret",
+                                "scopes": ["api.read"],
+                                "audience": "knowledge-api",
+                                "clientAuthMethod": "client_secret_post",
+                            },
+                        },
+                        "mapping": {
+                            "idField": "article_id",
+                            "titleField": "title",
+                            "contentTemplate": "{{ title }}",
+                        },
+                        "output": {
+                            "bucket": "gs://company-gemini-sync",
+                            "prefix": "kb-rest",
+                            "format": "ndjson",
+                        },
+                        "gemini": {
+                            "projectId": "my-project",
+                            "location": "global",
+                            "dataStoreId": "kb-ds",
+                        },
+                        "reconciliation": {"deletePolicy": "auto_delete_missing"},
+                    },
+                },
+                sort_keys=False,
+            ),
+            encoding="utf-8",
+        )
+
+        helm_values = root / "values.yaml"
+        helm_values.write_text(
+            yaml.safe_dump(
+                {
+                    "scheduleJobs": [
+                        {
+                            "name": "kb-rest",
+                            "schedule": "*/30 * * * *",
+                            "connectorPath": "connectors/kb-rest.yaml",
+                            "enabled": True,
+                        }
+                    ]
+                },
+                sort_keys=False,
+            ),
+            encoding="utf-8",
+        )
+
+        switch_to_sql_draft = {
+            "metadata": {"name": "kb-rest"},
+            "spec": {
+                "mode": "sql_pull",
+                "source": {
+                    "type": "postgres",
+                    "secretRef": "hr-db-credentials",
+                    "query": "SELECT employee_id FROM employees WHERE updated_at > :watermark",
+                    "watermarkField": "updated_at",
+                },
+                "mapping": {
+                    "idField": "employee_id",
+                    "titleField": "full_name",
+                    "contentTemplate": "{{ full_name }}",
+                },
+                "output": {
+                    "bucket": "gs://pochert-test-bucket",
+                    "prefix": "kb-rest",
+                    "format": "ndjson",
+                },
+                "gemini": {
+                    "projectId": "my-project",
+                    "location": "global",
+                    "dataStoreId": "kb-ds",
+                },
+                "reconciliation": {"deletePolicy": "auto_delete_missing"},
+            },
+            "schedule": {"cron": "0 */3 * * *", "enabled": True},
+        }
+
+        changes = build_proposed_file_changes(
+            action="edit",
+            connector_id="kb-rest",
+            draft=switch_to_sql_draft,
+            connectors_dir=connectors_dir,
+            helm_values_path=helm_values,
+        )
+
+        rendered = yaml.safe_load(changes["connectors/kb-rest.yaml"])
+        source = rendered["spec"]["source"]
+        assert rendered["spec"]["mode"] == "sql_pull"
+        assert source["type"] == "postgres"
+        assert "url" not in source
+        assert "payload" not in source
+        assert "paginationCursorField" not in source
+        assert "paginationNextCursorJsonPath" not in source
+        assert "headers" not in source
+        assert "method" not in source
+        assert "oauth" not in source
+
+
+def test_edit_rest_pull_prunes_query_and_forces_http_source_type() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        connectors_dir = root / "connectors"
+        connectors_dir.mkdir(parents=True)
+        connector_path = connectors_dir / "hr-employees.yaml"
+        connector_path.write_text(
+            yaml.safe_dump(
+                {
+                    "apiVersion": "sync.gemini.io/v1alpha1",
+                    "kind": "Connector",
+                    "metadata": {"name": "hr-employees"},
+                    "spec": {
+                        "mode": "sql_pull",
+                        "schedule": "0 */3 * * *",
+                        "source": {
+                            "type": "postgres",
+                            "secretRef": "hr-db-credentials",
+                            "query": (
+                                "SELECT employee_id FROM employees "
+                                "WHERE updated_at > :watermark"
+                            ),
+                            "watermarkField": "updated_at",
+                        },
+                        "mapping": {
+                            "idField": "employee_id",
+                            "titleField": "full_name",
+                            "contentTemplate": "{{ full_name }}",
+                        },
+                        "output": {
+                            "bucket": "gs://company-gemini-sync",
+                            "prefix": "hr-employees",
+                            "format": "ndjson",
+                        },
+                        "gemini": {
+                            "projectId": "my-project",
+                            "location": "global",
+                            "dataStoreId": "hr-ds",
+                        },
+                        "reconciliation": {"deletePolicy": "auto_delete_missing"},
+                    },
+                },
+                sort_keys=False,
+            ),
+            encoding="utf-8",
+        )
+
+        helm_values = root / "values.yaml"
+        helm_values.write_text(
+            yaml.safe_dump(
+                {
+                    "scheduleJobs": [
+                        {
+                            "name": "hr-employees",
+                            "schedule": "0 */3 * * *",
+                            "connectorPath": "connectors/hr-employees.yaml",
+                            "enabled": True,
+                        }
+                    ]
+                },
+                sort_keys=False,
+            ),
+            encoding="utf-8",
+        )
+
+        switch_to_rest_pull_draft = {
+            "metadata": {"name": "hr-employees"},
+            "spec": {
+                "mode": "rest_pull",
+                "source": {
+                    "type": "postgres",
+                    "secretRef": "kb-api-token",
+                    "url": "https://kb.local/articles",
+                    "method": "GET",
+                    "watermarkField": "updated_at",
+                    "oauth": {
+                        "grantType": "client_credentials",
+                        "tokenUrl": (
+                            "https://auth.local/realms/acme/protocol/openid-connect/token"
+                        ),
+                        "clientId": "bridge-client",
+                        "clientSecretRef": "oauth-client-secret",
+                        "scopes": ["api.read"],
+                        "audience": "knowledge-api",
+                        "clientAuthMethod": "client_secret_post",
+                    },
+                },
+                "mapping": {
+                    "idField": "employee_id",
+                    "titleField": "full_name",
+                    "contentTemplate": "{{ full_name }}",
+                },
+                "output": {
+                    "bucket": "gs://company-gemini-sync",
+                    "prefix": "hr-employees",
+                    "format": "ndjson",
+                },
+                "gemini": {
+                    "projectId": "my-project",
+                    "location": "global",
+                    "dataStoreId": "hr-ds",
+                },
+                "reconciliation": {"deletePolicy": "auto_delete_missing"},
+            },
+            "schedule": {"cron": "*/30 * * * *", "enabled": True},
+        }
+
+        changes = build_proposed_file_changes(
+            action="edit",
+            connector_id="hr-employees",
+            draft=switch_to_rest_pull_draft,
+            connectors_dir=connectors_dir,
+            helm_values_path=helm_values,
+        )
+
+        rendered = yaml.safe_load(changes["connectors/hr-employees.yaml"])
+        source = rendered["spec"]["source"]
+        assert rendered["spec"]["mode"] == "rest_pull"
+        assert source["type"] == "http"
+        assert source["secretRef"] == "kb-api-token"
+        assert "query" not in source
+        assert source["oauth"]["grantType"] == "client_credentials"
+        assert source["oauth"]["clientAuthMethod"] == "client_secret_post"
+
+
+def test_edit_rest_pull_sparse_draft_preserves_existing_oauth_fields() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        connectors_dir = root / "connectors"
+        connectors_dir.mkdir(parents=True)
+        connector_path = connectors_dir / "kb-rest.yaml"
+        connector_path.write_text(
+            yaml.safe_dump(
+                {
+                    "apiVersion": "sync.gemini.io/v1alpha1",
+                    "kind": "Connector",
+                    "metadata": {"name": "kb-rest"},
+                    "spec": {
+                        "mode": "rest_pull",
+                        "schedule": "*/30 * * * *",
+                        "source": {
+                            "type": "http",
+                            "secretRef": "kb-api-token",
+                            "url": "https://kb.local/articles",
+                            "method": "GET",
+                            "watermarkField": "updated_at",
+                            "oauth": {
+                                "grantType": "client_credentials",
+                                "tokenUrl": (
+                                    "https://auth.local/realms/acme/"
+                                    "protocol/openid-connect/token"
+                                ),
+                                "clientId": "bridge-client",
+                                "clientSecretRef": "oauth-client-secret",
+                                "scopes": ["api.read"],
+                                "audience": "knowledge-api",
+                                "clientAuthMethod": "client_secret_post",
+                            },
+                        },
+                        "mapping": {
+                            "idField": "article_id",
+                            "titleField": "title",
+                            "contentTemplate": "{{ title }}",
+                        },
+                        "output": {
+                            "bucket": "gs://company-gemini-sync",
+                            "prefix": "kb-rest",
+                            "format": "ndjson",
+                        },
+                        "gemini": {
+                            "projectId": "my-project",
+                            "location": "global",
+                            "dataStoreId": "kb-ds",
+                        },
+                        "reconciliation": {"deletePolicy": "auto_delete_missing"},
+                    },
+                },
+                sort_keys=False,
+            ),
+            encoding="utf-8",
+        )
+
+        helm_values = root / "values.yaml"
+        helm_values.write_text(
+            yaml.safe_dump(
+                {
+                    "scheduleJobs": [
+                        {
+                            "name": "kb-rest",
+                            "schedule": "*/30 * * * *",
+                            "connectorPath": "connectors/kb-rest.yaml",
+                            "enabled": True,
+                        }
+                    ]
+                },
+                sort_keys=False,
+            ),
+            encoding="utf-8",
+        )
+
+        sparse_edit_draft = {
+            "metadata": {"name": "kb-rest"},
+            "spec": {
+                "mode": "rest_pull",
+                "source": {
+                    "type": "http",
+                    "secretRef": "kb-api-token",
+                    "url": "https://kb.local/articles",
+                    "method": "GET",
+                    "watermarkField": "updated_at",
+                },
+                "mapping": {
+                    "idField": "article_id",
+                    "titleField": "title",
+                    "contentTemplate": "{{ title }}",
+                },
+                "output": {
+                    "bucket": "gs://pochert-test-bucket",
+                    "prefix": "kb-rest",
+                    "format": "ndjson",
+                },
+                "gemini": {
+                    "projectId": "my-project",
+                    "location": "global",
+                    "dataStoreId": "kb-ds",
+                },
+                "reconciliation": {"deletePolicy": "auto_delete_missing"},
+            },
+            "schedule": {"cron": "*/30 * * * *", "enabled": True},
+        }
+
+        changes = build_proposed_file_changes(
+            action="edit",
+            connector_id="kb-rest",
+            draft=sparse_edit_draft,
+            connectors_dir=connectors_dir,
+            helm_values_path=helm_values,
+        )
+
+        rendered = yaml.safe_load(changes["connectors/kb-rest.yaml"])
+        oauth = rendered["spec"]["source"]["oauth"]
+        assert oauth["grantType"] == "client_credentials"
+        assert oauth["tokenUrl"].endswith("/protocol/openid-connect/token")

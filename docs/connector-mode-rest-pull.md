@@ -64,6 +64,15 @@ spec:
     paginationNextCursorJsonPath: paging.next_cursor
     headers:
       X-Tenant: internal
+    oauth:
+      grantType: client_credentials
+      tokenUrl: https://auth.local/realms/acme/protocol/openid-connect/token
+      clientId: bridge-client
+      clientSecretRef: kb-oauth-client-secret # optional; falls back to secretRef
+      scopes:
+        - api.read
+      audience: knowledge-api
+      clientAuthMethod: client_secret_post # or client_secret_basic
   mapping:
     idField: article_id
     titleField: title
@@ -87,6 +96,35 @@ spec:
     deletePolicy: auto_delete_missing
 ```
 
+## OAuth Client Credentials (Keycloak S2S)
+
+Use `spec.source.oauth` when the source API requires service-to-service token acquisition.
+
+```yaml
+source:
+  type: http
+  secretRef: kb-api-token # fallback client secret ref when oauth.clientSecretRef is omitted
+  url: https://kb.internal/api/v1/articles
+  method: GET
+  oauth:
+    grantType: client_credentials
+    tokenUrl: https://auth.local/realms/acme/protocol/openid-connect/token
+    clientId: bridge-client
+    clientSecretRef: kb-oauth-client-secret
+    scopes:
+      - api.read
+      - api.write
+    audience: knowledge-api
+    clientAuthMethod: client_secret_post
+```
+
+Runtime behavior in OAuth mode:
+
+- Acquires bearer token from token endpoint before API request.
+- Refreshes token proactively near expiry.
+- Retries once with forced refresh on HTTP 401 from source API.
+- Overrides any static `Authorization` header with runtime-issued OAuth token.
+
 ## Field-by-field explanation
 
 | Field | Meaning | Options |
@@ -101,6 +139,7 @@ spec:
 | `spec.source.paginationCursorField` | Request query parameter key for cursor. | Example `cursor`. |
 | `spec.source.paginationNextCursorJsonPath` | Path to next cursor in response JSON. | Example `paging.next_cursor`. |
 | `spec.source.watermarkField` | Field used for checkpoint max-watermark. | Example `updated_at`. |
+| `spec.source.oauth` | Optional OAuth client-credentials block for S2S auth. | See OAuth section for fields. |
 
 ## Mode-specific decision matrix
 
@@ -124,7 +163,11 @@ spec:
 3. Secret token is available via `SECRET_<SECRETREF>` or managed secret.
 4. API returns either list or object containing `items` list.
 5. Pagination keys/json path align to API contract.
-6. Run `python scripts/validate_connectors.py`.
+6. If `spec.source.oauth` is set:
+   - `tokenUrl` and `clientId` are set.
+   - Secret exists in `clientSecretRef` (or `secretRef` fallback).
+   - `clientAuthMethod` matches provider requirements.
+7. Run `python scripts/validate_connectors.py`.
 
 ## Common failures and fixes
 
@@ -136,6 +179,10 @@ spec:
   - Reduce schedule frequency, tune source side limits, keep retries enabled.
 - No checkpoint movement
   - Ensure `watermarkField` exists in every returned row.
+- OAuth token endpoint 400/401/403
+  - Verify `clientId`, client secret reference, scopes/audience, and `clientAuthMethod`.
+- OAuth token response missing `access_token`
+  - Validate provider configuration and token endpoint response contract.
 
 ## Provider notes and links
 

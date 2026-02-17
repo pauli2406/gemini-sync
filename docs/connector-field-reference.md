@@ -14,7 +14,7 @@
 | `spec.schedule` | `string | null` | No | - | - | `sql_pull`, `rest_pull` | Cron schedule for pull connectors. | `0 */3 * * *` | Required for sql_pull and rest_pull; omitted for rest_push. |
 | `spec.source` | `object` | Yes | - | - | `sql_pull`, `rest_pull`, `rest_push` | Source extraction configuration. | `{type: postgres, secretRef: hr-db-credentials, ...}` | - |
 | `spec.source.type` | `string` | Yes | - | enum: `postgres`, `mssql`, `mysql`, `http` | `sql_pull`, `rest_pull`, `rest_push` | Source provider type. | `postgres` | Use http for rest_pull and rest_push. |
-| `spec.source.secretRef` | `string` | Yes | - | - | `sql_pull`, `rest_pull`, `rest_push` | Secret reference resolved by runtime. | `hr-db-credentials` | Maps to environment variable SECRET_HR_DB_CREDENTIALS or managed secret. |
+| `spec.source.secretRef` | `string` | Yes | - | - | `sql_pull`, `rest_pull`, `rest_push` | Secret reference resolved by runtime. | `hr-db-credentials` | Maps to environment variable SECRET_HR_DB_CREDENTIALS or managed secret; also used as OAuth client secret fallback when oauth.clientSecretRef is omitted. |
 | `spec.source.query` | `string | null` | No | - | - | `sql_pull` | SQL statement executed for extraction. | `SELECT employee_id, full_name FROM employees` | Required for sql_pull. Use snapshot query for auto_delete_missing. |
 | `spec.source.watermarkField` | `string | null` | No | - | - | `sql_pull`, `rest_pull` | Field used to compute max checkpoint watermark. | `updated_at` | Must exist in extracted rows to advance checkpoint. |
 | `spec.source.url` | `string | null` | No | - | - | `rest_pull` | REST endpoint URL to pull data from. | `https://kb.internal/api/v1/articles` | Required for rest_pull. |
@@ -22,7 +22,15 @@
 | `spec.source.payload` | `object | null` | No | - | - | `rest_pull` | Optional JSON body for REST requests. | `{includeArchived: false}` | Sent as request JSON. |
 | `spec.source.paginationCursorField` | `string | null` | No | - | - | `rest_pull` | Query parameter key used for cursor pagination requests. | `cursor` | - |
 | `spec.source.paginationNextCursorJsonPath` | `string | null` | No | - | - | `rest_pull` | Dotted JSON path to next cursor value in response body. | `paging.next_cursor` | If empty or missing at runtime, pagination stops. |
-| `spec.source.headers` | `object` | No | - | - | `rest_pull` | Static request headers map. | `{X-Tenant: internal}` | Authorization header is auto-added unless already provided. |
+| `spec.source.headers` | `object` | No | - | - | `rest_pull` | Static request headers map. | `{X-Tenant: internal}` | Authorization header is auto-added for static bearer mode unless already provided; OAuth mode overrides Authorization with runtime-issued token. |
+| `spec.source.oauth` | `object` | No | - | - | `rest_pull` | Optional OAuth client-credentials configuration for service-to-service token acquisition. | `{grantType: client_credentials, tokenUrl: https://auth.local/realms/acme/protocol/openid-connect/token, clientId: bridge-client}` | When set, runtime fetches and refreshes bearer tokens automatically. |
+| `spec.source.oauth.grantType` | `string` | No | `client_credentials` | const: `client_credentials` | `rest_pull` | OAuth grant type for token acquisition. | `client_credentials` | v1 supports only client_credentials. |
+| `spec.source.oauth.tokenUrl` | `string` | Yes | - | - | `rest_pull` | OAuth token endpoint URL. | `https://auth.local/realms/acme/protocol/openid-connect/token` | Required when oauth block is configured. |
+| `spec.source.oauth.clientId` | `string` | Yes | - | - | `rest_pull` | OAuth client identifier. | `bridge-client` | Required when oauth block is configured. |
+| `spec.source.oauth.clientSecretRef` | `string | null` | No | - | - | `rest_pull` | Optional secret reference for OAuth client secret. | `kb-oauth-client-secret` | Falls back to spec.source.secretRef when omitted. |
+| `spec.source.oauth.scopes` | `array` | No | - | - | `rest_pull` | OAuth scopes sent to token endpoint as space-delimited scope value. | `\[api.read, api.write\]` | - |
+| `spec.source.oauth.audience` | `string | null` | No | - | - | `rest_pull` | Optional OAuth audience parameter. | `knowledge-api` | - |
+| `spec.source.oauth.clientAuthMethod` | `string` | No | `client_secret_post` | enum: `client_secret_post`, `client_secret_basic` | `rest_pull` | OAuth client authentication method for token endpoint. | `client_secret_post` | Supported values are client_secret_post and client_secret_basic. |
 | `spec.mapping` | `object` | Yes | - | - | `sql_pull`, `rest_pull`, `rest_push` | Mapping from source row fields to canonical document. | `{idField: employee_id, titleField: full_name, ...}` | - |
 | `spec.mapping.idField` | `string` | Yes | - | - | `sql_pull`, `rest_pull`, `rest_push` | Source field used for unique record key. | `employee_id` | Combined with connector name to create canonical doc_id. |
 | `spec.mapping.titleField` | `string` | Yes | - | - | `sql_pull`, `rest_pull`, `rest_push` | Source field used for document title. | `full_name` | - |

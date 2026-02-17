@@ -11,6 +11,34 @@ def test_studio_pages_render(client) -> None:
     assert "Create Connection Profile" in wizard.text
 
 
+def test_studio_wizard_exposes_mode_specific_configuration_controls(client) -> None:
+    wizard = client.get("/studio/connectors/new")
+    assert wizard.status_code == 200
+
+    # Source controls
+    assert '<option value="oracle">oracle</option>' in wizard.text
+    assert 'id="draft-source-query"' in wizard.text
+    assert 'id="draft-source-url"' in wizard.text
+    assert 'id="draft-source-method"' in wizard.text
+    assert 'id="draft-source-watermark"' in wizard.text
+    assert 'id="draft-source-headers"' in wizard.text
+    assert 'id="draft-source-auth-mode"' in wizard.text
+    assert 'id="draft-source-oauth-token-url"' in wizard.text
+    assert 'id="draft-source-oauth-client-id"' in wizard.text
+    assert 'id="draft-source-oauth-client-secret-ref"' in wizard.text
+    assert 'id="draft-source-oauth-client-auth-method"' in wizard.text
+    assert 'id="draft-source-oauth-scopes"' in wizard.text
+    assert 'id="draft-source-oauth-audience"' in wizard.text
+
+    # Advanced mapping + reconciliation controls
+    assert 'id="draft-uri-template"' in wizard.text
+    assert 'id="draft-mime-type"' in wizard.text
+    assert 'id="draft-acl-users-field"' in wizard.text
+    assert 'id="draft-acl-groups-field"' in wizard.text
+    assert 'id="draft-metadata-fields"' in wizard.text
+    assert 'id="draft-delete-policy"' in wizard.text
+
+
 def test_studio_connector_lifecycle_pages_render(client) -> None:
     for path in [
         "/studio/connectors/support-push/edit",

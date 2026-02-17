@@ -14,6 +14,9 @@ scenarios:
   - id: retry-backoff-429-5xx
     path: evals/scenarios/retry-backoff-429-5xx.yaml
     critical: false
+  - id: rest-pull-oauth-client-credentials
+    path: evals/scenarios/rest-pull-oauth-client-credentials.yaml
+    critical: false
   - id: checkpoint-not-advanced-on-ingestion-failure
     path: evals/scenarios/checkpoint-not-advanced-on-ingestion-failure.yaml
     critical: true
@@ -34,6 +37,9 @@ scenarios:
     critical: true
   - id: hr-employees-sample-contract
     path: evals/scenarios/hr-employees-sample-contract.yaml
+    critical: false
+  - id: oracle-sample-contract
+    path: evals/scenarios/oracle-sample-contract.yaml
     critical: false
   - id: openapi-drift-gate
     path: evals/scenarios/openapi-drift-gate.yaml

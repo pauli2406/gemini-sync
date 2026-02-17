@@ -11,6 +11,9 @@ Agentic development is governed by `AGENTS.md` and roadmap outcomes are tracked 
   - `sql_pull`
   - `rest_pull`
   - `rest_push`
+- `rest_pull` authentication supports:
+  - static bearer token from `spec.source.secretRef`
+  - OAuth client credentials (`spec.source.oauth`) with token refresh and 401 retry
 - Canonical NDJSON document envelope with deterministic checksums.
 - Reconciliation engine that computes upserts and deletes (`auto_delete_missing`).
 - Artifact publishing to GCS (`gs://`) or local filesystem (`file://`) for development.
@@ -159,6 +162,7 @@ Connector Studio notes:
 
 - `sql_pull` mode now exposes editable SQL query and watermark fields in the wizard.
 - Changing mode (`sql_pull`/`rest_pull`/`rest_push`) updates visible source controls so proposals use mode-appropriate source configuration.
+- `rest_pull` mode supports static bearer and OAuth client-credentials source auth configuration in the wizard.
 
 Submit events:
 

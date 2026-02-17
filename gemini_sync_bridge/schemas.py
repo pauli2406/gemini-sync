@@ -3,15 +3,32 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 Mode = Literal["sql_pull", "rest_pull", "rest_push"]
-SourceType = Literal["postgres", "mssql", "mysql", "http"]
+SourceType = Literal["postgres", "mssql", "mysql", "oracle", "http"]
 DeletePolicy = Literal["auto_delete_missing", "soft_delete_only", "never_delete"]
+OAuthClientAuthMethod = Literal["client_secret_post", "client_secret_basic"]
 
 
 class Metadata(BaseModel):
     name: str
+
+
+class OAuthConfig(BaseModel):
+    grant_type: Literal["client_credentials"] = Field(
+        default="client_credentials",
+        alias="grantType",
+    )
+    token_url: str = Field(alias="tokenUrl")
+    client_id: str = Field(alias="clientId")
+    client_secret_ref: str | None = Field(default=None, alias="clientSecretRef")
+    scopes: list[str] = Field(default_factory=list)
+    audience: str | None = None
+    client_auth_method: OAuthClientAuthMethod = Field(
+        default="client_secret_post",
+        alias="clientAuthMethod",
+    )
 
 
 class SourceConfig(BaseModel):
@@ -27,6 +44,7 @@ class SourceConfig(BaseModel):
         default=None, alias="paginationNextCursorJsonPath"
     )
     headers: dict[str, str] = Field(default_factory=dict)
+    oauth: OAuthConfig | None = None
 
 
 class MappingConfig(BaseModel):
@@ -72,6 +90,30 @@ class ConnectorSpec(BaseModel):
         if mode in {"sql_pull", "rest_pull"} and not v:
             raise ValueError("schedule is required for pull connectors")
         return v
+
+    @model_validator(mode="after")
+    def validate_mode_source_contract(self) -> ConnectorSpec:
+        mode = self.mode
+        source_type = self.source.type
+
+        if mode == "sql_pull":
+            if source_type not in {"postgres", "mssql", "mysql", "oracle"}:
+                raise ValueError(
+                    "source.type must be one of postgres/mssql/mysql/oracle for sql_pull mode"
+                )
+            if not self.source.query:
+                raise ValueError("source.query is required for sql_pull mode")
+
+        if mode == "rest_pull":
+            if source_type != "http":
+                raise ValueError("source.type must be http for rest_pull mode")
+            if not self.source.url:
+                raise ValueError("source.url is required for rest_pull mode")
+
+        if mode == "rest_push" and source_type != "http":
+            raise ValueError("source.type must be http for rest_push mode")
+
+        return self
 
 
 class ConnectorConfig(BaseModel):

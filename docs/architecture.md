@@ -5,6 +5,7 @@
 1. **Connector Runtime (Python)**
 - Executes connector jobs in `sql_pull`, `rest_pull`, or `rest_push` mode.
 - Produces canonical documents and reconciliation results.
+- For `rest_pull`, supports static bearer auth and OAuth client-credentials token acquisition with refresh.
 
 2. **State Store (Postgres)**
 - `connector_checkpoints`: per-connector watermark.

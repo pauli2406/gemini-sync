@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from collections.abc import Iterable
 from datetime import UTC, datetime
 from typing import Any
@@ -81,19 +82,124 @@ def _request_with_retry(client: httpx.Client, method: str, url: str, **kwargs) -
     return response
 
 
+def _coerce_expires_in(raw: Any, default: int = 300) -> int:
+    try:
+        expires = int(float(raw))
+    except (TypeError, ValueError):
+        return default
+    return expires if expires > 0 else default
+
+
+class OAuthClientCredentialsTokenProvider:
+    def __init__(self, source: SourceConfig, client: httpx.Client) -> None:
+        self.source = source
+        self.client = client
+        self._access_token: str | None = None
+        self._token_type: str = "Bearer"
+        self._expires_at: float = 0.0
+        self._refresh_window_seconds = 30
+
+    def authorization_header(self, *, force_refresh: bool = False) -> str:
+        if force_refresh or self._needs_refresh():
+            self._refresh_token()
+        if not self._access_token:
+            raise ExtractionError("OAuth token provider failed to acquire an access token.")
+        return f"{self._token_type} {self._access_token}"
+
+    def _needs_refresh(self) -> bool:
+        if not self._access_token:
+            return True
+        return (self._expires_at - time.time()) <= self._refresh_window_seconds
+
+    def _refresh_token(self) -> None:
+        oauth = self.source.oauth
+        if oauth is None:
+            raise ExtractionError("OAuth configuration is required for token refresh.")
+
+        secret_ref = oauth.client_secret_ref or self.source.secret_ref
+        if not secret_ref:
+            raise ExtractionError(
+                "OAuth client secret reference is required. "
+                "Set source.secretRef or source.oauth.clientSecretRef."
+            )
+        client_secret = resolve_secret(secret_ref)
+
+        form_data: dict[str, str] = {"grant_type": oauth.grant_type}
+        if oauth.scopes:
+            form_data["scope"] = " ".join(scope.strip() for scope in oauth.scopes if scope.strip())
+        if oauth.audience:
+            form_data["audience"] = oauth.audience
+
+        auth: tuple[str, str] | None = None
+        if oauth.client_auth_method == "client_secret_post":
+            form_data["client_id"] = oauth.client_id
+            form_data["client_secret"] = client_secret
+        else:
+            auth = (oauth.client_id, client_secret)
+
+        response = _request_with_retry(
+            self.client,
+            "POST",
+            oauth.token_url,
+            data=form_data,
+            auth=auth,
+            headers={
+                "Accept": "application/json",
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+        )
+        if response.status_code >= 400:
+            raise ExtractionError(f"OAuth token request failed with status {response.status_code}.")
+
+        try:
+            payload = response.json()
+        except Exception as exc:  # noqa: BLE001
+            raise ExtractionError("OAuth token response was not valid JSON.") from exc
+
+        if not isinstance(payload, dict):
+            raise ExtractionError("OAuth token response must be a JSON object.")
+
+        access_token = payload.get("access_token")
+        if not isinstance(access_token, str) or not access_token.strip():
+            raise ExtractionError("OAuth token response missing required 'access_token' field.")
+
+        token_type = payload.get("token_type")
+        if isinstance(token_type, str) and token_type.strip():
+            self._token_type = token_type.strip()
+        else:
+            self._token_type = "Bearer"
+
+        expires_in = _coerce_expires_in(payload.get("expires_in"), default=300)
+        self._access_token = access_token
+        self._expires_at = time.time() + expires_in
+
+
 def extract_rest_rows(source: SourceConfig, current_watermark: str | None) -> PullResult:
     if not source.url:
         raise ExtractionError("source.url is required for rest_pull mode")
-
-    token = resolve_secret(source.secret_ref)
-    headers = dict(source.headers)
-    headers.setdefault("Authorization", f"Bearer {token}")
-    headers.setdefault("Accept", "application/json")
 
     rows: list[dict[str, Any]] = []
     cursor: str | None = None
 
     with httpx.Client(timeout=30.0) as client:
+        headers = dict(source.headers)
+        headers.setdefault("Accept", "application/json")
+
+        oauth_provider: OAuthClientCredentialsTokenProvider | None = None
+        if source.oauth:
+            oauth_provider = OAuthClientCredentialsTokenProvider(source, client)
+        else:
+            token = resolve_secret(source.secret_ref)
+            headers.setdefault("Authorization", f"Bearer {token}")
+
+        def _request_headers(*, force_oauth_refresh: bool = False) -> dict[str, str]:
+            request_headers = dict(headers)
+            if oauth_provider:
+                request_headers["Authorization"] = oauth_provider.authorization_header(
+                    force_refresh=force_oauth_refresh
+                )
+            return request_headers
+
         while True:
             params: dict[str, Any] = {}
             if current_watermark:
@@ -105,10 +211,19 @@ def extract_rest_rows(source: SourceConfig, current_watermark: str | None) -> Pu
                 client,
                 source.method,
                 source.url,
-                headers=headers,
+                headers=_request_headers(),
                 params=params,
                 json=source.payload,
             )
+            if oauth_provider and response.status_code == 401:
+                response = _request_with_retry(
+                    client,
+                    source.method,
+                    source.url,
+                    headers=_request_headers(force_oauth_refresh=True),
+                    params=params,
+                    json=source.payload,
+                )
             response.raise_for_status()
             payload = response.json()
 

@@ -84,6 +84,47 @@ def _deep_merge_dict(base: dict[str, Any], updates: dict[str, Any]) -> dict[str,
     return merged
 
 
+def _prune_incompatible_source_fields(spec: dict[str, Any]) -> dict[str, Any]:
+    source = spec.get("source")
+    mode = spec.get("mode")
+    if not isinstance(source, dict):
+        return spec
+
+    if mode == "sql_pull":
+        for key in (
+            "url",
+            "payload",
+            "paginationCursorField",
+            "paginationNextCursorJsonPath",
+            "headers",
+            "method",
+            "oauth",
+        ):
+            source.pop(key, None)
+        return spec
+
+    if mode == "rest_pull":
+        source["type"] = "http"
+        source.pop("query", None)
+        return spec
+
+    if mode == "rest_push":
+        source["type"] = "http"
+        for key in (
+            "query",
+            "watermarkField",
+            "url",
+            "method",
+            "payload",
+            "paginationCursorField",
+            "paginationNextCursorJsonPath",
+            "headers",
+            "oauth",
+        ):
+            source.pop(key, None)
+    return spec
+
+
 def _load_schedule_jobs(values_path: Path | None = None) -> list[dict[str, Any]]:
     target = values_path or _helm_values_path()
     payload = _load_yaml(target)
@@ -270,6 +311,7 @@ def build_proposed_file_changes(
         if not isinstance(existing_spec, dict):
             existing_spec = {}
         merged_spec = _deep_merge_dict(existing_spec, dict(parsed_draft.spec))
+        merged_spec = _prune_incompatible_source_fields(merged_spec)
         parsed_draft = ConnectorDraft.model_validate(
             {
                 "metadata": {"name": parsed_draft.metadata.name},

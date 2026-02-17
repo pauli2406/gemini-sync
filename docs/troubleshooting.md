@@ -59,6 +59,35 @@ Fix:
 - Export the expected secret env var, for example:
   - `SECRET_HR_DB_CREDENTIALS=postgresql+psycopg2://...`
 
+## REST Pull OAuth Token Request Fails
+
+Error pattern:
+
+- `OAuth token request failed with status 400`
+- `OAuth token request failed with status 401`
+- `OAuth token request failed with status 403`
+
+Fix:
+
+- Verify `spec.source.oauth.tokenUrl` and `spec.source.oauth.clientId`.
+- Verify OAuth client secret in `spec.source.oauth.clientSecretRef` or `spec.source.secretRef`.
+- Verify `spec.source.oauth.clientAuthMethod` matches provider expectation:
+  - `client_secret_post`
+  - `client_secret_basic`
+- Verify requested scopes/audience are allowed.
+
+## REST Pull OAuth Token Payload Invalid
+
+Error pattern:
+
+- `OAuth token response missing required 'access_token' field`
+- `OAuth token response was not valid JSON`
+
+Fix:
+
+- Verify token endpoint returns JSON object with `access_token`.
+- Check upstream auth proxy/IdP response transformation.
+
 ## Runtime DB Not Initialized
 
 Error pattern:

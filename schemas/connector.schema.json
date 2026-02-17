@@ -36,7 +36,7 @@
           "properties": {
             "type": {
               "type": "string",
-              "enum": ["postgres", "mssql", "mysql", "http"]
+              "enum": ["postgres", "mssql", "mysql", "oracle", "http"]
             },
             "secretRef": {"type": "string", "minLength": 1},
             "query": {"type": ["string", "null"]},
@@ -49,6 +49,31 @@
             "headers": {
               "type": "object",
               "additionalProperties": {"type": "string"}
+            },
+            "oauth": {
+              "type": "object",
+              "required": ["tokenUrl", "clientId"],
+              "additionalProperties": false,
+              "properties": {
+                "grantType": {
+                  "type": "string",
+                  "const": "client_credentials",
+                  "default": "client_credentials"
+                },
+                "tokenUrl": {"type": "string", "minLength": 1},
+                "clientId": {"type": "string", "minLength": 1},
+                "clientSecretRef": {"type": ["string", "null"]},
+                "scopes": {
+                  "type": "array",
+                  "items": {"type": "string"}
+                },
+                "audience": {"type": ["string", "null"]},
+                "clientAuthMethod": {
+                  "type": "string",
+                  "enum": ["client_secret_post", "client_secret_basic"],
+                  "default": "client_secret_post"
+                }
+              }
             }
           }
         },
@@ -114,6 +139,58 @@
           },
           "then": {
             "required": ["schedule"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {"const": "sql_pull"}
+            }
+          },
+          "then": {
+            "properties": {
+              "source": {
+                "properties": {
+                  "type": {
+                    "enum": ["postgres", "mssql", "mysql", "oracle"]
+                  }
+                },
+                "required": ["query"]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {"const": "rest_pull"}
+            }
+          },
+          "then": {
+            "properties": {
+              "source": {
+                "properties": {
+                  "type": {"const": "http"}
+                },
+                "required": ["url"]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {"const": "rest_push"}
+            }
+          },
+          "then": {
+            "properties": {
+              "source": {
+                "properties": {
+                  "type": {"const": "http"}
+                }
+              }
+            }
           }
         }
       ]

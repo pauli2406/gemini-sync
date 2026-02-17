@@ -44,22 +44,98 @@
               <option value="postgres">postgres</option>
               <option value="mssql">mssql</option>
               <option value="mysql">mysql</option>
+              <option value="oracle">oracle</option>
               <option value="http">http</option>
             </select>
           </label>
           <label>Secret Ref <input id="draft-secret-ref" type="text" value="source-secret" /></label>
+          <label data-visible-modes="sql_pull">SQL Query
+            <textarea id="draft-source-query">SELECT * FROM source_table WHERE updated_at > :watermark</textarea>
+          </label>
+          <label data-visible-modes="rest_pull">Source URL
+            <input id="draft-source-url" type="text" value="https://source.example/api/items" />
+          </label>
+          <label data-visible-modes="rest_pull">HTTP Method
+            <select id="draft-source-method">
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+              <option value="PUT">PUT</option>
+              <option value="PATCH">PATCH</option>
+            </select>
+          </label>
+          <label data-visible-modes="sql_pull rest_pull">Watermark Field
+            <input id="draft-source-watermark" type="text" value="updated_at" />
+          </label>
+          <label data-visible-modes="rest_pull">Payload JSON
+            <textarea id="draft-source-payload">{}</textarea>
+          </label>
+          <label data-visible-modes="rest_pull">Pagination Cursor Field
+            <input id="draft-source-pagination-cursor" type="text" value="" />
+          </label>
+          <label data-visible-modes="rest_pull">Pagination Next Cursor JSON Path
+            <input id="draft-source-pagination-next" type="text" value="" />
+          </label>
+          <label data-visible-modes="rest_pull">Headers JSON
+            <textarea id="draft-source-headers">{}</textarea>
+          </label>
+          <label data-visible-modes="rest_pull">Auth Mode
+            <select id="draft-source-auth-mode">
+              <option value="static_bearer">static_bearer</option>
+              <option value="oauth_client_credentials">oauth_client_credentials</option>
+            </select>
+          </label>
+          <label data-visible-modes="rest_pull" data-visible-auth-modes="oauth_client_credentials">OAuth Token URL
+            <input
+              id="draft-source-oauth-token-url"
+              type="text"
+              value="https://auth.example/realms/acme/protocol/openid-connect/token"
+            />
+          </label>
+          <label data-visible-modes="rest_pull" data-visible-auth-modes="oauth_client_credentials">OAuth Client ID
+            <input id="draft-source-oauth-client-id" type="text" value="bridge-client" />
+          </label>
+          <label data-visible-modes="rest_pull" data-visible-auth-modes="oauth_client_credentials">OAuth Client Secret Ref
+            <input id="draft-source-oauth-client-secret-ref" type="text" value="" />
+          </label>
+          <label data-visible-modes="rest_pull" data-visible-auth-modes="oauth_client_credentials">OAuth Client Auth Method
+            <select id="draft-source-oauth-client-auth-method">
+              <option value="client_secret_post">client_secret_post</option>
+              <option value="client_secret_basic">client_secret_basic</option>
+            </select>
+          </label>
+          <label data-visible-modes="rest_pull" data-visible-auth-modes="oauth_client_credentials">OAuth Scopes (comma separated)
+            <input id="draft-source-oauth-scopes" type="text" value="" />
+          </label>
+          <label data-visible-modes="rest_pull" data-visible-auth-modes="oauth_client_credentials">OAuth Audience
+            <input id="draft-source-oauth-audience" type="text" value="" />
+          </label>
           <label>ID Field <input id="draft-id-field" type="text" value="id" /></label>
           <label>Title Field <input id="draft-title-field" type="text" value="title" /></label>
           <label>Content Template <textarea id="draft-content-template">{{ title }}</textarea></label>
+          <label>URI Template <input id="draft-uri-template" type="text" value="" /></label>
+          <label>MIME Type <input id="draft-mime-type" type="text" value="text/plain" /></label>
+          <label>ACL Users Field <input id="draft-acl-users-field" type="text" value="" /></label>
+          <label>ACL Groups Field <input id="draft-acl-groups-field" type="text" value="" /></label>
+          <label>Metadata Fields (comma separated)
+            <input id="draft-metadata-fields" type="text" value="" />
+          </label>
         </article>
 
         <article class="studio-card">
           <h2>Step 3: Target</h2>
           <label>Output Bucket <input id="draft-output-bucket" type="text" value="file://./local-bucket" /></label>
           <label>Output Prefix <input id="draft-output-prefix" type="text" value="profile" /></label>
+          <label>Output Format <input id="draft-output-format" type="text" value="ndjson" readonly /></label>
           <label>Project Id <input id="draft-project" type="text" value="my-project" /></label>
           <label>Location <input id="draft-location" type="text" value="global" /></label>
           <label>Data Store Id <input id="draft-datastore" type="text" value="default-ds" /></label>
+          <label>Delete Policy
+            <select id="draft-delete-policy">
+              <option value="auto_delete_missing">auto_delete_missing</option>
+              <option value="soft_delete_only">soft_delete_only</option>
+              <option value="never_delete">never_delete</option>
+            </select>
+          </label>
         </article>
 
         <article class="studio-card">

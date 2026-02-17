@@ -49,7 +49,7 @@ fields:
   spec.source.secretRef:
     description: Secret reference resolved by runtime.
     example: hr-db-credentials
-    operationalNotes: Maps to environment variable SECRET_HR_DB_CREDENTIALS or managed secret.
+    operationalNotes: Maps to environment variable SECRET_HR_DB_CREDENTIALS or managed secret; also used as OAuth client secret fallback when oauth.clientSecretRef is omitted.
   spec.source.query:
     modes:
       - sql_pull
@@ -97,7 +97,53 @@ fields:
       - rest_pull
     description: Static request headers map.
     example: "{X-Tenant: internal}"
-    operationalNotes: Authorization header is auto-added unless already provided.
+    operationalNotes: Authorization header is auto-added for static bearer mode unless already provided; OAuth mode overrides Authorization with runtime-issued token.
+  spec.source.oauth:
+    modes:
+      - rest_pull
+    description: Optional OAuth client-credentials configuration for service-to-service token acquisition.
+    example: "{grantType: client_credentials, tokenUrl: https://auth.local/realms/acme/protocol/openid-connect/token, clientId: bridge-client}"
+    operationalNotes: When set, runtime fetches and refreshes bearer tokens automatically.
+  spec.source.oauth.grantType:
+    modes:
+      - rest_pull
+    description: OAuth grant type for token acquisition.
+    example: client_credentials
+    operationalNotes: v1 supports only client_credentials.
+  spec.source.oauth.tokenUrl:
+    modes:
+      - rest_pull
+    description: OAuth token endpoint URL.
+    example: https://auth.local/realms/acme/protocol/openid-connect/token
+    operationalNotes: Required when oauth block is configured.
+  spec.source.oauth.clientId:
+    modes:
+      - rest_pull
+    description: OAuth client identifier.
+    example: bridge-client
+    operationalNotes: Required when oauth block is configured.
+  spec.source.oauth.clientSecretRef:
+    modes:
+      - rest_pull
+    description: Optional secret reference for OAuth client secret.
+    example: kb-oauth-client-secret
+    operationalNotes: Falls back to spec.source.secretRef when omitted.
+  spec.source.oauth.scopes:
+    modes:
+      - rest_pull
+    description: OAuth scopes sent to token endpoint as space-delimited scope value.
+    example: "[api.read, api.write]"
+  spec.source.oauth.audience:
+    modes:
+      - rest_pull
+    description: Optional OAuth audience parameter.
+    example: knowledge-api
+  spec.source.oauth.clientAuthMethod:
+    modes:
+      - rest_pull
+    description: OAuth client authentication method for token endpoint.
+    example: client_secret_post
+    operationalNotes: Supported values are client_secret_post and client_secret_basic.
   spec.mapping:
     description: Mapping from source row fields to canonical document.
     example: "{idField: employee_id, titleField: full_name, ...}"
