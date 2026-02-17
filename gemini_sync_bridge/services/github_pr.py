@@ -8,6 +8,7 @@ from typing import Any
 import httpx
 
 from gemini_sync_bridge.studio_schemas import ProposalAction, ProposalResponse
+from gemini_sync_bridge.utils.http_clients import create_httpx_client
 
 
 def build_branch_name(action: str, connector_id: str, timestamp: str | None = None) -> str:
@@ -199,7 +200,7 @@ class GitHubPRService:
         pr_url = ""
 
         try:
-            with httpx.Client(base_url="https://api.github.com", timeout=30.0) as client:
+            with create_httpx_client(base_url="https://api.github.com", timeout=30.0) as client:
                 branch_response = client.get(
                     f"/repos/{owner}/{repo}/git/ref/heads/{self.github_base_branch}",
                     headers=self._headers(),

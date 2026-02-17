@@ -24,6 +24,31 @@ For deletion/cleanup of test data stores, use the same playbook section:
 
 - `Delete a Test Data Store`
 
+## Outbound Proxy Configuration
+
+Bridge outbound HTTP clients use standard environment variables for proxy and CA trust:
+
+- `HTTP_PROXY`
+- `HTTPS_PROXY`
+- `NO_PROXY`
+- `SSL_CERT_FILE`
+- `REQUESTS_CA_BUNDLE`
+
+Recommended deployment baseline:
+
+1. Set `HTTP_PROXY` and `HTTPS_PROXY` to enterprise proxy endpoints.
+2. Set `NO_PROXY` to include local/internal addresses (`localhost`, `127.0.0.1`, `postgres`, `.internal`).
+3. Set `SSL_CERT_FILE` and `REQUESTS_CA_BUNDLE` to the same enterprise CA bundle path when TLS interception/custom trust is required.
+4. Restart bridge runtime after env updates.
+
+Verification checklist:
+
+1. Run one `rest_pull` connector with static bearer and confirm run success.
+2. Run one `rest_pull` connector with OAuth client-credentials and confirm token acquisition + data pull.
+3. Trigger one connector failure and verify Teams/Splunk webhook delivery.
+4. Submit one Studio proposal with GitHub credentials enabled and verify PR creation.
+5. Verify Gemini ingestion run success (`GEMINI_INGESTION_DRY_RUN=false` in staging/prod).
+
 ## Failure Handling
 
 When a run fails:
