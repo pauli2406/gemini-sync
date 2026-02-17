@@ -75,6 +75,7 @@ configure connector, run first import, troubleshoot common errors), use:
   - `docs/connector-provider-postgres.md`
   - `docs/connector-provider-mysql.md`
   - `docs/connector-provider-mssql.md`
+  - `docs/connector-provider-oracle.md`
   - `docs/connector-provider-http.md`
   - `docs/connector-provider-future.md`
 

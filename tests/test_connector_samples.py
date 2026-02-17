@@ -37,3 +37,24 @@ def test_hr_employees_sample_connector_sql_contract() -> None:
 
     reconciliation = connector["spec"]["reconciliation"]
     assert reconciliation["deletePolicy"] == "auto_delete_missing"
+
+
+def test_oracle_employees_sample_connector_sql_contract() -> None:
+    connector = _load_connector("connectors/oracle-employees.yaml")
+    assert connector["metadata"]["name"] == "oracle-employees"
+    assert connector["spec"]["mode"] == "sql_pull"
+
+    source = connector["spec"]["source"]
+    assert source["type"] == "oracle"
+    assert source["secretRef"] == "oracle-hr-credentials"
+    assert source["watermarkField"] == "updated_at"
+    query = source["query"]
+    assert ":watermark" not in query
+    assert "FROM hr.employees" in query
+
+    mapping = connector["spec"]["mapping"]
+    assert mapping["idField"] == "employee_id"
+    assert mapping["titleField"] == "full_name"
+
+    reconciliation = connector["spec"]["reconciliation"]
+    assert reconciliation["deletePolicy"] == "auto_delete_missing"

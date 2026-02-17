@@ -1,0 +1,8 @@
+id: oracle-sample-contract
+name: Oracle sample connector contract
+description: Ensures the Oracle sample SQL connector keeps expected provider and reconciliation semantics.
+pytest_selector: tests/test_connector_samples.py::test_oracle_employees_sample_connector_sql_contract
+expected_behavior:
+  - source.type remains oracle in the sample connector.
+  - sample query is snapshot-style with no :watermark placeholder.
+  - reconciliation policy stays auto_delete_missing.

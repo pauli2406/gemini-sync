@@ -50,6 +50,7 @@ Use these pages while filling wizard fields:
 - Postgres provider: `docs/connector-provider-postgres.md`
 - MySQL provider: `docs/connector-provider-mysql.md`
 - MSSQL provider: `docs/connector-provider-mssql.md`
+- Oracle provider: `docs/connector-provider-oracle.md`
 - HTTP provider: `docs/connector-provider-http.md`
 - Full field reference: `docs/connector-field-reference.md`
 

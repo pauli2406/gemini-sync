@@ -45,7 +45,7 @@ fields:
   spec.source.type:
     description: Source provider type.
     example: postgres
-    operationalNotes: Use http for rest_pull and rest_push.
+    operationalNotes: Use postgres/mssql/mysql/oracle for sql_pull; use http for rest_pull and rest_push.
   spec.source.secretRef:
     description: Secret reference resolved by runtime.
     example: hr-db-credentials

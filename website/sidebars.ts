@@ -19,6 +19,7 @@ const sidebars: SidebarsConfig = {
         'connector-provider-postgres',
         'connector-provider-mysql',
         'connector-provider-mssql',
+        'connector-provider-oracle',
         'connector-provider-http',
         'connector-provider-future',
       ],

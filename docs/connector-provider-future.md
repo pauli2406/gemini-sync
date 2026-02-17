@@ -10,7 +10,6 @@ Not supported in current runtime.
 
 - BigQuery
 - Snowflake
-- Oracle
 
 ## Intended future shape
 
@@ -26,7 +25,7 @@ Expected direction for future provider support:
 Until these providers are implemented:
 
 1. Use currently supported providers:
-   - SQL: `postgres`, `mysql`, `mssql`
+   - SQL: `postgres`, `mysql`, `mssql`, `oracle`
    - API: `http`
 2. If source is unsupported, create an upstream export step that writes to a supported source:
    - push canonical docs via `rest_push`, or

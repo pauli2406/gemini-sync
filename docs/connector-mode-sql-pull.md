@@ -6,7 +6,7 @@ Use `sql_pull` when your source is a relational database and you want the bridge
 
 Best fit:
 
-- Source is PostgreSQL/MySQL/MSSQL.
+- Source is PostgreSQL/MySQL/MSSQL/Oracle.
 - You want centralized scheduling and retries.
 - You need deterministic reconciliation behavior.
 
@@ -54,7 +54,7 @@ spec:
   mode: sql_pull
   schedule: "0 */3 * * *" # required for pull modes
   source:
-    type: postgres # postgres | mysql | mssql
+    type: postgres # postgres | mysql | mssql | oracle
     secretRef: hr-db-credentials # SECRET_HR_DB_CREDENTIALS
     query: >
       SELECT employee_id, full_name, department, role, bio, allowed_users, allowed_groups, updated_at
@@ -88,7 +88,7 @@ spec:
 | Field | Meaning | Options |
 |---|---|---|
 | `spec.schedule` | Cron schedule for extraction. | Any valid cron string. |
-| `spec.source.type` | SQL provider adapter. | `postgres`, `mysql`, `mssql` |
+| `spec.source.type` | SQL provider adapter. | `postgres`, `mysql`, `mssql`, `oracle` |
 | `spec.source.secretRef` | Database DSN secret reference. | Any non-empty string; runtime resolves `SECRET_<SECRETREF>`. |
 | `spec.source.query` | SQL executed each run. | Any SQL valid for your DB. |
 | `spec.source.watermarkField` | Field used to compute checkpoint watermark from result rows. | Typically timestamp field like `updated_at`. |
@@ -128,4 +128,5 @@ spec:
 - Postgres: `docs/connector-provider-postgres.md`
 - MySQL: `docs/connector-provider-mysql.md`
 - MSSQL: `docs/connector-provider-mssql.md`
+- Oracle: `docs/connector-provider-oracle.md`
 - Full field table: `docs/connector-field-reference.md`

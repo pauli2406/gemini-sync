@@ -15,6 +15,7 @@ Then select provider specifics:
 - Postgres: `docs/connector-provider-postgres.md`
 - MySQL: `docs/connector-provider-mysql.md`
 - MSSQL: `docs/connector-provider-mssql.md`
+- Oracle: `docs/connector-provider-oracle.md`
 - HTTP: `docs/connector-provider-http.md`
 - Future placeholders: `docs/connector-provider-future.md`
 

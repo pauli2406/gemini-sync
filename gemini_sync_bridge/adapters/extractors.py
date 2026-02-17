@@ -54,12 +54,22 @@ def extract_sql_rows(source: SourceConfig, current_watermark: str | None) -> Pul
         raise ExtractionError("source.query is required for sql_pull mode")
 
     dsn = resolve_secret(source.secret_ref)
-    engine = create_engine(dsn, future=True)
+    try:
+        engine = create_engine(dsn, future=True)
+    except Exception as exc:  # noqa: BLE001
+        raise ExtractionError(
+            f"Invalid DSN for SQL source type '{source.type}': {exc}"
+        ) from exc
     params = {"watermark": current_watermark}
 
-    with engine.connect() as conn:
-        result = conn.execute(text(source.query), params)
-        rows = [dict(row._mapping) for row in result]
+    try:
+        with engine.connect() as conn:
+            result = conn.execute(text(source.query), params)
+            rows = [dict(row._mapping) for row in result]
+    except Exception as exc:  # noqa: BLE001
+        raise ExtractionError(
+            f"SQL extraction failed for source type '{source.type}': {exc}"
+        ) from exc
 
     watermark = _max_watermark(rows, source.watermark_field, current_watermark)
     return PullResult(rows=rows, watermark=watermark)

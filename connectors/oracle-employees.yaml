@@ -1,0 +1,34 @@
+apiVersion: sync.gemini.io/v1alpha1
+kind: Connector
+metadata:
+  name: oracle-employees
+spec:
+  mode: sql_pull
+  schedule: 0 */3 * * *
+  source:
+    type: oracle
+    secretRef: oracle-hr-credentials
+    query: >
+      SELECT employee_id, full_name, department, role, bio, allowed_users, allowed_groups, updated_at
+      FROM hr.employees
+    watermarkField: updated_at
+  mapping:
+    idField: employee_id
+    titleField: full_name
+    contentTemplate: '{{ department }} {{ role }} {{ bio }}'
+    uriTemplate: https://hr.internal/employees/{{ employee_id }}
+    aclUsersField: allowed_users
+    aclGroupsField: allowed_groups
+    metadataFields:
+    - department
+    - role
+  output:
+    bucket: gs://company-gemini-sync
+    prefix: oracle-employees
+    format: ndjson
+  gemini:
+    projectId: my-project
+    location: global
+    dataStoreId: oracle-hr-ds
+  reconciliation:
+    deletePolicy: auto_delete_missing
