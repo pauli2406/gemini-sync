@@ -60,7 +60,7 @@ Agentic development is governed by `AGENTS.md` and roadmap outcomes are tracked 
 ## Getting Started Guides
 
 - Full local setup (Docker Postgres + sample source data + first successful run):
-  `docs/getting-started-local.md`
+  `docs/getting-started-local.mdx`
 - Full end-to-end GCP onboarding (datastore + IAM + import verification):
   `docs/discovery-engine-cli-playbook.md`
 
@@ -108,7 +108,7 @@ Automated deploy workflow:
 
 Use the full onboarding guide for first-time setup:
 
-- `docs/getting-started-local.md`
+- `docs/getting-started-local.mdx`
 
 Fast path (after first-time setup):
 

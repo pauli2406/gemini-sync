@@ -1,0 +1,876 @@
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Local Getting Started Guide
+
+This guide takes you from a fresh clone to a successful local connector run.
+It uses Docker Postgres and local `file://` artifacts, so you can start without
+Google Cloud credentials.
+
+## What You Will Run
+
+- A local Postgres container for runtime state and sample source data
+- The Gemini Sync Bridge CLI (`init-db`, `run`, `serve`)
+- A local SQL pull connector writing artifacts to `./local-bucket`
+- Ops and Studio UIs at `http://localhost:8080`
+
+## 1) Prerequisites
+
+- Python `3.11+`
+- Docker + Docker Compose
+- `git`
+- `curl`
+
+## 2) Install Dependencies
+
+From the repository root:
+
+<Tabs groupId="os">
+<TabItem value="macos" label="macOS" default>
+
+```bash
+python3.11 -m venv .venv
+source .venv/bin/activate
+pip install -e .[dev]
+```
+
+</TabItem>
+<TabItem value="linux" label="Linux">
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .[dev]
+```
+
+</TabItem>
+<TabItem value="windows" label="Windows (PowerShell)">
+
+```powershell
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -e ".[dev]"
+```
+
+</TabItem>
+</Tabs>
+
+## 3) Start Postgres (Docker)
+
+```bash
+docker compose up -d postgres
+docker compose ps postgres
+docker compose logs --tail=30 postgres
+```
+
+Continue when logs show `database system is ready to accept connections`.
+
+## 4) Configure Local Environment
+
+<Tabs groupId="os">
+<TabItem value="macos" label="macOS" default>
+
+```bash
+cp .env.example .env
+```
+
+</TabItem>
+<TabItem value="linux" label="Linux">
+
+```bash
+cp .env.example .env
+```
+
+</TabItem>
+<TabItem value="windows" label="Windows (PowerShell)">
+
+```powershell
+Copy-Item .env.example .env
+```
+
+</TabItem>
+</Tabs>
+
+The default `.env.example` already enables local dry-run ingestion:
+
+- `GEMINI_INGESTION_DRY_RUN=true`
+- Runtime DB: `DATABASE_URL=.../gemini_sync_bridge`
+- Source secret: `SECRET_HR_DB_CREDENTIALS=.../hr`
+
+## 5) Initialize Runtime Tables
+
+<Tabs groupId="os">
+<TabItem value="macos" label="macOS" default>
+
+```bash
+.venv/bin/gemini-sync-bridge init-db
+docker compose exec -T postgres psql -U postgres -d gemini_sync_bridge -c "\\dt"
+```
+
+</TabItem>
+<TabItem value="linux" label="Linux">
+
+```bash
+.venv/bin/gemini-sync-bridge init-db
+docker compose exec -T postgres psql -U postgres -d gemini_sync_bridge -c "\\dt"
+```
+
+</TabItem>
+<TabItem value="windows" label="Windows (PowerShell)">
+
+```powershell
+.\.venv\Scripts\gemini-sync-bridge.exe init-db
+docker compose exec -T postgres psql -U postgres -d gemini_sync_bridge -c "\dt"
+```
+
+</TabItem>
+</Tabs>
+
+## 6) Seed Sample Source Data
+
+Create the `hr` source database and seed records (safe to rerun):
+
+<Tabs groupId="os">
+<TabItem value="macos" label="macOS" default>
+
+```bash
+docker compose exec -T postgres psql -U postgres -d postgres <<'SQL'
+SELECT 'CREATE DATABASE hr'
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'hr')\gexec
+SQL
+
+docker compose exec -T postgres psql -U postgres -d hr <<'SQL'
+CREATE TABLE IF NOT EXISTS employees (
+  employee_id BIGINT PRIMARY KEY,
+  full_name TEXT NOT NULL,
+  department TEXT NOT NULL,
+  role TEXT NOT NULL,
+  bio TEXT NOT NULL,
+  allowed_users TEXT[] NOT NULL DEFAULT '{}',
+  allowed_groups TEXT[] NOT NULL DEFAULT '{}',
+  updated_at TIMESTAMPTZ NOT NULL
+);
+
+INSERT INTO employees (
+  employee_id,
+  full_name,
+  department,
+  role,
+  bio,
+  allowed_users,
+  allowed_groups,
+  updated_at
+) VALUES
+  (
+    1001,
+    'Ada Lovelace',
+    'Engineering',
+    'Staff Engineer',
+    'Builds sync and ingestion workflows.',
+    ARRAY['ada@company.test'],
+    ARRAY['engineering'],
+    NOW() - INTERVAL '1 hour'
+  ),
+  (
+    1002,
+    'Grace Hopper',
+    'Platform',
+    'Principal Engineer',
+    'Owns reliability and release quality.',
+    ARRAY['grace@company.test'],
+    ARRAY['platform'],
+    NOW()
+  )
+ON CONFLICT (employee_id) DO UPDATE
+SET
+  full_name = EXCLUDED.full_name,
+  department = EXCLUDED.department,
+  role = EXCLUDED.role,
+  bio = EXCLUDED.bio,
+  allowed_users = EXCLUDED.allowed_users,
+  allowed_groups = EXCLUDED.allowed_groups,
+  updated_at = EXCLUDED.updated_at;
+SQL
+```
+
+</TabItem>
+<TabItem value="linux" label="Linux">
+
+```bash
+docker compose exec -T postgres psql -U postgres -d postgres <<'SQL'
+SELECT 'CREATE DATABASE hr'
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'hr')\gexec
+SQL
+
+docker compose exec -T postgres psql -U postgres -d hr <<'SQL'
+CREATE TABLE IF NOT EXISTS employees (
+  employee_id BIGINT PRIMARY KEY,
+  full_name TEXT NOT NULL,
+  department TEXT NOT NULL,
+  role TEXT NOT NULL,
+  bio TEXT NOT NULL,
+  allowed_users TEXT[] NOT NULL DEFAULT '{}',
+  allowed_groups TEXT[] NOT NULL DEFAULT '{}',
+  updated_at TIMESTAMPTZ NOT NULL
+);
+
+INSERT INTO employees (
+  employee_id,
+  full_name,
+  department,
+  role,
+  bio,
+  allowed_users,
+  allowed_groups,
+  updated_at
+) VALUES
+  (
+    1001,
+    'Ada Lovelace',
+    'Engineering',
+    'Staff Engineer',
+    'Builds sync and ingestion workflows.',
+    ARRAY['ada@company.test'],
+    ARRAY['engineering'],
+    NOW() - INTERVAL '1 hour'
+  ),
+  (
+    1002,
+    'Grace Hopper',
+    'Platform',
+    'Principal Engineer',
+    'Owns reliability and release quality.',
+    ARRAY['grace@company.test'],
+    ARRAY['platform'],
+    NOW()
+  )
+ON CONFLICT (employee_id) DO UPDATE
+SET
+  full_name = EXCLUDED.full_name,
+  department = EXCLUDED.department,
+  role = EXCLUDED.role,
+  bio = EXCLUDED.bio,
+  allowed_users = EXCLUDED.allowed_users,
+  allowed_groups = EXCLUDED.allowed_groups,
+  updated_at = EXCLUDED.updated_at;
+SQL
+```
+
+</TabItem>
+<TabItem value="windows" label="Windows (PowerShell)">
+
+```powershell
+@'
+SELECT 'CREATE DATABASE hr'
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'hr')\gexec
+'@ | docker compose exec -T postgres psql -U postgres -d postgres
+
+@'
+CREATE TABLE IF NOT EXISTS employees (
+  employee_id BIGINT PRIMARY KEY,
+  full_name TEXT NOT NULL,
+  department TEXT NOT NULL,
+  role TEXT NOT NULL,
+  bio TEXT NOT NULL,
+  allowed_users TEXT[] NOT NULL DEFAULT '{}',
+  allowed_groups TEXT[] NOT NULL DEFAULT '{}',
+  updated_at TIMESTAMPTZ NOT NULL
+);
+
+INSERT INTO employees (
+  employee_id,
+  full_name,
+  department,
+  role,
+  bio,
+  allowed_users,
+  allowed_groups,
+  updated_at
+) VALUES
+  (
+    1001,
+    'Ada Lovelace',
+    'Engineering',
+    'Staff Engineer',
+    'Builds sync and ingestion workflows.',
+    ARRAY['ada@company.test'],
+    ARRAY['engineering'],
+    NOW() - INTERVAL '1 hour'
+  ),
+  (
+    1002,
+    'Grace Hopper',
+    'Platform',
+    'Principal Engineer',
+    'Owns reliability and release quality.',
+    ARRAY['grace@company.test'],
+    ARRAY['platform'],
+    NOW()
+  )
+ON CONFLICT (employee_id) DO UPDATE
+SET
+  full_name = EXCLUDED.full_name,
+  department = EXCLUDED.department,
+  role = EXCLUDED.role,
+  bio = EXCLUDED.bio,
+  allowed_users = EXCLUDED.allowed_users,
+  allowed_groups = EXCLUDED.allowed_groups,
+  updated_at = EXCLUDED.updated_at;
+'@ | docker compose exec -T postgres psql -U postgres -d hr
+```
+
+</TabItem>
+</Tabs>
+
+## 7) Create a Local Connector Config
+
+Create a local connector file so you do not modify tracked samples:
+
+<Tabs groupId="os">
+<TabItem value="macos" label="macOS" default>
+
+```bash
+cat > connectors/hr-employees-local.yaml <<'YAML'
+apiVersion: sync.gemini.io/v1alpha1
+kind: Connector
+metadata:
+  name: hr-employees-local
+spec:
+  mode: sql_pull
+  schedule: "0 */3 * * *"
+  source:
+    type: postgres
+    secretRef: hr-db-credentials
+    query: >
+      SELECT employee_id, full_name, department, role, bio, allowed_users, allowed_groups, updated_at
+      FROM employees
+    watermarkField: updated_at
+  mapping:
+    idField: employee_id
+    titleField: full_name
+    contentTemplate: "{{ department }} {{ role }} {{ bio }}"
+    uriTemplate: "https://hr.internal/employees/{{ employee_id }}"
+    aclUsersField: allowed_users
+    aclGroupsField: allowed_groups
+    metadataFields:
+      - department
+      - role
+  output:
+    bucket: file://./local-bucket
+    prefix: hr-employees-local
+    format: ndjson
+  gemini:
+    projectId: local-dev
+    location: global
+    dataStoreId: hr-local
+  reconciliation:
+    deletePolicy: auto_delete_missing
+YAML
+```
+
+</TabItem>
+<TabItem value="linux" label="Linux">
+
+```bash
+cat > connectors/hr-employees-local.yaml <<'YAML'
+apiVersion: sync.gemini.io/v1alpha1
+kind: Connector
+metadata:
+  name: hr-employees-local
+spec:
+  mode: sql_pull
+  schedule: "0 */3 * * *"
+  source:
+    type: postgres
+    secretRef: hr-db-credentials
+    query: >
+      SELECT employee_id, full_name, department, role, bio, allowed_users, allowed_groups, updated_at
+      FROM employees
+    watermarkField: updated_at
+  mapping:
+    idField: employee_id
+    titleField: full_name
+    contentTemplate: "{{ department }} {{ role }} {{ bio }}"
+    uriTemplate: "https://hr.internal/employees/{{ employee_id }}"
+    aclUsersField: allowed_users
+    aclGroupsField: allowed_groups
+    metadataFields:
+      - department
+      - role
+  output:
+    bucket: file://./local-bucket
+    prefix: hr-employees-local
+    format: ndjson
+  gemini:
+    projectId: local-dev
+    location: global
+    dataStoreId: hr-local
+  reconciliation:
+    deletePolicy: auto_delete_missing
+YAML
+```
+
+</TabItem>
+<TabItem value="windows" label="Windows (PowerShell)">
+
+```powershell
+@'
+apiVersion: sync.gemini.io/v1alpha1
+kind: Connector
+metadata:
+  name: hr-employees-local
+spec:
+  mode: sql_pull
+  schedule: "0 */3 * * *"
+  source:
+    type: postgres
+    secretRef: hr-db-credentials
+    query: >
+      SELECT employee_id, full_name, department, role, bio, allowed_users, allowed_groups, updated_at
+      FROM employees
+    watermarkField: updated_at
+  mapping:
+    idField: employee_id
+    titleField: full_name
+    contentTemplate: "{{ department }} {{ role }} {{ bio }}"
+    uriTemplate: "https://hr.internal/employees/{{ employee_id }}"
+    aclUsersField: allowed_users
+    aclGroupsField: allowed_groups
+    metadataFields:
+      - department
+      - role
+  output:
+    bucket: file://./local-bucket
+    prefix: hr-employees-local
+    format: ndjson
+  gemini:
+    projectId: local-dev
+    location: global
+    dataStoreId: hr-local
+  reconciliation:
+    deletePolicy: auto_delete_missing
+'@ | Set-Content -Path connectors/hr-employees-local.yaml -Encoding utf8
+```
+
+</TabItem>
+</Tabs>
+
+## 8) Validate and Run
+
+<Tabs groupId="os">
+<TabItem value="macos" label="macOS" default>
+
+```bash
+mkdir -p local-bucket
+python scripts/validate_connectors.py
+.venv/bin/gemini-sync-bridge run --connector connectors/hr-employees-local.yaml
+```
+
+</TabItem>
+<TabItem value="linux" label="Linux">
+
+```bash
+mkdir -p local-bucket
+python scripts/validate_connectors.py
+.venv/bin/gemini-sync-bridge run --connector connectors/hr-employees-local.yaml
+```
+
+</TabItem>
+<TabItem value="windows" label="Windows (PowerShell)">
+
+```powershell
+New-Item -ItemType Directory -Path local-bucket -Force | Out-Null
+python scripts/validate_connectors.py
+.\.venv\Scripts\gemini-sync-bridge.exe run --connector connectors/hr-employees-local.yaml
+```
+
+</TabItem>
+</Tabs>
+
+Expected first run:
+
+- `upserts` should be `2`
+- `deletes` should be `0`
+
+## 9) Verify Local Artifacts
+
+<Tabs groupId="os">
+<TabItem value="macos" label="macOS" default>
+
+```bash
+find local-bucket/connectors/hr-employees-local -maxdepth 4 -type f | sort
+cat local-bucket/connectors/hr-employees-local/state/latest_success.json
+
+RUN_ID="$(python3 - <<'PY'
+import json
+from pathlib import Path
+
+state = Path("local-bucket/connectors/hr-employees-local/state/latest_success.json")
+print(json.loads(state.read_text(encoding="utf-8"))["run_id"])
+PY
+)"
+
+cat "local-bucket/connectors/hr-employees-local/runs/${RUN_ID}/manifest.json"
+head -n 2 "local-bucket/connectors/hr-employees-local/runs/${RUN_ID}/upserts.ndjson"
+```
+
+</TabItem>
+<TabItem value="linux" label="Linux">
+
+```bash
+find local-bucket/connectors/hr-employees-local -maxdepth 4 -type f | sort
+cat local-bucket/connectors/hr-employees-local/state/latest_success.json
+
+RUN_ID="$(python3 - <<'PY'
+import json
+from pathlib import Path
+
+state = Path("local-bucket/connectors/hr-employees-local/state/latest_success.json")
+print(json.loads(state.read_text(encoding="utf-8"))["run_id"])
+PY
+)"
+
+cat "local-bucket/connectors/hr-employees-local/runs/${RUN_ID}/manifest.json"
+head -n 2 "local-bucket/connectors/hr-employees-local/runs/${RUN_ID}/upserts.ndjson"
+```
+
+</TabItem>
+<TabItem value="windows" label="Windows (PowerShell)">
+
+```powershell
+Get-ChildItem local-bucket\connectors\hr-employees-local -Recurse -File | Select-Object -ExpandProperty FullName
+Get-Content local-bucket\connectors\hr-employees-local\state\latest_success.json
+
+$state = Get-Content local-bucket\connectors\hr-employees-local\state\latest_success.json | ConvertFrom-Json
+$RUN_ID = $state.run_id
+
+Get-Content "local-bucket\connectors\hr-employees-local\runs\$RUN_ID\manifest.json"
+Get-Content "local-bucket\connectors\hr-employees-local\runs\$RUN_ID\upserts.ndjson" -TotalCount 2
+```
+
+</TabItem>
+</Tabs>
+
+## 10) Start API + UIs
+
+Start API server:
+
+<Tabs groupId="os">
+<TabItem value="macos" label="macOS" default>
+
+```bash
+.venv/bin/gemini-sync-bridge serve --host 0.0.0.0 --port 8080
+```
+
+</TabItem>
+<TabItem value="linux" label="Linux">
+
+```bash
+.venv/bin/gemini-sync-bridge serve --host 0.0.0.0 --port 8080
+```
+
+</TabItem>
+<TabItem value="windows" label="Windows (PowerShell)">
+
+```powershell
+.\.venv\Scripts\gemini-sync-bridge.exe serve --host 0.0.0.0 --port 8080
+```
+
+</TabItem>
+</Tabs>
+
+In another terminal:
+
+<Tabs groupId="os">
+<TabItem value="macos" label="macOS" default>
+
+```bash
+curl -s http://localhost:8080/healthz
+curl -s "http://localhost:8080/v1/ops/snapshot?window_hours=168&limit_runs=5" | python3 -m json.tool | head -n 40
+```
+
+</TabItem>
+<TabItem value="linux" label="Linux">
+
+```bash
+curl -s http://localhost:8080/healthz
+curl -s "http://localhost:8080/v1/ops/snapshot?window_hours=168&limit_runs=5" | python3 -m json.tool | head -n 40
+```
+
+</TabItem>
+<TabItem value="windows" label="Windows (PowerShell)">
+
+```powershell
+Invoke-RestMethod http://localhost:8080/healthz
+Invoke-RestMethod "http://localhost:8080/v1/ops/snapshot?window_hours=168&limit_runs=5" | ConvertTo-Json -Depth 6
+```
+
+</TabItem>
+</Tabs>
+
+Open:
+
+- Ops dashboard: `http://localhost:8080/ops`
+- Studio: `http://localhost:8080/studio/connectors`
+- Connector detail: `http://localhost:8080/ops/connectors/hr-employees-local`
+
+## 11) Optional: REST Push Smoke Test
+
+Create local push connector:
+
+<Tabs groupId="os">
+<TabItem value="macos" label="macOS" default>
+
+```bash
+cat > connectors/support-push-local.yaml <<'YAML'
+apiVersion: sync.gemini.io/v1alpha1
+kind: Connector
+metadata:
+  name: support-push-local
+spec:
+  mode: rest_push
+  source:
+    type: http
+    secretRef: support-push-token
+  mapping:
+    idField: ticket_id
+    titleField: title
+    contentTemplate: "{{ subject }} {{ body }}"
+    uriTemplate: "https://support.internal/tickets/{{ ticket_id }}"
+    aclUsersField: allowed_users
+    aclGroupsField: allowed_groups
+  output:
+    bucket: file://./local-bucket
+    prefix: support-push-local
+    format: ndjson
+  gemini:
+    projectId: local-dev
+    location: global
+    dataStoreId: support-local
+  reconciliation:
+    deletePolicy: auto_delete_missing
+YAML
+```
+
+</TabItem>
+<TabItem value="linux" label="Linux">
+
+```bash
+cat > connectors/support-push-local.yaml <<'YAML'
+apiVersion: sync.gemini.io/v1alpha1
+kind: Connector
+metadata:
+  name: support-push-local
+spec:
+  mode: rest_push
+  source:
+    type: http
+    secretRef: support-push-token
+  mapping:
+    idField: ticket_id
+    titleField: title
+    contentTemplate: "{{ subject }} {{ body }}"
+    uriTemplate: "https://support.internal/tickets/{{ ticket_id }}"
+    aclUsersField: allowed_users
+    aclGroupsField: allowed_groups
+  output:
+    bucket: file://./local-bucket
+    prefix: support-push-local
+    format: ndjson
+  gemini:
+    projectId: local-dev
+    location: global
+    dataStoreId: support-local
+  reconciliation:
+    deletePolicy: auto_delete_missing
+YAML
+```
+
+</TabItem>
+<TabItem value="windows" label="Windows (PowerShell)">
+
+```powershell
+@'
+apiVersion: sync.gemini.io/v1alpha1
+kind: Connector
+metadata:
+  name: support-push-local
+spec:
+  mode: rest_push
+  source:
+    type: http
+    secretRef: support-push-token
+  mapping:
+    idField: ticket_id
+    titleField: title
+    contentTemplate: "{{ subject }} {{ body }}"
+    uriTemplate: "https://support.internal/tickets/{{ ticket_id }}"
+    aclUsersField: allowed_users
+    aclGroupsField: allowed_groups
+  output:
+    bucket: file://./local-bucket
+    prefix: support-push-local
+    format: ndjson
+  gemini:
+    projectId: local-dev
+    location: global
+    dataStoreId: support-local
+  reconciliation:
+    deletePolicy: auto_delete_missing
+'@ | Set-Content -Path connectors/support-push-local.yaml -Encoding utf8
+```
+
+</TabItem>
+</Tabs>
+
+Send events:
+
+<Tabs groupId="os">
+<TabItem value="macos" label="macOS" default>
+
+```bash
+curl -X POST "http://localhost:8080/v1/connectors/support-push-local/events" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: local-run-001" \
+  -d '[
+    {
+      "doc_id":"support-push-local:123",
+      "title":"VPN issue",
+      "content":"Cannot connect from home",
+      "uri":"https://support.internal/tickets/123",
+      "mime_type":"text/plain",
+      "updated_at":"2026-02-16T08:30:00Z",
+      "acl_users":[],
+      "acl_groups":["it-support"],
+      "metadata":{"connector_id":"support-push-local"},
+      "checksum":"sha256:test",
+      "op":"UPSERT"
+    }
+  ]'
+```
+
+</TabItem>
+<TabItem value="linux" label="Linux">
+
+```bash
+curl -X POST "http://localhost:8080/v1/connectors/support-push-local/events" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: local-run-001" \
+  -d '[
+    {
+      "doc_id":"support-push-local:123",
+      "title":"VPN issue",
+      "content":"Cannot connect from home",
+      "uri":"https://support.internal/tickets/123",
+      "mime_type":"text/plain",
+      "updated_at":"2026-02-16T08:30:00Z",
+      "acl_users":[],
+      "acl_groups":["it-support"],
+      "metadata":{"connector_id":"support-push-local"},
+      "checksum":"sha256:test",
+      "op":"UPSERT"
+    }
+  ]'
+```
+
+</TabItem>
+<TabItem value="windows" label="Windows (PowerShell)">
+
+```powershell
+$body = @'
+[
+  {
+    "doc_id":"support-push-local:123",
+    "title":"VPN issue",
+    "content":"Cannot connect from home",
+    "uri":"https://support.internal/tickets/123",
+    "mime_type":"text/plain",
+    "updated_at":"2026-02-16T08:30:00Z",
+    "acl_users":[],
+    "acl_groups":["it-support"],
+    "metadata":{"connector_id":"support-push-local"},
+    "checksum":"sha256:test",
+    "op":"UPSERT"
+  }
+]
+'@
+
+Invoke-RestMethod `
+  -Method Post `
+  -Uri "http://localhost:8080/v1/connectors/support-push-local/events" `
+  -Headers @{ "Idempotency-Key" = "local-run-001" } `
+  -ContentType "application/json" `
+  -Body $body
+```
+
+</TabItem>
+</Tabs>
+
+Process queued push batch:
+
+<Tabs groupId="os">
+<TabItem value="macos" label="macOS" default>
+
+```bash
+.venv/bin/gemini-sync-bridge run --connector connectors/support-push-local.yaml
+```
+
+</TabItem>
+<TabItem value="linux" label="Linux">
+
+```bash
+.venv/bin/gemini-sync-bridge run --connector connectors/support-push-local.yaml
+```
+
+</TabItem>
+<TabItem value="windows" label="Windows (PowerShell)">
+
+```powershell
+.\.venv\Scripts\gemini-sync-bridge.exe run --connector connectors/support-push-local.yaml
+```
+
+</TabItem>
+</Tabs>
+
+## 12) Local Quality Gates (Optional)
+
+```bash
+python scripts/check_tdd_guardrails.py
+python scripts/check_docs_drift.py
+python scripts/check_openapi_drift.py
+python scripts/check_connector_reference_drift.py
+python scripts/check_security_policy.py
+python scripts/run_dependency_audit.py
+```
+
+## 13) Stop and Reset
+
+<Tabs groupId="os">
+<TabItem value="macos" label="macOS" default>
+
+```bash
+docker compose down
+rm -rf local-bucket
+docker compose down -v
+```
+
+</TabItem>
+<TabItem value="linux" label="Linux">
+
+```bash
+docker compose down
+rm -rf local-bucket
+docker compose down -v
+```
+
+</TabItem>
+<TabItem value="windows" label="Windows (PowerShell)">
+
+```powershell
+docker compose down
+Remove-Item -Recurse -Force local-bucket -ErrorAction SilentlyContinue
+docker compose down -v
+```
+
+</TabItem>
+</Tabs>
