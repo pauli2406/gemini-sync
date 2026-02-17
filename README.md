@@ -66,6 +66,7 @@ configure connector, run first import, troubleshoot common errors), use:
 - Production docs URL (Vercel): `https://gemini-sync-bridge-docs.vercel.app`
 - Docs source: `docs/`
 - Docs app: `website/`
+- Homepage styling is tuned for both light and dark mode readability.
 
 Local docs workflow:
 
