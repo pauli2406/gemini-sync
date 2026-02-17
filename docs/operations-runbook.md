@@ -18,7 +18,11 @@
 
 For the complete CLI workflow to onboard additional data stores/connectors, use:
 
-- `/Users/marcelpochert/Programming/ai/gemini-sync/docs/discovery-engine-cli-playbook.md`
+- `docs/discovery-engine-cli-playbook.md`
+
+For deletion/cleanup of test data stores, use the same playbook section:
+
+- `Delete a Test Data Store`
 
 ## Failure Handling
 
@@ -70,3 +74,17 @@ python scripts/replay_run_artifacts.py --upserts <upserts-ndjson> --deletes <del
 python scripts/generate_slo_report.py --database-url "$DATABASE_URL" --output slo-metrics.json
 python scripts/check_slo_gate.py --metrics slo-metrics.json
 ```
+
+## Docs Site Commands
+
+```bash
+python scripts/export_openapi.py
+python scripts/check_openapi_drift.py
+npm --prefix website ci
+npm --prefix website run build
+```
+
+Vercel deploy automation:
+
+- Workflow: `.github/workflows/docs-deploy-vercel.yaml`
+- Secrets: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`

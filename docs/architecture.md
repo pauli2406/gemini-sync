@@ -50,6 +50,12 @@
 - Manages Helm `scheduleJobs` entries (including `enabled` pause/resume).
 - Supports managed secrets with encrypted-at-rest storage plus env secret fallback.
 
+10. **Hosted Documentation Site**
+- Docusaurus app in `website/` with docs sourced from root `docs/`.
+- OpenAPI schema exported to `website/static/openapi.json`.
+- API docs rendered with Redoc in `/docs/api-reference`.
+- CI docs build and OpenAPI drift checks gate merges.
+
 ## Data Lifecycle
 
 1. Extract source records.

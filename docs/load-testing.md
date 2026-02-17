@@ -21,7 +21,7 @@ Validate sustained operation for 100 connectors with mixed schedules over 24 hou
 
 - no sustained backlog growth for push batches
 - 99%+ success rate over 24h
-- freshness <= 3h for scheduled connectors
+- freshness `<= 3h` for scheduled connectors
 - no checkpoint advancement on failed runs
 
 ## Execution Pattern

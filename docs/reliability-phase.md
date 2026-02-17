@@ -56,8 +56,8 @@ python scripts/check_slo_gate.py --metrics slo-metrics.json
 Default thresholds:
 
 - success rate >= 99%
-- max freshness lag <= 10800 seconds
-- MTTR <= 1800 seconds
+- max freshness lag `<= 10800` seconds
+- MTTR `<= 1800` seconds
 
 ## Workflow Integration
 

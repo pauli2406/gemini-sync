@@ -41,6 +41,7 @@ rules:
   - name: governance_and_quality
     sources:
       - "scripts/check_*.py"
+      - "scripts/export_openapi.py"
       - "scripts/generate_slo_report.py"
       - "scripts/replay_run_artifacts.py"
       - ".agent/**"
@@ -52,6 +53,18 @@ rules:
       - "AGENTS.md"
       - "docs/roadmap.md"
       - "docs/reliability-phase.md"
+      - "docs/api-reference.mdx"
+      - "docs/troubleshooting.md"
+
+  - name: docs_site
+    sources:
+      - "website/**"
+    docs_any_of:
+      - "README.md"
+      - "docs/operations-runbook.md"
+      - "docs/architecture.md"
+      - "docs/api-reference.mdx"
+      - "docs/troubleshooting.md"
 
 consistency:
   required_files:

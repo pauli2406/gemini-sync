@@ -2,7 +2,7 @@
 
 Gemini Sync Bridge is an open-source, GitOps-managed integration layer for syncing on-prem SQL/REST data into Google Cloud Storage (single cloud handoff) and ingesting it into Gemini Enterprise data stores.
 
-Agentic development is governed by `/Users/marcelpochert/Programming/ai/gemini-sync/AGENTS.md` and roadmap outcomes are tracked in `/Users/marcelpochert/Programming/ai/gemini-sync/docs/roadmap.md`.
+Agentic development is governed by `AGENTS.md` and roadmap outcomes are tracked in `docs/roadmap.md`.
 
 ## What v1 Includes
 
@@ -59,7 +59,30 @@ Agentic development is governed by `/Users/marcelpochert/Programming/ai/gemini-s
 For a full end-to-end CLI onboarding flow (create datastore, grant bucket IAM,
 configure connector, run first import, troubleshoot common errors), use:
 
-- `/Users/marcelpochert/Programming/ai/gemini-sync/docs/discovery-engine-cli-playbook.md`
+- `docs/discovery-engine-cli-playbook.md`
+
+## Hosted Documentation
+
+- Production docs URL (Vercel): `https://gemini-sync-bridge-docs.vercel.app`
+- Docs source: `docs/`
+- Docs app: `website/`
+
+Local docs workflow:
+
+```bash
+python scripts/export_openapi.py
+npm --prefix website ci
+npm --prefix website run build
+npm --prefix website run start
+```
+
+Automated deploy workflow:
+
+- `.github/workflows/docs-deploy-vercel.yaml`
+- Required repo secrets:
+  - `VERCEL_TOKEN`
+  - `VERCEL_ORG_ID`
+  - `VERCEL_PROJECT_ID`
 
 ## Quickstart (Local)
 
@@ -150,6 +173,7 @@ gemini-sync-bridge run --connector connectors/support-push.yaml
 ```bash
 python scripts/check_tdd_guardrails.py
 python scripts/check_docs_drift.py
+python scripts/check_openapi_drift.py
 python scripts/check_security_policy.py
 python scripts/run_dependency_audit.py
 python scripts/run_scenario_evals.py --registry evals/eval_registry.yaml --baseline evals/baseline.json
@@ -182,6 +206,7 @@ python scripts/check_slo_gate.py --metrics slo-metrics.json
 - Canonical runtime command: `gemini-sync-bridge run --connector connectors/hr-employees.yaml`
 - Canonical API command: `gemini-sync-bridge serve --host 0.0.0.0 --port 8080`
 - Governance gate commands: `python scripts/check_tdd_guardrails.py` and `python scripts/check_docs_drift.py`
+- OpenAPI drift gate command: `python scripts/check_openapi_drift.py`
 
 ## License
 

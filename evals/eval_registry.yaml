@@ -35,3 +35,6 @@ scenarios:
   - id: hr-employees-sample-contract
     path: evals/scenarios/hr-employees-sample-contract.yaml
     critical: false
+  - id: openapi-drift-gate
+    path: evals/scenarios/openapi-drift-gate.yaml
+    critical: false

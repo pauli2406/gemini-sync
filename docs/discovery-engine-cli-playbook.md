@@ -201,3 +201,25 @@ For each new connector/data store pair:
 3. Secret env var for source
 4. `init-db` once per runtime DB
 5. First run + artifact verification
+
+## 13) Delete a Test Data Store
+
+Use this for cleanup in lower environments:
+
+```bash
+DELETE_RESPONSE="$(curl -s -X DELETE \
+  -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
+  -H "x-goog-user-project: ${PROJECT_ID}" \
+  "https://${API_HOST}/v1/projects/${PROJECT_ID}/locations/${LOCATION}/collections/default_collection/dataStores/${DATA_STORE_ID}")"
+echo "${DELETE_RESPONSE}"
+```
+
+Poll until done:
+
+```bash
+OP_NAME="$(echo "${DELETE_RESPONSE}" | jq -r '.name')"
+curl -s \
+  -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
+  -H "x-goog-user-project: ${PROJECT_ID}" \
+  "https://${API_HOST}/v1/${OP_NAME}"
+```

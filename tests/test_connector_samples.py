@@ -21,7 +21,7 @@ def test_hr_employees_sample_connector_sql_contract() -> None:
     assert source["secretRef"] == "hr-db-credentials"
     assert source["watermarkField"] == "updated_at"
     query = source["query"]
-    assert ":watermark" in query
+    assert ":watermark" not in query
     assert "FROM employees" in query
     assert "SELECT * FROM source_table" not in query
 
@@ -34,3 +34,6 @@ def test_hr_employees_sample_connector_sql_contract() -> None:
     output = connector["spec"]["output"]
     assert output["bucket"].startswith("gs://")
     assert output["prefix"] == "hr-employees"
+
+    reconciliation = connector["spec"]["reconciliation"]
+    assert reconciliation["deletePolicy"] == "auto_delete_missing"

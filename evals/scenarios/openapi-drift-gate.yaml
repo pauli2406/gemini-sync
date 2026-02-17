@@ -1,0 +1,7 @@
+id: openapi-drift-gate
+name: OpenAPI drift gate
+description: Ensures OpenAPI drift checks fail when committed schema is stale.
+pytest_selector: tests/test_openapi_scripts.py::test_check_openapi_drift_fails_for_mismatch
+expected_behavior:
+  - check_openapi_drift fails on mismatch between committed and generated schema.
+  - developers receive actionable remediation guidance.

@@ -43,6 +43,7 @@ This roadmap is intentionally horizon-based and continuously updated. It is opti
 - Added a read-only FastAPI + Jinja Ops UI (`/ops`) with JSON polling endpoints for connector/run visibility.
 - Added ops run filtering/pagination and optional Splunk/Kestra run deep links by `run_id`.
 - Added `hr-employees` connector contract regression coverage (test + scenario eval).
+- Added hosted docs foundation (`website/`) with Docusaurus, Redoc API reference, OpenAPI drift gate, and Vercel preview/production deploy workflow.
 
 **Exit Criteria**
 
@@ -65,7 +66,7 @@ This roadmap is intentionally horizon-based and continuously updated. It is opti
 **Exit Criteria**
 
 - 100 mixed connectors run for 24h with no sustained backlog growth.
-- Freshness objective (<= 3h for scheduled connectors) maintained under load.
+- Freshness objective (`<= 3h` for scheduled connectors) maintained under load.
 
 **Success Metrics**
 
