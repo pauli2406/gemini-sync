@@ -61,6 +61,20 @@ configure connector, run first import, troubleshoot common errors), use:
 
 - `docs/discovery-engine-cli-playbook.md`
 
+## Connector Setup Docs
+
+- Hub: `docs/connector-authoring.md`
+- SQL Pull: `docs/connector-mode-sql-pull.md`
+- REST Pull: `docs/connector-mode-rest-pull.md`
+- REST Push: `docs/connector-mode-rest-push.md`
+- Field reference (generated): `docs/connector-field-reference.md`
+- Providers:
+  - `docs/connector-provider-postgres.md`
+  - `docs/connector-provider-mysql.md`
+  - `docs/connector-provider-mssql.md`
+  - `docs/connector-provider-http.md`
+  - `docs/connector-provider-future.md`
+
 ## Hosted Documentation
 
 - Production docs URL (Vercel): `https://gemini-sync-bridge-docs.vercel.app`
@@ -72,6 +86,7 @@ Local docs workflow:
 
 ```bash
 python scripts/export_openapi.py
+python scripts/export_connector_reference.py
 npm --prefix website ci
 npm --prefix website run build
 npm --prefix website run start
@@ -140,6 +155,11 @@ Open the operations UI:
 - Example filtered dashboard URL: `http://localhost:8080/ops?status=FAILED&connector_id=support-push&window_hours=168`
 - Connector Studio: `http://localhost:8080/studio/connectors`
 
+Connector Studio notes:
+
+- `sql_pull` mode now exposes editable SQL query and watermark fields in the wizard.
+- Changing mode (`sql_pull`/`rest_pull`/`rest_push`) updates visible source controls so proposals use mode-appropriate source configuration.
+
 Submit events:
 
 ```bash
@@ -175,6 +195,7 @@ gemini-sync-bridge run --connector connectors/support-push.yaml
 python scripts/check_tdd_guardrails.py
 python scripts/check_docs_drift.py
 python scripts/check_openapi_drift.py
+python scripts/check_connector_reference_drift.py
 python scripts/check_security_policy.py
 python scripts/run_dependency_audit.py
 python scripts/run_scenario_evals.py --registry evals/eval_registry.yaml --baseline evals/baseline.json
@@ -196,6 +217,7 @@ python scripts/check_slo_gate.py --metrics slo-metrics.json
 - Ruff linting
 - TDD/EDD changed-files guardrails
 - Docs drift and docs consistency checks
+- Connector field reference drift check
 - Diff coverage enforcement
 - Security policy validation, secret scanning, and dependency audit
 

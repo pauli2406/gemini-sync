@@ -32,10 +32,26 @@ Set this for managed secrets:
 
 1. Open `/studio/connectors/new`.
 2. Complete the wizard (source, mapping, target, schedule).
+   - `sql_pull` exposes SQL query + watermark controls.
+   - `rest_pull` exposes URL/method/payload/pagination/headers controls.
+   - `rest_push` narrows source controls to push-compatible settings.
 3. Run `Validate` and `Preview`.
 4. Click `Create PR Proposal`.
 5. Review and merge the PR.
 6. Trigger run now from Studio or run via CLI/orchestrator.
+
+## Mode and Provider Guides
+
+Use these pages while filling wizard fields:
+
+- SQL Pull mode: `docs/connector-mode-sql-pull.md`
+- REST Pull mode: `docs/connector-mode-rest-pull.md`
+- REST Push mode: `docs/connector-mode-rest-push.md`
+- Postgres provider: `docs/connector-provider-postgres.md`
+- MySQL provider: `docs/connector-provider-mysql.md`
+- MSSQL provider: `docs/connector-provider-mssql.md`
+- HTTP provider: `docs/connector-provider-http.md`
+- Full field reference: `docs/connector-field-reference.md`
 
 ## Notes
 

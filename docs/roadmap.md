@@ -44,6 +44,7 @@ This roadmap is intentionally horizon-based and continuously updated. It is opti
 - Added ops run filtering/pagination and optional Splunk/Kestra run deep links by `run_id`.
 - Added `hr-employees` connector contract regression coverage (test + scenario eval).
 - Added hosted docs foundation (`website/`) with Docusaurus, Redoc API reference, OpenAPI drift gate, and Vercel preview/production deploy workflow.
+- Added mode-specific and provider-specific connector documentation with schema-generated field reference and CI drift enforcement.
 
 **Exit Criteria**
 

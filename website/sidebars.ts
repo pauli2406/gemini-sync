@@ -10,7 +10,18 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Connector Authoring',
-      items: ['connector-authoring'],
+      items: [
+        'connector-authoring',
+        'connector-mode-sql-pull',
+        'connector-mode-rest-pull',
+        'connector-mode-rest-push',
+        'connector-field-reference',
+        'connector-provider-postgres',
+        'connector-provider-mysql',
+        'connector-provider-mssql',
+        'connector-provider-http',
+        'connector-provider-future',
+      ],
     },
     {
       type: 'category',

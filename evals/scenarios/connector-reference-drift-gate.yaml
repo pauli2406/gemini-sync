@@ -1,0 +1,7 @@
+id: connector-reference-drift-gate
+name: Connector reference drift gate
+description: Ensures connector field reference drift checks fail when committed docs are stale.
+pytest_selector: tests/test_connector_reference_scripts.py::test_check_connector_reference_drift_fails_for_mismatch
+expected_behavior:
+  - connector reference drift check fails when generated and committed markdown differ.
+  - remediation message points to export script command.

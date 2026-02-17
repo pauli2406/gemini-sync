@@ -38,3 +38,9 @@ scenarios:
   - id: openapi-drift-gate
     path: evals/scenarios/openapi-drift-gate.yaml
     critical: false
+  - id: studio-mode-switch-configurability
+    path: evals/scenarios/studio-mode-switch-configurability.yaml
+    critical: false
+  - id: connector-reference-drift-gate
+    path: evals/scenarios/connector-reference-drift-gate.yaml
+    critical: false

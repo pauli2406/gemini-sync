@@ -1,0 +1,163 @@
+version: 1
+
+defaults:
+  modes:
+    - sql_pull
+    - rest_pull
+    - rest_push
+  description: "-"
+  example: "-"
+  operationalNotes: "-"
+
+fields:
+  apiVersion:
+    description: Connector API version.
+    example: sync.gemini.io/v1alpha1
+    operationalNotes: Must remain unchanged for v1 compatibility.
+  kind:
+    description: Top-level resource kind.
+    example: Connector
+    operationalNotes: Must be Connector.
+  metadata:
+    description: Connector metadata container.
+    example: "{name: hr-employees}"
+  metadata.name:
+    description: Stable connector identifier used in runs, paths, and UI.
+    example: hr-employees
+    operationalNotes: Must match ^[a-z0-9]([a-z0-9-]{0,62}[a-z0-9])?$.
+  spec:
+    description: Connector runtime specification.
+    example: "{mode: sql_pull, ...}"
+  spec.mode:
+    description: Connector execution mode.
+    example: sql_pull
+    operationalNotes: Select sql_pull, rest_pull, or rest_push only.
+  spec.schedule:
+    modes:
+      - sql_pull
+      - rest_pull
+    description: Cron schedule for pull connectors.
+    example: 0 */3 * * *
+    operationalNotes: Required for sql_pull and rest_pull; omitted for rest_push.
+  spec.source:
+    description: Source extraction configuration.
+    example: "{type: postgres, secretRef: hr-db-credentials, ...}"
+  spec.source.type:
+    description: Source provider type.
+    example: postgres
+    operationalNotes: Use http for rest_pull and rest_push.
+  spec.source.secretRef:
+    description: Secret reference resolved by runtime.
+    example: hr-db-credentials
+    operationalNotes: Maps to environment variable SECRET_HR_DB_CREDENTIALS or managed secret.
+  spec.source.query:
+    modes:
+      - sql_pull
+    description: SQL statement executed for extraction.
+    example: SELECT employee_id, full_name FROM employees
+    operationalNotes: Required for sql_pull. Use snapshot query for auto_delete_missing.
+  spec.source.watermarkField:
+    modes:
+      - sql_pull
+      - rest_pull
+    description: Field used to compute max checkpoint watermark.
+    example: updated_at
+    operationalNotes: Must exist in extracted rows to advance checkpoint.
+  spec.source.url:
+    modes:
+      - rest_pull
+    description: REST endpoint URL to pull data from.
+    example: https://kb.internal/api/v1/articles
+    operationalNotes: Required for rest_pull.
+  spec.source.method:
+    modes:
+      - rest_pull
+    description: HTTP method used for REST pull requests.
+    example: GET
+    operationalNotes: GET is default; POST can be used for query APIs.
+  spec.source.payload:
+    modes:
+      - rest_pull
+    description: Optional JSON body for REST requests.
+    example: "{includeArchived: false}"
+    operationalNotes: Sent as request JSON.
+  spec.source.paginationCursorField:
+    modes:
+      - rest_pull
+    description: Query parameter key used for cursor pagination requests.
+    example: cursor
+  spec.source.paginationNextCursorJsonPath:
+    modes:
+      - rest_pull
+    description: Dotted JSON path to next cursor value in response body.
+    example: paging.next_cursor
+    operationalNotes: If empty or missing at runtime, pagination stops.
+  spec.source.headers:
+    modes:
+      - rest_pull
+    description: Static request headers map.
+    example: "{X-Tenant: internal}"
+    operationalNotes: Authorization header is auto-added unless already provided.
+  spec.mapping:
+    description: Mapping from source row fields to canonical document.
+    example: "{idField: employee_id, titleField: full_name, ...}"
+  spec.mapping.idField:
+    description: Source field used for unique record key.
+    example: employee_id
+    operationalNotes: Combined with connector name to create canonical doc_id.
+  spec.mapping.titleField:
+    description: Source field used for document title.
+    example: full_name
+  spec.mapping.contentTemplate:
+    description: Jinja template rendered into document content.
+    example: "{{ department }} {{ role }} {{ bio }}"
+    operationalNotes: Missing template variables cause run failure.
+  spec.mapping.uriTemplate:
+    description: Optional Jinja template for source document URI.
+    example: https://hr.internal/employees/{{ employee_id }}
+  spec.mapping.mimeType:
+    description: MIME type for generated document content.
+    example: text/plain
+  spec.mapping.aclUsersField:
+    description: Source field that maps to acl_users.
+    example: allowed_users
+  spec.mapping.aclGroupsField:
+    description: Source field that maps to acl_groups.
+    example: allowed_groups
+  spec.mapping.metadataFields:
+    description: Additional source fields copied into metadata.
+    example: "[department, role]"
+  spec.output:
+    description: Artifact publishing destination settings.
+    example: "{bucket: gs://company-gemini-sync, prefix: hr-employees, format: ndjson}"
+  spec.output.bucket:
+    description: Object store URI prefix for artifacts.
+    example: gs://company-gemini-sync
+    operationalNotes: Supports gs:// for cloud and file:// for local development.
+  spec.output.prefix:
+    description: Connector-specific output path segment under connectors/.
+    example: hr-employees
+  spec.output.format:
+    description: Output serialization format.
+    example: ndjson
+    operationalNotes: Only ndjson is supported in v1.
+  spec.gemini:
+    description: Gemini/Discovery Engine target data store configuration.
+    example: "{projectId: my-project, location: eu, dataStoreId: hr-ds}"
+  spec.gemini.projectId:
+    description: GCP project ID containing target data store.
+    example: gemini-enterprise-test-487620
+  spec.gemini.location:
+    description: Data store location and API routing region.
+    example: eu
+    operationalNotes: Must match the actual data store location.
+  spec.gemini.dataStoreId:
+    description: Target Discovery Engine data store ID.
+    example: hr-ds
+  spec.reconciliation:
+    description: Reconciliation and delete strategy settings.
+    example: "{deletePolicy: auto_delete_missing}"
+  spec.reconciliation.deletePolicy:
+    description: Controls how missing/removed records are handled.
+    example: auto_delete_missing
+    operationalNotes: For auto_delete_missing, use snapshot extraction queries.

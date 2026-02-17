@@ -21,9 +21,19 @@ rules:
     sources:
       - "connectors/**"
       - "schemas/connector.schema.json"
+      - "schemas/connector.docs-meta.yaml"
     docs_any_of:
       - "README.md"
       - "docs/connector-authoring.md"
+      - "docs/connector-mode-sql-pull.md"
+      - "docs/connector-mode-rest-pull.md"
+      - "docs/connector-mode-rest-push.md"
+      - "docs/connector-provider-postgres.md"
+      - "docs/connector-provider-mysql.md"
+      - "docs/connector-provider-mssql.md"
+      - "docs/connector-provider-http.md"
+      - "docs/connector-provider-future.md"
+      - "docs/connector-field-reference.md"
       - "docs/discovery-engine-cli-playbook.md"
 
   - name: orchestrator_and_deploy
@@ -42,6 +52,7 @@ rules:
     sources:
       - "scripts/check_*.py"
       - "scripts/export_openapi.py"
+      - "scripts/export_connector_reference.py"
       - "scripts/generate_slo_report.py"
       - "scripts/replay_run_artifacts.py"
       - ".agent/**"
@@ -51,6 +62,8 @@ rules:
     docs_any_of:
       - "README.md"
       - "AGENTS.md"
+      - "docs/connector-authoring.md"
+      - "docs/connector-field-reference.md"
       - "docs/roadmap.md"
       - "docs/reliability-phase.md"
       - "docs/api-reference.mdx"
@@ -61,6 +74,16 @@ rules:
       - "website/**"
     docs_any_of:
       - "README.md"
+      - "docs/connector-authoring.md"
+      - "docs/connector-mode-sql-pull.md"
+      - "docs/connector-mode-rest-pull.md"
+      - "docs/connector-mode-rest-push.md"
+      - "docs/connector-provider-postgres.md"
+      - "docs/connector-provider-mysql.md"
+      - "docs/connector-provider-mssql.md"
+      - "docs/connector-provider-http.md"
+      - "docs/connector-provider-future.md"
+      - "docs/connector-field-reference.md"
       - "docs/operations-runbook.md"
       - "docs/architecture.md"
       - "docs/api-reference.mdx"

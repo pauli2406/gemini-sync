@@ -49,6 +49,9 @@ jobs:
       - name: OpenAPI drift check
         run: python scripts/check_openapi_drift.py
 
+      - name: Connector reference drift check
+        run: python scripts/check_connector_reference_drift.py
+
       - name: Build docs site
         run: npm --prefix website run build
 
