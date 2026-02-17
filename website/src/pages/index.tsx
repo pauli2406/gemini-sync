@@ -7,6 +7,12 @@ import styles from './index.module.css';
 
 const entryPoints = [
   {
+    title: 'Local Getting Started',
+    description:
+      'Run a full local setup with Docker Postgres, seeded source data, and a successful first connector run.',
+    to: '/docs/getting-started-local',
+  },
+  {
     title: 'Quickstart CLI Playbook',
     description: 'Create data stores, wire GCS permissions, run connectors, and verify imports.',
     to: '/docs/discovery-engine-cli-playbook',
@@ -49,11 +55,11 @@ export default function Home(): ReactNode {
             one canonical playbook.
           </p>
           <div className={styles.heroActions}>
-            <Link className="button button--primary button--lg" to="/docs/discovery-engine-cli-playbook">
-              Start With CLI Playbook
+            <Link className="button button--primary button--lg" to="/docs/getting-started-local">
+              Start Local Setup
             </Link>
-            <Link className="button button--secondary button--lg" to="/docs/api-reference">
-              Open API Reference
+            <Link className="button button--secondary button--lg" to="/docs/discovery-engine-cli-playbook">
+              Open CLI Playbook
             </Link>
           </div>
         </section>

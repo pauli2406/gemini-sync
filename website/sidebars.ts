@@ -5,7 +5,7 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Getting Started',
-      items: ['discovery-engine-cli-playbook', 'connector-studio', 'troubleshooting'],
+      items: ['getting-started-local', 'discovery-engine-cli-playbook', 'connector-studio', 'troubleshooting'],
     },
     {
       type: 'category',

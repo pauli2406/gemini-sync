@@ -57,12 +57,12 @@ Agentic development is governed by `AGENTS.md` and roadmap outcomes are tracked 
 - `tests/`: unit and API tests.
 - `docs/`: architecture, operations, and connector authoring docs.
 
-## Discovery Engine CLI Setup
+## Getting Started Guides
 
-For a full end-to-end CLI onboarding flow (create datastore, grant bucket IAM,
-configure connector, run first import, troubleshoot common errors), use:
-
-- `docs/discovery-engine-cli-playbook.md`
+- Full local setup (Docker Postgres + sample source data + first successful run):
+  `docs/getting-started-local.md`
+- Full end-to-end GCP onboarding (datastore + IAM + import verification):
+  `docs/discovery-engine-cli-playbook.md`
 
 ## Connector Setup Docs
 
@@ -106,95 +106,29 @@ Automated deploy workflow:
 
 ## Quickstart (Local)
 
-### 1) Install
+Use the full onboarding guide for first-time setup:
+
+- `docs/getting-started-local.md`
+
+Fast path (after first-time setup):
 
 ```bash
-python3.11 -m venv .venv
 source .venv/bin/activate
-pip install -e .[dev]
-```
-
-### 2) Start local dependencies
-
-```bash
 docker compose up -d postgres
-```
-
-### 3) Configure env
-
-```bash
 cp .env.example .env
-```
-
-For local-only testing without GCS, set connector bucket to `file://./local-bucket`.
-
-### 4) Initialize DB tables
-
-```bash
 gemini-sync-bridge init-db
-```
-
-### 5) Validate connector definitions
-
-```bash
 python scripts/validate_connectors.py
-```
-
-### 6) Run a connector pipeline manually
-
-```bash
-gemini-sync-bridge run --connector connectors/hr-employees.yaml
-```
-
-### 7) Start push API
-
-```bash
+gemini-sync-bridge run --connector connectors/hr-employees-local.yaml
 gemini-sync-bridge serve --host 0.0.0.0 --port 8080
 ```
 
-Open the operations UI:
+Open the UIs:
 
-- Dashboard: `http://localhost:8080/ops`
-- Connector detail: `http://localhost:8080/ops/connectors/support-push`
-- Example filtered dashboard URL: `http://localhost:8080/ops?status=FAILED&connector_id=support-push&window_hours=168`
+- Ops dashboard: `http://localhost:8080/ops`
+- Connector detail: `http://localhost:8080/ops/connectors/hr-employees-local`
 - Connector Studio: `http://localhost:8080/studio/connectors`
 
-Connector Studio notes:
-
-- `sql_pull` mode now exposes editable SQL query and watermark fields in the wizard.
-- Changing mode (`sql_pull`/`rest_pull`/`rest_push`) updates visible source controls so proposals use mode-appropriate source configuration.
-- `rest_pull` mode supports static bearer and OAuth client-credentials source auth configuration in the wizard.
-
-Submit events:
-
-```bash
-curl -X POST "http://localhost:8080/v1/connectors/support-push/events" \
-  -H "Content-Type: application/json" \
-  -H "Idempotency-Key: run-001" \
-  -d '[
-    {
-      "doc_id":"support-push:123",
-      "title":"VPN issue",
-      "content":"Cannot connect from home",
-      "uri":"https://support.internal/tickets/123",
-      "mime_type":"text/plain",
-      "updated_at":"2026-02-16T08:30:00Z",
-      "acl_users":[],
-      "acl_groups":["it-support"],
-      "metadata":{"connector_id":"support-push"},
-      "checksum":"sha256:test",
-      "op":"UPSERT"
-    }
-  ]'
-```
-
-Process queued push events:
-
-```bash
-gemini-sync-bridge run --connector connectors/support-push.yaml
-```
-
-### 8) Run local governance gates
+Optional local governance gates:
 
 ```bash
 python scripts/check_tdd_guardrails.py
@@ -207,10 +141,10 @@ python scripts/run_scenario_evals.py --registry evals/eval_registry.yaml --basel
 python scripts/performance_smoke.py --records 1000 --max-seconds 2.0
 ```
 
-### 9) Reliability phase commands
+Reliability-phase commands:
 
 ```bash
-python scripts/replay_run_artifacts.py --upserts file://./local-bucket/connectors/hr-employees/runs/<run_id>/upserts.ndjson --deletes file://./local-bucket/connectors/hr-employees/runs/<run_id>/deletes.ndjson
+python scripts/replay_run_artifacts.py --upserts file://./local-bucket/connectors/hr-employees-local/runs/<run_id>/upserts.ndjson --deletes file://./local-bucket/connectors/hr-employees-local/runs/<run_id>/deletes.ndjson
 python scripts/generate_slo_report.py --database-url \"$DATABASE_URL\" --output slo-metrics.json
 python scripts/check_slo_gate.py --metrics slo-metrics.json
 ```

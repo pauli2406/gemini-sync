@@ -13,6 +13,7 @@ rules:
       - "gemini_sync_bridge/**"
     docs_any_of:
       - "README.md"
+      - "docs/getting-started-local.md"
       - "docs/architecture.md"
       - "docs/operations-runbook.md"
       - "docs/discovery-engine-cli-playbook.md"
@@ -24,6 +25,7 @@ rules:
       - "schemas/connector.docs-meta.yaml"
     docs_any_of:
       - "README.md"
+      - "docs/getting-started-local.md"
       - "docs/connector-authoring.md"
       - "docs/connector-mode-sql-pull.md"
       - "docs/connector-mode-rest-pull.md"
@@ -45,6 +47,7 @@ rules:
       - "Dockerfile"
     docs_any_of:
       - "README.md"
+      - "docs/getting-started-local.md"
       - "docs/architecture.md"
       - "docs/operations-runbook.md"
       - "docs/discovery-engine-cli-playbook.md"
@@ -75,6 +78,7 @@ rules:
       - "website/**"
     docs_any_of:
       - "README.md"
+      - "docs/getting-started-local.md"
       - "docs/connector-authoring.md"
       - "docs/connector-mode-sql-pull.md"
       - "docs/connector-mode-rest-pull.md"
