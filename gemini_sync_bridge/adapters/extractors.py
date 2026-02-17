@@ -10,6 +10,7 @@ from sqlalchemy import create_engine, text
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from gemini_sync_bridge.schemas import SourceConfig
+from gemini_sync_bridge.utils.http_clients import create_httpx_client
 from gemini_sync_bridge.utils.secrets import resolve_secret
 
 
@@ -191,7 +192,7 @@ def extract_rest_rows(source: SourceConfig, current_watermark: str | None) -> Pu
     rows: list[dict[str, Any]] = []
     cursor: str | None = None
 
-    with httpx.Client(timeout=30.0) as client:
+    with create_httpx_client(timeout=30.0) as client:
         headers = dict(source.headers)
         headers.setdefault("Accept", "application/json")
 

@@ -54,6 +54,22 @@ Set:
 export SECRET_KB_API_TOKEN='replace-me'
 ```
 
+## Proxy and TLS trust configuration
+
+HTTP provider traffic uses runtime outbound proxy environment variables:
+
+- `HTTP_PROXY`
+- `HTTPS_PROXY`
+- `NO_PROXY`
+- `SSL_CERT_FILE`
+- `REQUESTS_CA_BUNDLE`
+
+Behavior notes:
+
+- Applies to both REST pull API calls and OAuth token endpoint calls.
+- If proxy credentials are embedded in URL, URL-encode special characters.
+- Use `NO_PROXY` for internal hosts to avoid sending private traffic through proxy.
+
 ## YAML snippets
 
 ### REST pull

@@ -1,50 +1,44 @@
 # Task
 
-- Task ID: rest-pull-oauth-s2s
-- Title: Add OAuth client-credentials (Keycloak-style S2S) support to `rest_pull`
+- Task ID: outbound-proxy-env-support
+- Title: Enforce env-driven proxy support for all outbound HTTP egress
 - Owner Role: planner
 - Risk Tier: tier_2
 
 ## Intent
 
-Support internal APIs that require service-to-service OAuth token acquisition and refresh for `rest_pull`, while preserving existing static bearer-token behavior.
+Make outbound HTTP routing explicitly honor standard environment variables for proxy and CA trust across runtime and studio egress paths, without changing connector schema or public API.
 
 ## Acceptance Criteria
 
-1. Connector contract supports optional `spec.source.oauth` for `rest_pull` with:
-   - `grantType=client_credentials`
-   - `tokenUrl`
-   - `clientId`
-   - optional `clientSecretRef`, `scopes`, `audience`
-   - `clientAuthMethod` in `client_secret_post|client_secret_basic`
-2. Runtime `rest_pull` supports:
-   - token acquisition via OAuth client credentials
-   - proactive token refresh near expiry
-   - single forced refresh retry on first 401
-   - clear extraction errors for invalid token endpoint responses
-3. OAuth mode overrides manual `Authorization` header with runtime token.
-4. Existing static bearer `rest_pull` behavior remains backward compatible.
-5. Studio wizard supports configuring static bearer vs OAuth client credentials.
-6. Mode switch pruning removes `source.oauth` for `sql_pull` and `rest_push`.
-7. Tests and scenario eval coverage are updated.
-8. Mapped docs and generated connector field reference are updated.
+1. REST pull + OAuth token requests use an explicitly env-trusting HTTP client factory.
+2. Splunk and Teams webhook delivery use the same env-trusting HTTP client factory.
+3. GitHub PR proposal API calls use the same env-trusting HTTP client factory.
+4. Gemini ingestion `AuthorizedSession` explicitly enables `trust_env`.
+5. Proxy contract is documented via `HTTP_PROXY`, `HTTPS_PROXY`, `NO_PROXY`, `SSL_CERT_FILE`, `REQUESTS_CA_BUNDLE`.
+6. Connector/API schema remains unchanged.
+7. New proxy regression tests and scenario eval are added and passing.
 
 ## Specialist Role Mapping
 
 1. Planner Agent
-   - Locked contract, defaults, acceptance criteria, and risk tier.
+   - Finalized scope, constraints, acceptance criteria, and risk tier.
 2. Implementer Agent
-   - Updated runtime extractor, schema model/schema JSON, and Studio UI/proposal pruning.
+   - Added shared HTTP client helper and wired outbound call sites.
 3. Test/Eval Agent
-   - Added OAuth runtime tests, Studio/schema tests, and scenario eval entry.
+   - Added failing-first proxy regression tests and eval scenario registration.
 4. Docs Agent
-   - Updated README, architecture, REST pull mode/provider docs, troubleshooting, docs meta, and generated field reference.
+   - Updated env sample, README, operations runbook, provider HTTP doc, and troubleshooting.
 5. Security Agent
-   - Verified secret handling behavior and security policy/dependency checks.
+   - Validated standard CA/proxy env contract and policy/audit gates.
 6. Release Agent
-   - Defined canary and rollback guidance in risk tier artifact.
+   - Captured rollout/rollback guidance and gate outcomes in risk artifact.
 
 ## Scope
 
-- In scope: `rest_pull` OAuth client credentials only.
-- Out of scope: ingress endpoint auth hardening, non-client-credentials grants, connector-level proxy contract.
+- In scope:
+  - Env-driven proxy support for outbound HTTP egress.
+  - Custom CA env documentation (`SSL_CERT_FILE`, `REQUESTS_CA_BUNDLE`).
+- Out of scope:
+  - Per-connector proxy overrides.
+  - Advanced proxy auth (NTLM/Kerberos/PAC/mTLS proxy handshake).

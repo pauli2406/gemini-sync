@@ -17,6 +17,9 @@ scenarios:
   - id: rest-pull-oauth-client-credentials
     path: evals/scenarios/rest-pull-oauth-client-credentials.yaml
     critical: false
+  - id: outbound-proxy-env-support
+    path: evals/scenarios/outbound-proxy-env-support.yaml
+    critical: false
   - id: checkpoint-not-advanced-on-ingestion-failure
     path: evals/scenarios/checkpoint-not-advanced-on-ingestion-failure.yaml
     critical: true

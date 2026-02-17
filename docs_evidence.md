@@ -2,25 +2,27 @@
 
 ## Updated Documentation
 
+- `.env.example`
 - `README.md`
-- `docs/architecture.md`
-- `docs/connector-mode-rest-pull.md`
+- `docs/operations-runbook.md`
 - `docs/connector-provider-http.md`
 - `docs/troubleshooting.md`
-- `schemas/connector.docs-meta.yaml`
-- `docs/connector-field-reference.md` (generated)
 
 ## Why Docs Were Required
 
-- `gemini_sync_bridge/**` and `schemas/**` changed (`runtime_and_api` + `connector_contract` rules in `docs/doc_sync_map.yaml`).
-- `evals/scenarios/**` changed (`governance_and_quality` rule).
-- Updated docs now cover:
-  - OAuth client-credentials contract for `rest_pull`.
-  - Studio OAuth configuration behavior.
-  - Token refresh and 401 retry behavior.
-  - Troubleshooting for OAuth token endpoint and payload errors.
+- Runtime files changed under `gemini_sync_bridge/**` (`runtime_and_api` docs drift rule).
+- Eval files changed under `evals/**` (`governance_and_quality` docs drift rule).
+- Operators need explicit proxy and CA configuration guidance for enterprise deployments.
 
-## Generation Step
+## Coverage Added
 
-- Ran: `./.venv/bin/python scripts/export_connector_reference.py`
-- Output updated: `docs/connector-field-reference.md`
+- Standard env proxy contract:
+  - `HTTP_PROXY`, `HTTPS_PROXY`, `NO_PROXY`
+- Custom CA env contract:
+  - `SSL_CERT_FILE`, `REQUESTS_CA_BUNDLE`
+- Outbound egress coverage clarification:
+  - REST pull/OAuth, Gemini ingestion, Splunk/Teams webhooks, GitHub PR API
+- Troubleshooting for:
+  - `407 Proxy Authentication Required`
+  - TLS certificate verification failures behind enterprise proxy
+  - `NO_PROXY` routing mistakes

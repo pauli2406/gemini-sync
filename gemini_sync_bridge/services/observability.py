@@ -4,9 +4,8 @@ import logging
 from datetime import UTC, datetime
 from typing import Any
 
-import httpx
-
 from gemini_sync_bridge.settings import Settings
+from gemini_sync_bridge.utils.http_clients import create_httpx_client
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +22,7 @@ def send_splunk_event(settings: Settings, event: dict[str, Any]) -> None:
     headers = {"Authorization": f"Splunk {settings.splunk_hec_token}"}
 
     try:
-        with httpx.Client(timeout=10) as client:
+        with create_httpx_client(timeout=10) as client:
             response = client.post(settings.splunk_hec_url, headers=headers, json=payload)
             response.raise_for_status()
     except Exception:
@@ -54,7 +53,7 @@ def send_teams_alert(
     }
 
     try:
-        with httpx.Client(timeout=10) as client:
+        with create_httpx_client(timeout=10) as client:
             response = client.post(settings.teams_webhook_url, json=payload)
             response.raise_for_status()
     except Exception:

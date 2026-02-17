@@ -1,45 +1,36 @@
 # Risk Tier
 
-- Assigned Tier: tier_2
+- Assigned Tier: `tier_2`
 - Rationale:
-  - Runtime behavior changed in `gemini_sync_bridge/adapters/extractors.py`.
-  - Public connector contract changed in `schemas/connector.schema.json` and `gemini_sync_bridge/schemas.py`.
-  - Studio authoring/proposal behavior changed for source auth.
+  - Runtime outbound HTTP behavior changed in `gemini_sync_bridge/**`.
+  - No infra/release workflow changes (`tier_3` not triggered).
 
-## Required Gates and Outcomes
+## Required Approvals
 
-- Connector schema validation: pass
-- Lint (`ruff`): pass
-- Tests + coverage: pass (`106 passed`, coverage `80.87%`)
-- TDD/EDD guardrail: pass
-- Connector field reference drift gate: pass
+- Reviewer bot: required
+- Human reviewers: 1 required
+
+## Gate Outcomes
+
+- Connector validation: pass
+- Ruff lint: pass
+- TDD guardrail: pass
+- Docs drift (explicit changed-file invocation): pass
 - OpenAPI drift gate: pass
-- Security policy check: pass
-- Dependency audit: pass (after PATH correction)
+- Connector reference drift gate: pass
+- Security policy conformance: pass
+- Dependency audit: pass
 - Scenario eval suite: pass (`100%`, critical `100%`)
 
-## Docs Drift Gate Note
+## Rollout Plan
 
-- Default `check_docs_drift.py` invocation failed in current local state because changed-file detection considered untracked eval files without matching tracked doc files from base-ref comparison.
-- Verified rule compliance with explicit changed-file invocation including updated mapped docs.
-
-## Release/Canary Plan
-
-1. Canary one `rest_pull` connector with `source.oauth` enabled.
-2. Monitor:
-   - run failure rate
-   - source API 401 rate
-   - OAuth token endpoint 4xx/5xx errors
-3. Keep all other connectors on static bearer mode during canary.
+1. Enable proxy env vars in staging.
+2. Verify one `rest_pull` static bearer run and one OAuth run.
+3. Verify one Gemini ingestion run (`GEMINI_INGESTION_DRY_RUN=false` in staging).
+4. Verify webhook delivery (Splunk/Teams) and one Studio GitHub PR proposal.
 
 ## Rollback Plan
 
-1. Remove `spec.source.oauth` block from canary connector.
-2. Revert to static bearer (`spec.source.secretRef` token).
-3. Re-run connector validation and redeploy.
-4. If needed, revert commit containing OAuth runtime changes.
-
-## Merge Policy
-
-- Tier 2 requires reviewer bot + one human reviewer.
-- Tier 3 restrictions do not apply.
+1. Remove proxy/CA env vars from deployment if regressions are observed.
+2. Re-run a canary connector to confirm recovery.
+3. Revert commit if behavior remains unstable.
