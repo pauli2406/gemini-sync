@@ -6,7 +6,7 @@ Agentic development is governed by `AGENTS.md` and roadmap outcomes are tracked 
 
 ## What v1 Includes
 
-- Connector definitions in Git (`connectors/*.yaml`) validated by JSON Schema.
+- Example connector definitions in Git (`connectors/*.yaml`) validated by JSON Schema.
 - Python runtime with four connector modes:
   - `sql_pull`
   - `rest_pull`
@@ -36,8 +36,8 @@ Agentic development is governed by `AGENTS.md` and roadmap outcomes are tracked 
   - `GET /studio/connectors/new`
   - `GET /v1/studio/*` JSON APIs for validate/preview/propose/secrets/run-now
   - `POST /v1/studio/connectors/propose` creates a GitHub branch + PR when
-    `GITHUB_TOKEN` and `GITHUB_REPO` are configured; otherwise it returns a
-    local proposal URL for offline workflows
+    `GITHUB_TOKEN` and `GITHUB_REPO` (target connector-config repo) are
+    configured; otherwise it returns a local proposal URL for offline workflows
 - Postgres-backed state store:
   - checkpoints
   - run status
@@ -51,12 +51,32 @@ Agentic development is governed by `AGENTS.md` and roadmap outcomes are tracked 
 ## Repository Layout
 
 - `gemini_sync_bridge/`: runtime, API, and pipeline code.
-- `connectors/`: sample connector definitions.
+- `connectors/`: sample connector definitions only.
 - `flows/`: Kestra flow examples.
 - `schemas/`: connector JSON schema.
 - `infra/`: Helm chart and Kubernetes manifests.
 - `tests/`: unit and API tests.
 - `docs/`: architecture, operations, and connector authoring docs.
+
+## Connector Storage Model
+
+- Keep this repository focused on runtime/tooling and sample connectors.
+- Store user-specific connectors in a separate config repository or external directory.
+- Set `CONNECTORS_DIR` so API/Ops/Studio discover connectors from that external location.
+- Keep Studio PR automation pointed at the connector-config repository via `GITHUB_REPO`.
+
+Example (external directory discovery for API/Ops/Studio):
+
+```bash
+export CONNECTORS_DIR=/opt/gemini-sync/connectors
+gemini-sync-bridge serve --host 0.0.0.0 --port 8080
+```
+
+`gemini-sync-bridge run` always accepts an explicit connector path:
+
+```bash
+gemini-sync-bridge run --connector /opt/gemini-sync/connectors/hr-employees.yaml
+```
 
 ## Getting Started Guides
 
@@ -64,6 +84,8 @@ Agentic development is governed by `AGENTS.md` and roadmap outcomes are tracked 
   `docs/getting-started-local.mdx`
 - Full end-to-end GCP onboarding (datastore + IAM + import verification):
   `docs/discovery-engine-cli-playbook.md`
+- Migration for existing staging setups with custom connectors in this repo:
+  `docs/migration-custom-connectors.md`
 
 ## Connector Setup Docs
 
@@ -136,6 +158,7 @@ Optional local governance gates:
 ```bash
 python scripts/check_tdd_guardrails.py
 python scripts/check_docs_drift.py
+python scripts/check_connector_examples_only.py
 python scripts/check_openapi_drift.py
 python scripts/check_connector_reference_drift.py
 python scripts/check_security_policy.py
@@ -179,6 +202,7 @@ Notes:
 ## CI Checks
 
 - Connector schema validation
+- Connector examples-only guard (`python scripts/check_connector_examples_only.py`)
 - Pytest suite
 - Ruff linting
 - TDD/EDD changed-files guardrails
@@ -192,6 +216,8 @@ Notes:
 - Keep `GEMINI_INGESTION_DRY_RUN=false` only in environments with valid Google credentials and quota controls.
 - Use Kubernetes Secrets to provide `SECRET_<SECRETREF>` values.
 - Run this service in a private network segment with access to on-prem systems and controlled egress to GCP.
+- Set `CONNECTORS_DIR` to an external connector directory in production deployments.
+- Set `GITHUB_REPO` to the connector-config repository used by Studio PR proposals.
 - Canonical runtime command: `gemini-sync-bridge run --connector connectors/hr-employees.yaml`
 - Canonical API command: `gemini-sync-bridge serve --host 0.0.0.0 --port 8080`
 - Governance gate commands: `python scripts/check_tdd_guardrails.py` and `python scripts/check_docs_drift.py`

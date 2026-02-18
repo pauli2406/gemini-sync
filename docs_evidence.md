@@ -1,40 +1,32 @@
 # Docs Evidence
 
-## Updated Docs
+## Updated Documentation
 
-- New:
-  - `docs/connector-mode-file-pull.md`
-  - `docs/connector-provider-file.md`
-- Updated:
-  - `README.md`
-  - `docs/connector-authoring.md`
-  - `docs/connector-studio.md`
-  - `docs/architecture.md`
-  - `docs/discovery-engine-cli-playbook.md`
-  - `docs/connector-provider-http.md`
-  - `docs/connector-provider-postgres.md`
-  - `docs/connector-provider-mysql.md`
-  - `docs/connector-provider-mssql.md`
-  - `docs/connector-provider-oracle.md`
-  - `docs/connector-provider-future.md`
-  - `docs/roadmap.md`
-  - `website/sidebars.ts`
-  - `schemas/connector.docs-meta.yaml`
-  - `docs/connector-field-reference.md` (regenerated)
+- `.env.example`
+- `README.md`
+- `docs/operations-runbook.md`
+- `docs/connector-authoring.md`
+- `docs/connector-studio.md`
+- `docs/getting-started-local.mdx`
+- `docs/migration-custom-connectors.md`
+- `docs/roadmap.md`
+- `website/sidebars.ts`
+- `CONTRIBUTING.md`
 
-## Why These Docs Were Required
+## Why Docs Were Required
 
-- Runtime contract changed under `gemini_sync_bridge/**` and `schemas/**`:
-  - required `runtime_and_api` and `connector_contract` docs coverage.
-- Connector/eval updates changed `connectors/**` and `evals/**`:
-  - required contract/governance docs coverage.
-- Website sidebar changed under `website/**`:
-  - required docs-site navigation sync.
+- `gemini_sync_bridge/**` changed (`runtime_and_api` rule).
+- `connectors/**` changed (`connector_contract` rule).
+- `scripts/check_*.py` and `evals/**` changed (`governance_and_quality` rule).
+- `website/**` changed (`docs_site` rule).
 
-## Key Documentation Outcomes
+## Coverage of User-Facing Changes
 
-- Added complete authoring guidance for `file_pull` mode and `file` provider.
-- Documented CSV `documentMode=row|file` behavior and synthetic mapping fields.
-- Documented compact checkpoint format (`v/rw/fc/lm/fh`) and compatibility behavior.
-- Updated connector hub/navigation to include new mode/provider pages.
-- Kept generated connector field reference aligned with schema/docs-meta changes.
+- Added `CONNECTORS_DIR` env contract and default behavior.
+- Clarified repo separation model:
+  - runtime/tooling + curated examples in this repo,
+  - user-specific connectors in external directory/config repo.
+- Clarified `GITHUB_REPO` as Connector Studio PR target repository.
+- Documented examples-only connector guard command for local/CI checks.
+- Added a migration playbook for legacy staging setups that currently store custom connectors in this runtime repo.
+- Added docs sidebar navigation entry for the migration guide.

@@ -1,47 +1,42 @@
 # Task
 
-- Task ID: file-pull-csv-support
-- Title: Add `file_pull` mode with CSV file-storage extraction and extensible parser contract
+- Task ID: clean-connector-flow
+- Title: Keep user-specific connectors out of runtime repo with env-driven discovery and CI guardrails
 - Owner Role: planner
 - Risk Tier: tier_2
 
 ## Intent
 
-Extend connector authoring and runtime from API/DB pull sources to local file-storage pull sources, starting with CSV, while preserving YAML mapping semantics and introducing a future parser extension hook.
+Prevent user-specific connector profiles from being committed into this runtime/tooling repository while preserving backward compatibility for existing deployments.
 
 ## Acceptance Criteria
 
-1. Connector contract supports `spec.mode=file_pull` and `spec.source.type=file`.
-2. `file_pull` allows optional `source.secretRef`; existing modes keep `secretRef` required.
-3. `file_pull` requires `source.path`, `source.glob`, `source.format=csv`, and `source.csv` config.
-4. Runtime extracts CSV with `documentMode=row|file` and injects flat synthetic file metadata fields.
-5. `file_pull` checkpoint persists compact JSON (`v/rw/fc/lm/fh`) in existing watermark column and accepts legacy plain watermark fallback.
-6. Duplicate normalized `doc_id` values in `file_pull` fail the run.
-7. Studio wizard and proposal generation support `file_pull`, including mode-switch pruning.
-8. New tests/evals/docs/sample connector/artifacts are added and all local gates pass.
+1. API/Ops/Studio connector discovery is env-driven via `CONNECTORS_DIR`.
+2. Default behavior remains unchanged when `CONNECTORS_DIR` is unset (`connectors/`).
+3. Studio proposal payload paths remain `connectors/<connector-id>.yaml`.
+4. CI fails if non-allowlisted files under `connectors/` are changed.
+5. Repo tracks an explicit connector example allowlist.
+6. Docs clarify external connector storage and `GITHUB_REPO` usage as connector-config target.
+7. Tests and eval coverage are updated.
 
 ## Specialist Role Mapping
 
 1. Planner Agent
-   - Finalized scope, risk tier, acceptance criteria, and rollout constraints.
+   - Locked scope, compatibility constraints, and acceptance criteria.
 2. Implementer Agent
-   - Updated schema, Pydantic contract, extractor logic, pipeline dispatch, Studio UI/logic, and sample connector.
+   - Added shared connector path helper and wired API/Ops/Studio discovery to env-driven config.
+   - Added connector example guard script and CI integration.
 3. Test/Eval Agent
-   - Added schema/runtime/pipeline/studio tests and registered new scenario evals.
+   - Added failing-first tests for `CONNECTORS_DIR` discovery and connector guard script.
+   - Added scenario eval for external connector directory support.
 4. Docs Agent
-   - Added file mode/provider docs and updated architecture/authoring/readme/sidebar/reference docs.
+   - Updated README, operations runbook, connector authoring/studio docs, local getting-started note, migration guide, and `.env.example`.
 5. Security Agent
-   - Preserved prompt-injection protections, validated non-recursive glob behavior, and passed policy/dependency/security gates.
+   - Verified no secret exposure changes and ran policy/audit checks.
 6. Release Agent
-   - Captured gate outcomes and rollout/rollback guidance in risk artifact.
+   - Documented tier, gates, rollout/rollback posture in risk artifact.
 
 ## Scope
 
-- In scope:
-  - `file_pull` mode and CSV parser controls.
-  - Compact checkpoint format in existing `connector_checkpoints.watermark`.
-  - Studio authoring support, test/eval coverage, and docs updates.
-- Out of scope:
-  - PDF/unstructured parser implementation.
-  - DB schema migration for structured checkpoint columns.
-  - Non-local file sources (no direct `gs://` source reads).
+- In scope: API/Ops/Studio connector discovery, docs contract updates, CI guardrail.
+- Out of scope: connector schema changes, per-connector storage overrides, runtime CLI interface changes.

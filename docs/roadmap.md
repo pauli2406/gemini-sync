@@ -46,6 +46,8 @@ This roadmap is intentionally horizon-based and continuously updated. It is opti
 - Added hosted docs foundation (`website/`) with Docusaurus, Redoc API reference, OpenAPI drift gate, and Vercel preview/production deploy workflow.
 - Added mode-specific and provider-specific connector documentation with schema-generated field reference and CI drift enforcement.
 - Added `file_pull` mode for local CSV file-storage ingestion with Studio support, contract tests, and scenario eval coverage.
+- Added env-driven connector discovery (`CONNECTORS_DIR`) and examples-only connector guardrails for cleaner runtime/tooling repo boundaries.
+- Added migration documentation for legacy staging setups moving custom connectors to dedicated connector-config repositories.
 
 **Exit Criteria**
 

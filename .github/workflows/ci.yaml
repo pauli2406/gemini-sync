@@ -37,6 +37,9 @@ jobs:
       - name: Validate connector schemas
         run: python scripts/validate_connectors.py
 
+      - name: Enforce example-only connector changes
+        run: python scripts/check_connector_examples_only.py
+
       - name: Lint
         run: ruff check .
 

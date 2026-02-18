@@ -1,0 +1,10 @@
+id: external-connector-directory-support
+name: External connector directory support
+description: Ensures API/Ops/Studio honor CONNECTORS_DIR and preserve proposal file path contracts.
+critical: false
+pytest_selector: tests/test_connector_directory_support.py
+acceptance:
+  - API connector lookup resolves files from CONNECTORS_DIR.
+  - Ops and Studio connector discovery use CONNECTORS_DIR when set.
+  - Default discovery remains repo-local connectors when CONNECTORS_DIR is unset.
+  - Studio proposals still target connectors/<connector-id>.yaml paths.

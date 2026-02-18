@@ -30,6 +30,7 @@ from gemini_sync_bridge.studio_schemas import (
     ProposalResponse,
     RunNowResponse,
 )
+from gemini_sync_bridge.utils.paths import configured_connectors_dir
 
 
 def _repo_root() -> Path:
@@ -37,7 +38,7 @@ def _repo_root() -> Path:
 
 
 def _connectors_dir() -> Path:
-    return _repo_root() / "connectors"
+    return configured_connectors_dir(cwd=_repo_root())
 
 
 def _helm_values_path() -> Path:

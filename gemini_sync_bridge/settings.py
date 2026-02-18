@@ -11,6 +11,7 @@ class Settings(BaseSettings):
         default="postgresql+psycopg2://postgres:postgres@localhost:5432/gemini_sync_bridge",
         alias="DATABASE_URL",
     )
+    connectors_dir: str = Field(default="connectors", alias="CONNECTORS_DIR")
     google_cloud_project: str = Field(default="", alias="GOOGLE_CLOUD_PROJECT")
     gemini_ingestion_dry_run: bool = Field(default=True, alias="GEMINI_INGESTION_DRY_RUN")
     teams_webhook_url: str = Field(default="", alias="TEAMS_WEBHOOK_URL")
