@@ -1,37 +1,44 @@
 # Test Evidence
 
-## Red/Green Coverage for New Gate
+## Red Phase Evidence
 
-- Added dedicated tests for allowlist drift behavior:
-  - `tests/test_connector_examples_allowlist_drift.py`
-- Test coverage includes:
-  - matching inventory pass
-  - missing allowlist entry fail
-  - stale allowlist entry fail
-  - invalid and duplicate allowlist entry fail
+- New default-path expectations for connector reference scripts were added in tests first:
+  - `tests/test_connector_reference_scripts.py`
+- During cutover, docs build initially failed due unquoted frontmatter titles (`Provider: ...`), proving route/content regressions were caught by docs build gate before final green.
 
-## Targeted Validation
+## Green Phase Evidence
 
-- `./.venv/bin/pytest -q tests/test_connector_examples_allowlist_drift.py tests/test_connector_examples_only_guard.py tests/test_connector_samples.py`
-  - Result: `11 passed`
-
-## Full Validation
-
-- `./.venv/bin/python scripts/validate_connectors.py` -> pass
-- `./.venv/bin/python scripts/check_connector_examples_allowlist_drift.py` -> pass
-- `./.venv/bin/python scripts/check_connector_examples_only.py` -> pass
-- `./.venv/bin/ruff check .` -> pass
-- `./.venv/bin/python scripts/check_tdd_guardrails.py` -> pass
-- `./.venv/bin/python scripts/check_docs_drift.py --changed-file ...` -> pass
-- `./.venv/bin/python scripts/check_openapi_drift.py` -> pass
-- `./.venv/bin/python scripts/check_connector_reference_drift.py` -> pass
-- `./.venv/bin/python scripts/check_security_policy.py` -> pass
-- `PATH=.venv/bin:$PATH ./.venv/bin/python scripts/run_dependency_audit.py` -> pass (`No known vulnerabilities found`)
+- `./.venv/bin/pytest -q tests/test_connector_reference_scripts.py tests/test_openapi_scripts.py tests/test_quality_gate_docs.py tests/test_quality_gate_tdd.py`
+  - Result: `16 passed`
 - `./.venv/bin/pytest --cov=gemini_sync_bridge --cov-report=xml --cov-fail-under=60`
-  - Result: `169 passed`, coverage `85.32%`
+  - Result: `171 passed`, total coverage `85.27%`
 - `./.venv/bin/diff-cover coverage.xml --compare-branch=origin/main --fail-under=92`
   - Result: pass (`No lines with coverage information in this diff.`)
-- `PATH=.venv/bin:$PATH ./.venv/bin/python scripts/run_scenario_evals.py --registry evals/eval_registry.yaml --baseline evals/baseline.json`
-  - Result: `pass_rate_percent=100.0`, `critical_pass_rate_percent=100.0`
-  - New scenario `connector-examples-allowlist-drift-gate`: passed
-- `npm --prefix website run build` -> pass
+
+## Commands
+
+```bash
+./.venv/bin/python scripts/validate_connectors.py
+./.venv/bin/python scripts/check_connector_examples_allowlist_drift.py
+./.venv/bin/python scripts/check_connector_examples_only.py
+./.venv/bin/ruff check .
+./.venv/bin/python scripts/check_tdd_guardrails.py
+./.venv/bin/python scripts/check_docs_drift.py
+./.venv/bin/python scripts/check_openapi_drift.py
+./.venv/bin/python scripts/check_connector_reference_drift.py
+./.venv/bin/python scripts/check_security_policy.py
+PATH=.venv/bin:$PATH ./.venv/bin/python scripts/run_dependency_audit.py
+./.venv/bin/pytest --cov=gemini_sync_bridge --cov-report=xml --cov-fail-under=60
+./.venv/bin/diff-cover coverage.xml --compare-branch=origin/main --fail-under=92
+PATH=.venv/bin:$PATH ./.venv/bin/python scripts/run_scenario_evals.py --registry evals/eval_registry.yaml --baseline evals/baseline.json
+npm --prefix website ci
+npm --prefix website run build
+```
+
+## Key Outcomes
+
+- Docs build: pass
+- OpenAPI drift gate: pass
+- Connector reference drift gate (new default path): pass
+- Scenario eval pass rate: `100.0%` (critical `100.0%`)
+- Dependency audit: `No known vulnerabilities found`

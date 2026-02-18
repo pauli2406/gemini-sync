@@ -15,7 +15,7 @@ def main() -> int:
     )
     parser.add_argument("--schema", default="schemas/connector.schema.json")
     parser.add_argument("--meta", default="schemas/connector.docs-meta.yaml")
-    parser.add_argument("--target", default="docs/connector-field-reference.md")
+    parser.add_argument("--target", default="docs/reference/connector-fields.md")
     args = parser.parse_args()
 
     schema_doc = _load_doc(Path(args.schema))

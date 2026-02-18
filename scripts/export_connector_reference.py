@@ -150,7 +150,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Export connector field reference markdown.")
     parser.add_argument("--schema", default="schemas/connector.schema.json")
     parser.add_argument("--meta", default="schemas/connector.docs-meta.yaml")
-    parser.add_argument("--output", default="docs/connector-field-reference.md")
+    parser.add_argument("--output", default="docs/reference/connector-fields.md")
     args = parser.parse_args()
 
     schema_path = Path(args.schema)

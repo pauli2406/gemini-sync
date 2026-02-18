@@ -2,39 +2,30 @@
 
 - Assigned Tier: `tier_2`
 - Rationale:
-  - `scripts/**` changed (new CI governance gate script).
-  - CI policy behavior changed via `.github/workflows/ci.yaml`.
-  - No runtime API/schema contract changes.
+  - `scripts/**` changed (reference export/check defaults).
+  - `website/**` changed (navigation + docs homepage behavior).
+  - No runtime API contract changes in `gemini_sync_bridge/**`.
 
-## Required Gates and Outcomes
+## Required Gates
 
-- Connector schema validation: pass
-- Connector examples allowlist drift gate: pass
-- Connector examples-only guard: pass
-- Lint (`ruff`): pass
-- TDD/EDD guardrail: pass
-- Docs drift: pass (explicit changed-file invocation)
-- OpenAPI drift gate: pass
-- Connector reference drift gate: pass
-- Security policy check: pass
-- Dependency audit: pass
-- Tests + coverage: pass (`169 passed`, coverage `85.32%`)
-- Diff coverage: pass
-- Scenario eval suite: pass (`100%`, critical `100%`)
-- Docs site build: pass
+- Connector schema validation
+- Connector example allowlist + examples-only guards
+- Lint
+- TDD/EDD guardrail
+- Docs drift + consistency
+- OpenAPI drift gate
+- Connector reference drift gate
+- Tests + coverage + diff coverage
+- Security policy + secret scan + dependency audit
+- Scenario eval thresholds
+- Docs site build
 
-## Merge Policy
+## Merge Constraints
 
 - Tier 2 requires reviewer bot + one human reviewer.
 
-## Rollout Plan
+## Rollout / Rollback
 
-1. Merge and monitor CI for allowlist drift gate behavior on connector sample updates.
-2. Share `docs/start-here.md` + migration checklist with staging operators.
-3. Use migration checklist for the next staging cutover touching connector storage.
-
-## Rollback Plan
-
-1. Revert the allowlist drift script + CI step if it blocks legitimate workflows unexpectedly.
-2. Keep existing `check_connector_examples_only.py` guard as minimum baseline.
-3. Restore previous docs/sidebar structure if needed (docs-only rollback).
+1. Merge with full green gate set.
+2. Verify docs build/deploy parity.
+3. Roll back by reverting the docs-cutover commit if unexpected regressions are found.

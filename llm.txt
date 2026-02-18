@@ -1,76 +1,71 @@
-Gemini Sync Bridge - Agent Operating Guide
+Gemini Sync Bridge - Contributor and Agent Contract
 
 Purpose
-- This file tells AI agents and automation tools how to use Gemini Sync Bridge correctly.
-- Primary rule: keep this repository clean (runtime/tooling + curated examples), and keep use-case-specific connectors outside this repo.
+- Define the default operating rules for contributors and AI agents.
+- Keep this repository focused on runtime/tooling plus curated connector examples.
 
-Core Model (must follow)
-1. Runtime/tooling repo:
-   - Contains code, docs, tests, and curated sample connectors under connectors/.
-2. Use-case connector repo (or external directory):
-   - Contains environment/team-specific connectors.
-3. Discovery:
+Operating Model
+1. Runtime/tooling repository
+   - Contains runtime code, docs, tests, scripts, CI, and curated examples under connectors/.
+2. Connector-config repository (recommended)
+   - Contains environment/team-specific connector YAML files.
+3. Discovery behavior
    - API/Ops/Studio discover connectors from CONNECTORS_DIR.
-   - If CONNECTORS_DIR is unset, default discovery is connectors/ in this repo.
+   - If CONNECTORS_DIR is unset, discovery defaults to connectors/ in this repository.
 
-Critical Environment Variables
-- CONNECTORS_DIR: external connector directory for API/Ops/Studio discovery.
-- GITHUB_REPO: connector-config repo target for Studio PR proposals.
-- GITHUB_TOKEN, GITHUB_BASE_BRANCH: Studio PR auth/branch settings.
+Non-Negotiable Rules
+- Do not commit customer-specific or environment-specific connectors to this runtime repo.
+- Preserve schema and API compatibility unless an explicit migration plan exists.
+- Keep generated references committed and in sync:
+  - docs/reference/connector-fields.md
+  - website/static/openapi.json
 
-How To Run The Tool
-1. Local bootstrap:
-   - cp .env.example .env
-   - docker compose up -d postgres
-   - gemini-sync-bridge init-db
-2. Validate connector contracts:
-   - python scripts/validate_connectors.py
-3. Run a connector explicitly:
-   - gemini-sync-bridge run --connector /absolute/path/to/connector.yaml
-4. Run API + UIs:
-   - gemini-sync-bridge serve --host 0.0.0.0 --port 8080
+Canonical Docs Map
+- Start hub: docs/start-here.mdx
+- Tutorials:
+  - docs/tutorials/getting-started-local.mdx
+  - docs/tutorials/gcp-onboarding.mdx
+- How-to:
+  - docs/how-to/connector-authoring.mdx
+  - docs/how-to/connector-studio.mdx
+  - docs/how-to/migrate-custom-connectors.mdx
+  - docs/how-to/operate-runs.mdx
+  - docs/how-to/troubleshooting.mdx
+  - docs/how-to/load-testing.mdx
+  - docs/how-to/connectors/sql-pull.mdx
+  - docs/how-to/connectors/rest-pull.mdx
+  - docs/how-to/connectors/rest-push.mdx
+  - docs/how-to/connectors/file-pull.mdx
+- Concepts:
+  - docs/concepts/architecture.mdx
+  - docs/concepts/connector-model.mdx
+  - docs/concepts/data-envelope-ndjson.mdx
+  - docs/concepts/reconciliation-upserts-deletes.mdx
+  - docs/concepts/idempotency-and-deltas.mdx
+  - docs/concepts/security-and-governance.mdx
+  - docs/concepts/reliability-and-slos.mdx
+- Reference:
+  - docs/reference/api-reference.mdx
+  - docs/reference/cli.mdx
+  - docs/reference/env-vars.mdx
+  - docs/reference/error-codes.mdx
+  - docs/reference/connector-fields.md
+  - docs/reference/providers/*.mdx
+- Contributing:
+  - docs/contributing/contributing.mdx
+  - docs/contributing/dev-setup.mdx
+  - docs/contributing/testing-ci.mdx
+  - docs/contributing/release-process.mdx
 
-How To Add A New Connector For A Use Case (default path)
-1. Do NOT add it to this repo unless it is a curated sample.
-2. Create the connector in your connector-config repo under connectors/<name>.yaml.
-3. Choose mode:
-   - sql_pull, rest_pull, rest_push, file_pull
-4. Use existing samples as template:
-   - connectors/hr-employees.yaml
-   - connectors/oracle-employees.yaml
-   - connectors/kb-rest.yaml
-   - connectors/support-push.yaml
-   - connectors/hr-file-csv.yaml
-5. Configure runtime to discover external connectors:
-   - export CONNECTORS_DIR=/path/to/connector-config-repo/connectors
-6. Validate and test:
-   - python scripts/validate_connectors.py
-   - gemini-sync-bridge run --connector /path/to/connector-config-repo/connectors/<name>.yaml
-7. If using Studio, create/propose and ensure PR targets GITHUB_REPO (connector-config repo).
-
-How To Add/Change A Curated Sample In This Repo (exception path)
-1. Add/update connector file in connectors/.
-2. Update connectors/examples-allowlist.txt in same change.
-3. Ensure guardrails pass:
-   - python scripts/check_connector_examples_allowlist_drift.py
-   - python scripts/check_connector_examples_only.py
-4. Update docs + tests as needed:
-   - docs/connector-authoring.md sample list
-   - tests/test_connector_samples.py
-   - add scenario in evals/scenarios/ if behavior changes
-
-Non-Negotiable Guardrails
-- Do not commit custom/customer-specific connectors to this repo.
-- Do not bypass allowlist drift checks or examples-only checks.
-- Keep connector schema/API contracts backward compatible unless explicitly planned.
-
-Release-Readiness Command Set
+Mandatory Validation Command Set
 - python scripts/validate_connectors.py
 - python scripts/check_connector_examples_allowlist_drift.py
 - python scripts/check_connector_examples_only.py
 - ruff check .
 - python scripts/check_tdd_guardrails.py
 - python scripts/check_docs_drift.py
+- python scripts/check_openapi_drift.py
+- python scripts/check_connector_reference_drift.py
 - python scripts/check_security_policy.py
 - python scripts/run_dependency_audit.py
 - pytest --cov=gemini_sync_bridge --cov-report=xml --cov-fail-under=60
@@ -78,9 +73,23 @@ Release-Readiness Command Set
 - python scripts/run_scenario_evals.py --registry evals/eval_registry.yaml --baseline evals/baseline.json
 - npm --prefix website run build
 
-Primary Docs For Agents
-- docs/start-here.md
-- docs/connector-authoring.md
-- docs/connector-studio.md
-- docs/migration-custom-connectors.md
-- docs/operations-runbook.md
+PR Evidence Expectations
+- Red evidence:
+  - failing or mismatch proof for new behavior/gates before implementation
+- Green evidence:
+  - passing tests/evals after implementation
+- Docs evidence:
+  - updated docs mapped by docs/doc_sync_map.yaml
+- Risk evidence:
+  - risk tier assignment with required gate outcomes
+
+Required Handoff Artifacts
+- task.md
+- changes.md
+- test_evidence.md
+- docs_evidence.md
+- risk_tier.md
+
+Runtime Commands
+- gemini-sync-bridge run --connector /absolute/path/to/connector.yaml
+- gemini-sync-bridge serve --host 0.0.0.0 --port 8080

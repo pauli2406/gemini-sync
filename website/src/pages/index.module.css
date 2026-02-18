@@ -6,9 +6,9 @@
 
 .hero {
   background:
-    radial-gradient(circle at 0% 0%, rgba(12, 113, 195, 0.18), transparent 40%),
-    radial-gradient(circle at 100% 0%, rgba(18, 179, 122, 0.18), transparent 42%),
-    linear-gradient(135deg, #f7fbff 0%, #eef6ff 45%, #f6fff8 100%);
+    radial-gradient(circle at 0% 0%, rgba(13, 120, 173, 0.2), transparent 41%),
+    radial-gradient(circle at 95% 0%, rgba(31, 144, 98, 0.22), transparent 45%),
+    linear-gradient(145deg, #f8fcff 0%, #ecf8ff 42%, #f8fff9 100%);
   border: 1px solid #d8e7fa;
   border-radius: 24px;
   padding: 2.5rem;
@@ -44,8 +44,8 @@
 
 .grid {
   display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.1rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-top: 1.25rem;
 }
 
@@ -76,9 +76,9 @@
 
 [data-theme='dark'] .hero {
   background:
-    radial-gradient(circle at 0% 0%, rgba(74, 160, 245, 0.18), transparent 42%),
-    radial-gradient(circle at 100% 0%, rgba(49, 201, 150, 0.18), transparent 45%),
-    linear-gradient(135deg, #11243a 0%, #162d45 48%, #163333 100%);
+    radial-gradient(circle at 0% 0%, rgba(76, 171, 255, 0.19), transparent 42%),
+    radial-gradient(circle at 100% 0%, rgba(70, 197, 135, 0.2), transparent 46%),
+    linear-gradient(145deg, #13263c 0%, #162f4a 48%, #183736 100%);
   border-color: #2e4765;
 }
 
@@ -111,7 +111,7 @@
 
 @media (max-width: 996px) {
   .grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .hero {
@@ -121,5 +121,11 @@
   .heroActions {
     flex-direction: column;
     align-items: stretch;
+  }
+}
+
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr;
   }
 }

@@ -61,8 +61,9 @@ const config: Config = {
           position: 'left',
           label: 'Docs',
         },
-        {to: '/docs/api-reference', label: 'API', position: 'left'},
-        {to: '/docs/discovery-engine-cli-playbook', label: 'CLI Playbook', position: 'left'},
+        {to: '/docs/reference/api-reference', label: 'Reference', position: 'left'},
+        {to: '/docs/contributing/contributing', label: 'Contributing', position: 'left'},
+        {to: '/docs/changelog', label: 'Changelog', position: 'left'},
         {
           href: 'https://github.com/pauli2406/gemini-sync',
           label: 'GitHub',
@@ -77,25 +78,29 @@ const config: Config = {
           title: 'Docs',
           items: [
             {
-              label: 'Quickstart',
-              to: '/docs/discovery-engine-cli-playbook',
+              label: 'Start Here',
+              to: '/docs/start-here',
             },
-            {label: 'API Reference', to: '/docs/api-reference'},
+            {label: 'Tutorials', to: '/docs/tutorials/getting-started-local'},
           ],
         },
         {
-          title: 'Operations',
+          title: 'Reference',
           items: [
-            {label: 'Operations Runbook', to: '/docs/operations-runbook'},
-            {label: 'Troubleshooting', to: '/docs/troubleshooting'},
+            {label: 'API Reference', to: '/docs/reference/api-reference'},
+            {label: 'CLI Reference', to: '/docs/reference/cli'},
           ],
         },
         {
           title: 'More',
           items: [
             {
-              label: 'Roadmap',
-              to: '/docs/roadmap',
+              label: 'Contributing',
+              to: '/docs/contributing/contributing',
+            },
+            {
+              label: 'Changelog',
+              to: '/docs/changelog',
             },
             {
               label: 'GitHub',

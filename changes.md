@@ -1,56 +1,37 @@
 # Changes
 
-## Examples and Guardrails
+## Docs Hard-Cutover
 
-- Updated canonical sample allowlist:
-  - `connectors/examples-allowlist.txt`
-  - added missing core sample: `connectors/hr-file-csv.yaml`
-- Added strict allowlist drift gate:
-  - `scripts/check_connector_examples_allowlist_drift.py`
-  - validates missing/stale entries, malformed lines, and duplicates.
-- CI integration:
-  - `.github/workflows/ci.yaml`
-  - added `python scripts/check_connector_examples_allowlist_drift.py`.
-- Local contributor workflow updates:
-  - `CONTRIBUTING.md`
-  - `README.md`
-  - added allowlist drift gate command.
+- Replaced legacy flat docs with Diataxis structure:
+  - `docs/tutorials/**`
+  - `docs/how-to/**`
+  - `docs/concepts/**`
+  - `docs/reference/**`
+  - `docs/contributing/**`
+  - `docs/start-here.mdx`, `docs/roadmap.mdx`, `docs/changelog.mdx`
+- Removed legacy docs files under `docs/*.md(x)` after migration.
+
+## Docusaurus
+
+- Updated `website/sidebars.ts` to Diataxis categories.
+- Updated `website/docusaurus.config.ts` navbar/footer links.
+- Rewrote `website/src/pages/index.tsx` and `website/src/pages/index.module.css` for new IA entry points.
+
+## Tooling and Gates
+
+- Updated connector reference script defaults:
+  - `scripts/export_connector_reference.py` default output -> `docs/reference/connector-fields.md`
+  - `scripts/check_connector_reference_drift.py` default target -> `docs/reference/connector-fields.md`
+- Regenerated `docs/reference/connector-fields.md`.
+- Rewrote `docs/doc_sync_map.yaml` for new paths and consistency files/tokens.
+
+## Readme and Agent Guide
+
+- Fully rewrote `README.md` for 2-minute pitch + quickstart + audience split + gate summary.
+- Fully rewrote `llm.txt` as contributor/agent contract aligned to the new docs map.
 
 ## Tests and Evals
 
-- Added unit tests for allowlist drift gate:
-  - `tests/test_connector_examples_allowlist_drift.py`
-- Existing examples-only guard behavior remains covered:
-  - `tests/test_connector_examples_only_guard.py`
-- Added scenario eval:
-  - `evals/scenarios/connector-examples-allowlist-drift-gate.yaml`
-- Registered scenario:
-  - `evals/eval_registry.yaml`
-
-## Docs UX Overhaul (Targeted IA Revamp)
-
-- Added onboarding hub:
-  - `docs/start-here.md`
-- Reorganized docs navigation IA:
-  - `website/sidebars.ts`
-  - categories now emphasize Start Here, Build Connectors, Migrate & Operate, API & Governance.
-- Updated docs homepage entry points:
-  - `website/src/pages/index.tsx`
-  - added Start Here and Migration Checklist cards and primary CTA changes.
-- Upgraded migration guide to strict checklist style:
-  - `docs/migration-custom-connectors.md`
-  - added preflight, expected outcomes, verification commands, and rollback checks.
-- Added cross-links and command updates:
-  - `README.md`
-  - `docs/operations-runbook.md`
-  - `docs/connector-studio.md`
-  - `docs/connector-authoring.md`
-
-## Docs Drift Mapping
-
-- Updated `docs/doc_sync_map.yaml` to include:
-  - `docs/start-here.md`
-  - `docs/migration-custom-connectors.md`
-  - `docs/connector-mode-file-pull.md`
-  - `docs/connector-provider-file.md`
-  in relevant rules (`runtime_and_api`, `connector_contract`, `governance_and_quality`, `docs_site`).
+- Expanded `tests/test_connector_reference_scripts.py` with default-path behavior tests.
+- Updated `evals/scenarios/connector-reference-drift-gate.yaml` for new default target path.
+- Updated docs/tdd gate tests to use new architecture doc path.

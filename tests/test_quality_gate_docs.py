@@ -10,7 +10,7 @@ def _mapping() -> dict:
             {
                 "name": "runtime",
                 "sources": ["gemini_sync_bridge/**"],
-                "docs_any_of": ["README.md", "docs/architecture.md"],
+                "docs_any_of": ["README.md", "docs/concepts/architecture.mdx"],
             }
         ],
         "consistency": {
@@ -31,7 +31,7 @@ def test_docs_drift_passes_when_mapped_doc_changes() -> None:
     result = evaluate_docs_drift(
         [
             "gemini_sync_bridge/services/pipeline.py",
-            "docs/architecture.md",
+            "docs/concepts/architecture.mdx",
         ],
         _mapping(),
     )

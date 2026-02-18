@@ -35,6 +35,8 @@ def test_tdd_guardrail_passes_with_source_test_and_eval_updates() -> None:
 
 
 def test_tdd_guardrail_passes_for_exempt_only_changes() -> None:
-    result = evaluate_tdd_edd_guardrails(["tests/test_push_api.py", "docs/architecture.md"])
+    result = evaluate_tdd_edd_guardrails(
+        ["tests/test_push_api.py", "docs/concepts/architecture.mdx"]
+    )
 
     assert result.passed
