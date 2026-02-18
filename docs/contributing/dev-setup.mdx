@@ -1,0 +1,21 @@
+---
+title: Development Setup
+---
+
+## Local Setup
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .[dev]
+cp .env.example .env
+docker compose up -d postgres
+gemini-sync-bridge init-db
+```
+
+## Optional Docs Setup
+
+```bash
+npm --prefix website ci
+npm --prefix website run build
+```

@@ -1,0 +1,48 @@
+---
+title: File Pull
+---
+
+Use `file_pull` when source systems publish CSV files into a local directory.
+
+## Minimal Example
+
+```yaml
+apiVersion: sync.gemini.io/v1alpha1
+kind: Connector
+metadata:
+  name: hr-file-csv
+spec:
+  mode: file_pull
+  schedule: "0 */2 * * *"
+  source:
+    type: file
+    path: ./runtime/sources/hr
+    glob: "*.csv"
+    format: csv
+    watermarkField: updated_at
+    csv:
+      documentMode: row
+      delimiter: ","
+      hasHeader: true
+      encoding: utf-8
+  mapping:
+    idField: employee_id
+    titleField: full_name
+    contentTemplate: "{{ full_name }}"
+  output:
+    bucket: file://./local-bucket
+    prefix: hr-file-csv
+    format: ndjson
+  gemini:
+    projectId: my-project
+    location: global
+    dataStoreId: hr-file-ds
+  reconciliation:
+    deletePolicy: auto_delete_missing
+```
+
+## Notes
+
+- `glob` is non-recursive in v1.
+- Only CSV format is supported in v1.
+- `documentMode` supports `row` and `file`.

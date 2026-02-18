@@ -1,0 +1,46 @@
+---
+title: REST Pull
+---
+
+Use `rest_pull` when an HTTP API should be polled on a schedule.
+
+## Minimal Example
+
+```yaml
+apiVersion: sync.gemini.io/v1alpha1
+kind: Connector
+metadata:
+  name: kb-rest
+spec:
+  mode: rest_pull
+  schedule: "*/30 * * * *"
+  source:
+    type: http
+    secretRef: kb-api-token
+    url: https://kb.internal/api/v1/articles
+    method: GET
+    watermarkField: updated_at
+  mapping:
+    idField: article_id
+    titleField: title
+    contentTemplate: "{{ title }}\n{{ body }}"
+  output:
+    bucket: gs://company-gemini-sync
+    prefix: kb-rest
+    format: ndjson
+  gemini:
+    projectId: my-project
+    location: global
+    dataStoreId: kb-ds
+  reconciliation:
+    deletePolicy: auto_delete_missing
+```
+
+## Authentication Modes
+
+- Static bearer via `spec.source.secretRef`
+- OAuth client credentials via `spec.source.oauth`
+
+## Pagination
+
+Use `paginationCursorField` and `paginationNextCursorJsonPath` to traverse cursor-based APIs.

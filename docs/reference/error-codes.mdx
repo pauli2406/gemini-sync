@@ -1,0 +1,20 @@
+---
+title: Error Codes
+---
+
+## API Error Statuses
+
+Common HTTP responses from API routes:
+
+- `400 Bad Request`: invalid payload shape, invalid filter values, validation failures
+- `404 Not Found`: connector or run not found
+- `409 Conflict`: idempotency key reused with different payload
+- `202 Accepted`: asynchronous run-now scheduling accepted
+
+## Operational Error Patterns
+
+- Missing secret resolution for `SECRET_<...>`
+- Discovery Engine endpoint/location mismatch
+- API disabled or insufficient IAM permissions
+
+Use [Troubleshooting](/docs/how-to/troubleshooting) for remediation playbooks.

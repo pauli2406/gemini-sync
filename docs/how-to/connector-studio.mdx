@@ -1,0 +1,41 @@
+---
+title: Connector Studio
+---
+
+Connector Studio provides guided authoring, validation, preview, and proposal workflows.
+
+## Access
+
+- List: `/studio/connectors`
+- New connector wizard: `/studio/connectors/new`
+- API endpoints: `/v1/studio/*`
+
+## Required Configuration
+
+- `GITHUB_TOKEN`
+- `GITHUB_REPO` (connector-config repository)
+- `GITHUB_BASE_BRANCH` (default `main`)
+- Optional managed secrets: `MANAGED_SECRET_ENCRYPTION_KEY`
+
+## Create a Proposal
+
+1. Open the new connector wizard.
+2. Choose mode and source fields.
+3. Validate and preview sample records.
+4. Submit proposal.
+
+Behavior:
+
+- If GitHub credentials are configured, Studio opens a branch + PR in `GITHUB_REPO`.
+- Without GitHub credentials, Studio returns a local proposal URL for offline workflows.
+
+## Run-Now and Lifecycle
+
+Studio supports create, edit, clone, pause, resume, delete, and run-now actions.
+Pause/resume updates Helm schedule `enabled` state in generated proposal changes.
+
+## Related Docs
+
+- [Connector Authoring](/docs/how-to/connector-authoring)
+- [Migrate Custom Connectors](/docs/how-to/migrate-custom-connectors)
+- [API Reference](/docs/reference/api-reference)

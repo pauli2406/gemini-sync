@@ -1,0 +1,19 @@
+---
+title: Release Process
+---
+
+## Gate Policy
+
+Risk tier policy is defined in `.agent/risk_policy.yaml`.
+
+For this repository baseline:
+
+- Tier 0/1 can auto-merge after green gates.
+- Tier 2 requires reviewer bot + one human reviewer.
+- Tier 3 never auto-merges.
+
+## Rollout
+
+1. Merge only after all required gates pass.
+2. Validate canary behavior and operational signals.
+3. Keep rollback path as a single revert when possible.

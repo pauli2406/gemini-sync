@@ -1,0 +1,41 @@
+---
+title: CLI Reference
+---
+
+CLI entrypoint: `gemini-sync-bridge`.
+
+## Commands
+
+### `init-db`
+
+Initialize runtime database tables.
+
+```bash
+gemini-sync-bridge init-db
+```
+
+### `run`
+
+Execute one connector run.
+
+```bash
+gemini-sync-bridge run --connector /absolute/path/to/connector.yaml
+```
+
+Options:
+
+- `--connector` (required)
+- `--push-run-id` (optional, process existing queued push run)
+
+### `serve`
+
+Start API + Ops UI + Studio UI.
+
+```bash
+gemini-sync-bridge serve --host 0.0.0.0 --port 8080
+```
+
+Options:
+
+- `--host` (default `0.0.0.0`)
+- `--port` (default `8080`)

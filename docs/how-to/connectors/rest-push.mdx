@@ -1,0 +1,44 @@
+---
+title: REST Push
+---
+
+Use `rest_push` when upstream systems send delta events to Gemini Sync Bridge.
+
+## Minimal Example
+
+```yaml
+apiVersion: sync.gemini.io/v1alpha1
+kind: Connector
+metadata:
+  name: support-push
+spec:
+  mode: rest_push
+  source:
+    type: http
+    secretRef: support-push-token
+  mapping:
+    idField: ticket_id
+    titleField: title
+    contentTemplate: "{{ subject }} {{ body }}"
+  output:
+    bucket: gs://company-gemini-sync
+    prefix: support-push
+    format: ndjson
+  gemini:
+    projectId: my-project
+    location: global
+    dataStoreId: support-ds
+  reconciliation:
+    deletePolicy: auto_delete_missing
+```
+
+## Push API Contract
+
+- Endpoint: `POST /v1/connectors/{connector_id}/events`
+- Header: `Idempotency-Key` (required)
+- Event operation values: `UPSERT` or `DELETE`
+
+## Idempotency Semantics
+
+- Same key + same payload: accepted replay
+- Same key + different payload: `409 Conflict`

@@ -1,0 +1,54 @@
+---
+title: SQL Pull
+---
+
+Use `sql_pull` when data comes from relational systems and should be fetched on a schedule.
+
+## Minimal Example
+
+```yaml
+apiVersion: sync.gemini.io/v1alpha1
+kind: Connector
+metadata:
+  name: hr-employees
+spec:
+  mode: sql_pull
+  schedule: "0 */3 * * *"
+  source:
+    type: postgres
+    secretRef: hr-db-credentials
+    query: >
+      SELECT employee_id, full_name, updated_at
+      FROM employees
+    watermarkField: updated_at
+  mapping:
+    idField: employee_id
+    titleField: full_name
+    contentTemplate: "{{ full_name }}"
+  output:
+    bucket: gs://company-gemini-sync
+    prefix: hr-employees
+    format: ndjson
+  gemini:
+    projectId: my-project
+    location: eu
+    dataStoreId: hr-ds
+  reconciliation:
+    deletePolicy: auto_delete_missing
+```
+
+## Provider Values
+
+Supported `spec.source.type` values for SQL pull:
+
+- `postgres`
+- `mysql`
+- `mssql`
+- `oracle`
+
+See provider references under [/docs/reference/providers/postgres](/docs/reference/providers/postgres).
+
+## Safety Guidance
+
+- Use snapshot extraction queries when `deletePolicy=auto_delete_missing`.
+- Avoid mixing incremental extraction with auto-delete unless downstream deletes are explicitly controlled.

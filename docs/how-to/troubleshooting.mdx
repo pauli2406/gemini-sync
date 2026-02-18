@@ -1,0 +1,42 @@
+---
+title: Troubleshooting
+---
+
+Use this page for common operational failures.
+
+## Discovery Engine API Disabled
+
+Symptom: `SERVICE_DISABLED` or API not enabled errors.
+
+Fix:
+
+```bash
+gcloud services enable discoveryengine.googleapis.com --project "${PROJECT_ID}"
+```
+
+## Region Endpoint Mismatch
+
+Symptom: wrong endpoint for selected location.
+
+Fix:
+
+- `global` -> `discoveryengine.googleapis.com`
+- non-global -> `${LOCATION}-discoveryengine.googleapis.com`
+
+## Data Store Not Found
+
+Symptom: `dataStores/<id> not found`.
+
+Fix: verify connector `projectId`, `location`, and `dataStoreId` exactly match target datastore.
+
+## Missing Secret
+
+Symptom: missing `SECRET_<...>` resolution failures.
+
+Fix: define expected secret env var or managed secret and retry run.
+
+## Idempotency Conflict on Push
+
+Symptom: HTTP 409 for repeated `Idempotency-Key` with changed payload.
+
+Fix: either resend identical payload for same key or generate a new key for new payload.

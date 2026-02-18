@@ -1,0 +1,26 @@
+---
+title: Security and Governance
+---
+
+Gemini Sync Bridge enforces guardrails for docs, tests, security, and release quality.
+
+## Required Security Checks
+
+- Secret scan
+- Dependency vulnerability audit
+- Policy conformance validation
+- Prompt-injection regression checks
+
+## Required Quality Gates
+
+- Schema validation
+- TDD/EDD guardrails
+- Docs drift + consistency
+- OpenAPI drift gate
+- Connector reference drift gate
+- Scenario eval thresholds
+
+## Secret Handling
+
+- Connector `secretRef` resolves to `SECRET_<SECRETREF>` environment variables.
+- Managed secret registry can be used from Studio for stored secret metadata.

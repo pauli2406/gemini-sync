@@ -1,0 +1,47 @@
+---
+title: Connector Authoring
+---
+
+Use this guide to create connector YAML files that are valid, reviewable, and production-safe.
+
+## Baseline Required Fields
+
+Every connector must define:
+
+- `apiVersion: sync.gemini.io/v1alpha1`
+- `kind: Connector`
+- `metadata.name`
+- `spec.mode`
+- `spec.source`
+- `spec.mapping`
+- `spec.output`
+- `spec.gemini`
+- `spec.reconciliation`
+
+## Choose Mode First
+
+- Poll SQL sources: [SQL Pull](/docs/how-to/connectors/sql-pull)
+- Poll REST APIs: [REST Pull](/docs/how-to/connectors/rest-pull)
+- Accept event pushes: [REST Push](/docs/how-to/connectors/rest-push)
+- Poll local CSV files: [File Pull](/docs/how-to/connectors/file-pull)
+
+## Keep Runtime Repo Clean
+
+- Add only curated examples to `connectors/`.
+- Keep environment-specific connectors in a separate connector-config repo.
+- Set `CONNECTORS_DIR` for API/Ops/Studio discovery.
+
+## Validate Before PR
+
+```bash
+python scripts/validate_connectors.py
+python scripts/check_connector_examples_allowlist_drift.py
+python scripts/check_connector_examples_only.py
+pytest tests/test_connector_samples.py
+```
+
+## Reference
+
+- Full field table: [Connector Fields](/docs/reference/connector-fields)
+- Provider details: [Providers](/docs/reference/providers/postgres)
+- Conceptual model: [Connector Model](/docs/concepts/connector-model)

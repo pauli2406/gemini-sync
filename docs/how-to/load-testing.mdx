@@ -1,0 +1,39 @@
+---
+title: Load Testing
+---
+
+Use this guide to validate runtime behavior under multi-connector load.
+
+## Example Test Mix
+
+- 40 `sql_pull` connectors
+- 40 `rest_pull` connectors
+- 20 `rest_push` connectors
+
+## Key Metrics
+
+- Run success rate
+- Freshness lag per connector
+- Mean and p95 runtime duration
+- Push pending queue depth
+
+## Pass Criteria
+
+- No sustained push backlog growth
+- 99% or better success over test window
+- Scheduled connector freshness within expected interval
+- No checkpoint advancement on failed runs
+
+## Suggested Procedure
+
+1. Deploy test environment with representative connector distribution.
+2. Execute a 24-hour synthetic workload.
+3. Export run state + SLO metrics.
+4. Enforce SLO gate and review failure traces.
+
+## Supporting Commands
+
+```bash
+python scripts/generate_slo_report.py --database-url "$DATABASE_URL" --output slo-metrics.json
+python scripts/check_slo_gate.py --metrics slo-metrics.json
+```

@@ -1,0 +1,30 @@
+---
+title: Connector Model
+---
+
+Connector files are declarative contracts validated by schema.
+
+## Storage Model
+
+- This runtime repo contains code plus curated examples.
+- Environment-specific connectors should live in a connector-config repo.
+- API/Ops/Studio discovery uses `CONNECTORS_DIR`.
+
+## Contract Shape
+
+A connector includes:
+
+- Source extraction configuration
+- Canonical mapping configuration
+- Output destination
+- Gemini target
+- Reconciliation policy
+
+## Modes
+
+- `sql_pull`
+- `rest_pull`
+- `rest_push`
+- `file_pull`
+
+Each mode constrains valid source fields and operational behavior.

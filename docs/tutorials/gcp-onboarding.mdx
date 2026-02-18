@@ -1,0 +1,54 @@
+---
+title: GCP Onboarding
+---
+
+This tutorial shows end-to-end onboarding for Discovery Engine ingestion.
+
+## 1. Set Variables
+
+```bash
+export PROJECT_ID="your-project-id"
+export LOCATION="eu"
+export DATA_STORE_ID="your-datastore-id"
+export BUCKET="your-bucket"
+export CONNECTOR_ID="hr-employees"
+
+if [ "${LOCATION}" = "global" ]; then
+  export API_HOST="discoveryengine.googleapis.com"
+else
+  export API_HOST="${LOCATION}-discoveryengine.googleapis.com"
+fi
+```
+
+## 2. Configure Auth and Quota
+
+```bash
+gcloud config set project "${PROJECT_ID}"
+gcloud auth application-default login
+gcloud auth application-default set-quota-project "${PROJECT_ID}"
+```
+
+## 3. Create Data Store
+
+Use Discovery Engine API to create a target data store and verify it reaches `ACTIVE` state.
+
+## 4. Grant Storage and Discovery Access
+
+Grant the bridge service account and Discovery service agent access to the artifact bucket.
+
+## 5. Run Connector and Verify Imports
+
+```bash
+gemini-sync-bridge run --connector connectors/hr-employees.yaml
+```
+
+Verify:
+
+- Artifact files in `gs://<bucket>/connectors/<connector-id>/runs/<run-id>/`
+- Imported documents in Discovery Engine
+
+## 6. Operationalize
+
+- Keep `GEMINI_INGESTION_DRY_RUN=false` only in controlled environments.
+- Configure failure visibility in [Operate Runs](/docs/how-to/operate-runs).
+- Track SLO baselines in [Reliability and SLOs](/docs/concepts/reliability-and-slos).

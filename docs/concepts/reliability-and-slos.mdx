@@ -1,0 +1,19 @@
+---
+title: Reliability and SLOs
+---
+
+Reliability work focuses on deterministic replay, failure observability, and SLO enforcement.
+
+## Core Outcomes
+
+- Adapter test matrix coverage
+- Replay tooling for run artifact verification
+- SLO report and threshold gate integration
+
+## Commands
+
+```bash
+python scripts/replay_run_artifacts.py --upserts file://./local-bucket/connectors/<id>/runs/<run_id>/upserts.ndjson --deletes file://./local-bucket/connectors/<id>/runs/<run_id>/deletes.ndjson
+python scripts/generate_slo_report.py --database-url "$DATABASE_URL" --output slo-metrics.json
+python scripts/check_slo_gate.py --metrics slo-metrics.json
+```

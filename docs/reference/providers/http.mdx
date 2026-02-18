@@ -1,0 +1,14 @@
+---
+title: "Provider: HTTP"
+---
+
+Use `source.type: http` for `rest_pull` and `rest_push` modes.
+
+## Auth Options
+
+- Static bearer token via `secretRef`
+- OAuth client credentials via `source.oauth`
+
+## Proxy Support
+
+HTTP provider calls honor standard proxy and CA environment variables.

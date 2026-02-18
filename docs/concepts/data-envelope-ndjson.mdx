@@ -1,0 +1,20 @@
+---
+title: Data Envelope and NDJSON
+---
+
+All modes normalize records into a canonical document envelope before publish/ingest.
+
+## Why Canonical Envelope
+
+- Consistent downstream processing across sources
+- Deterministic checksums for diffing
+- Stable replay and auditability
+
+## Artifacts
+
+- `upserts.ndjson`
+- `upserts.discovery.ndjson`
+- `deletes.ndjson`
+- `manifest.json`
+
+Artifacts are written under connector/run paths in configured object storage.

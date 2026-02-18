@@ -1,0 +1,62 @@
+---
+title: Local Getting Started
+---
+
+This tutorial takes a fresh clone to a successful connector run.
+
+## Prerequisites
+
+- Python 3.11+
+- Docker and Docker Compose
+- Node 20+ (for docs build)
+
+## 1. Bootstrap Environment
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .[dev]
+cp .env.example .env
+docker compose up -d postgres
+```
+
+## 2. Initialize Runtime State
+
+```bash
+gemini-sync-bridge init-db
+python scripts/validate_connectors.py
+```
+
+## 3. Execute First Connector Run
+
+```bash
+gemini-sync-bridge run --connector connectors/hr-employees-local.yaml
+```
+
+Expected result: JSON output with a successful run summary.
+
+## 4. Start API and UIs
+
+```bash
+gemini-sync-bridge serve --host 0.0.0.0 --port 8080
+```
+
+Open:
+
+- Ops UI: `http://localhost:8080/ops`
+- Studio UI: `http://localhost:8080/studio/connectors`
+
+## 5. Validate Governance Gates
+
+```bash
+python scripts/check_tdd_guardrails.py
+python scripts/check_docs_drift.py
+python scripts/check_openapi_drift.py
+python scripts/check_connector_reference_drift.py
+```
+
+## Next Steps
+
+- GCP onboarding: [GCP Onboarding Tutorial](/docs/tutorials/gcp-onboarding)
+- Connector creation: [Connector Authoring](/docs/how-to/connector-authoring)
+- Operations baseline: [Operate Runs](/docs/how-to/operate-runs)

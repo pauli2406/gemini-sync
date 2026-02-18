@@ -1,0 +1,32 @@
+---
+title: Architecture
+---
+
+Gemini Sync Bridge is a GitOps-managed ingestion runtime that normalizes source records, computes reconciliation deltas, publishes artifacts, and ingests into Discovery Engine.
+
+## Main Components
+
+1. Connector runtime (SQL, REST pull, REST push, file pull)
+2. Postgres state store (`run_state`, checkpoints, record state, push batches)
+3. Artifact publisher (`upserts.ndjson`, `deletes.ndjson`, `manifest.json`)
+4. Discovery ingestion client
+5. FastAPI service (Ops, Studio, Push API)
+6. Optional orchestrator integration (Kestra examples)
+
+## Data Flow
+
+1. Extract source records.
+2. Map records to canonical envelope documents.
+3. Compute upserts/deletes against stored state.
+4. Publish artifacts to `gs://` or `file://` destination.
+5. Import into Discovery Engine and persist run status.
+
+## Runtime Entry Points
+
+- `gemini-sync-bridge run --connector connectors/hr-employees.yaml`
+- `gemini-sync-bridge serve --host 0.0.0.0 --port 8080`
+
+## Governance Gates
+
+- `python scripts/check_tdd_guardrails.py`
+- `python scripts/check_docs_drift.py`

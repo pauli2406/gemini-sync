@@ -1,0 +1,42 @@
+---
+title: Environment Variables
+---
+
+## Core Runtime
+
+- `DATABASE_URL`
+- `CONNECTORS_DIR`
+- `GOOGLE_CLOUD_PROJECT`
+- `GEMINI_INGESTION_DRY_RUN`
+- `LOG_LEVEL`
+- `MAX_RETRIES`
+- `RETRY_BACKOFF_SECONDS`
+
+## Studio / GitHub Integration
+
+- `GITHUB_TOKEN`
+- `GITHUB_REPO`
+- `GITHUB_BASE_BRANCH`
+- `MANAGED_SECRET_ENCRYPTION_KEY`
+
+## Alerts and Observability
+
+- `TEAMS_WEBHOOK_URL`
+- `SPLUNK_HEC_URL`
+- `SPLUNK_HEC_TOKEN`
+- `SPLUNK_RUN_URL_TEMPLATE`
+- `KESTRA_RUN_URL_TEMPLATE`
+
+## Proxy and CA Trust
+
+- `HTTP_PROXY`
+- `HTTPS_PROXY`
+- `NO_PROXY`
+- `SSL_CERT_FILE`
+- `REQUESTS_CA_BUNDLE`
+
+## Secret Resolution Convention
+
+Connector `spec.source.secretRef` resolves to environment variable:
+
+- `SECRET_<UPPERCASED_SECRETREF>`

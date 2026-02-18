@@ -1,0 +1,19 @@
+---
+title: Idempotency and Deltas
+---
+
+Push workflows require deterministic replay behavior.
+
+## Idempotency
+
+`POST /v1/connectors/{connector_id}/events` requires `Idempotency-Key`.
+
+- Repeated key with identical payload is replay-safe.
+- Repeated key with different payload is rejected with conflict.
+
+## Delta Operations
+
+Push events represent explicit deltas:
+
+- `UPSERT`
+- `DELETE`

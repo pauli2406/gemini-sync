@@ -1,0 +1,58 @@
+---
+title: Operate Runs
+---
+
+Use this runbook for daily operations, incident triage, and release readiness.
+
+## Health and Visibility
+
+- `GET /healthz`
+- `GET /ops`
+- `GET /ops/connectors/{connector_id}`
+- `GET /ops/runs/{run_id}`
+- `GET /v1/ops/snapshot` (filters + pagination)
+
+## Core Runtime Commands
+
+```bash
+gemini-sync-bridge run --connector connectors/hr-employees.yaml
+gemini-sync-bridge serve --host 0.0.0.0 --port 8080
+```
+
+## Reliability Checks
+
+```bash
+python scripts/generate_slo_report.py --database-url "$DATABASE_URL" --output slo-metrics.json
+python scripts/check_slo_gate.py --metrics slo-metrics.json
+```
+
+Replay artifacts for deterministic diagnostics:
+
+```bash
+python scripts/replay_run_artifacts.py --upserts file://./local-bucket/connectors/<id>/runs/<run_id>/upserts.ndjson --deletes file://./local-bucket/connectors/<id>/runs/<run_id>/deletes.ndjson
+```
+
+## Mandatory Gates Before High-Risk Changes
+
+```bash
+python scripts/check_tdd_guardrails.py
+python scripts/check_docs_drift.py
+python scripts/check_security_policy.py
+python scripts/run_dependency_audit.py
+```
+
+## Outbound Connectivity Baseline
+
+Set these when proxy routing or enterprise CA trust is required:
+
+- `HTTP_PROXY`
+- `HTTPS_PROXY`
+- `NO_PROXY`
+- `SSL_CERT_FILE`
+- `REQUESTS_CA_BUNDLE`
+
+## Related Docs
+
+- [Troubleshooting](/docs/how-to/troubleshooting)
+- [Reliability and SLOs](/docs/concepts/reliability-and-slos)
+- [Splunk Queries](/docs/reference/splunk-dashboard-queries)

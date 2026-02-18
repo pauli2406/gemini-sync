@@ -1,0 +1,17 @@
+---
+title: "Provider: PostgreSQL"
+---
+
+Use `source.type: postgres` for SQL pull connectors.
+
+DSN format:
+
+```text
+postgresql+psycopg2://<user>:<password>@<host>:<port>/<database>
+```
+
+Example environment variable:
+
+```bash
+export SECRET_HR_DB_CREDENTIALS='postgresql+psycopg2://postgres:postgres@localhost:5432/hr'
+```

@@ -1,0 +1,15 @@
+---
+title: Reconciliation, Upserts, and Deletes
+---
+
+Reconciliation compares current extracted records with prior state to derive deltas.
+
+## Delete Policies
+
+- `auto_delete_missing`: missing records produce deletes
+- `soft_delete_only`: mark-only semantics for integrations that avoid hard deletes
+- `never_delete`: upserts only
+
+## Guidance
+
+Use snapshot extraction when relying on `auto_delete_missing` to avoid false deletes.
