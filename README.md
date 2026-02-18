@@ -57,6 +57,7 @@ Agentic development is governed by `AGENTS.md` and roadmap outcomes are tracked 
 - `infra/`: Helm chart and Kubernetes manifests.
 - `tests/`: unit and API tests.
 - `docs/`: architecture, operations, and connector authoring docs.
+- `llm.txt`: agent operating guide for using the tool and adding connectors correctly.
 
 ## Connector Storage Model
 
