@@ -42,6 +42,11 @@ def _disallowed_connector_changes(
             continue
         if path in allowlisted_paths:
             continue
+        # Deletions are allowed so migrated custom connectors can be cleaned up.
+        # `git diff --name-only` does not include status, so infer deletion from
+        # missing path in the current workspace.
+        if not Path(path).exists():
+            continue
         violations.append(path)
     return sorted(set(violations))
 
