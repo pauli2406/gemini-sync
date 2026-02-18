@@ -5,10 +5,12 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-Mode = Literal["sql_pull", "rest_pull", "rest_push"]
-SourceType = Literal["postgres", "mssql", "mysql", "oracle", "http"]
+Mode = Literal["sql_pull", "rest_pull", "rest_push", "file_pull"]
+SourceType = Literal["postgres", "mssql", "mysql", "oracle", "http", "file"]
 DeletePolicy = Literal["auto_delete_missing", "soft_delete_only", "never_delete"]
 OAuthClientAuthMethod = Literal["client_secret_post", "client_secret_basic"]
+SourceFormat = Literal["csv"]
+CsvDocumentMode = Literal["row", "file"]
 
 
 class Metadata(BaseModel):
@@ -31,12 +33,30 @@ class OAuthConfig(BaseModel):
     )
 
 
+class CsvConfig(BaseModel):
+    document_mode: CsvDocumentMode = Field(default="row", alias="documentMode")
+    delimiter: str = ","
+    has_header: bool = Field(default=True, alias="hasHeader")
+    encoding: str = "utf-8"
+
+    @field_validator("delimiter")
+    @classmethod
+    def validate_delimiter(cls, value: str) -> str:
+        if len(value) != 1:
+            raise ValueError("source.csv.delimiter must be a single character")
+        return value
+
+
 class SourceConfig(BaseModel):
     type: SourceType
-    secret_ref: str = Field(alias="secretRef")
+    secret_ref: str | None = Field(default=None, alias="secretRef")
     query: str | None = None
     watermark_field: str | None = Field(default=None, alias="watermarkField")
     url: str | None = None
+    path: str | None = None
+    glob: str | None = None
+    format: SourceFormat | None = None
+    csv: CsvConfig | None = None
     method: str = "GET"
     payload: dict[str, Any] | None = None
     pagination_cursor_field: str | None = Field(default=None, alias="paginationCursorField")
@@ -87,7 +107,7 @@ class ConnectorSpec(BaseModel):
     @classmethod
     def validate_schedule(cls, v: str | None, info):
         mode = info.data.get("mode")
-        if mode in {"sql_pull", "rest_pull"} and not v:
+        if mode in {"sql_pull", "rest_pull", "file_pull"} and not v:
             raise ValueError("schedule is required for pull connectors")
         return v
 
@@ -101,17 +121,36 @@ class ConnectorSpec(BaseModel):
                 raise ValueError(
                     "source.type must be one of postgres/mssql/mysql/oracle for sql_pull mode"
                 )
+            if not self.source.secret_ref:
+                raise ValueError("source.secretRef is required for sql_pull mode")
             if not self.source.query:
                 raise ValueError("source.query is required for sql_pull mode")
 
         if mode == "rest_pull":
             if source_type != "http":
                 raise ValueError("source.type must be http for rest_pull mode")
+            if not self.source.secret_ref:
+                raise ValueError("source.secretRef is required for rest_pull mode")
             if not self.source.url:
                 raise ValueError("source.url is required for rest_pull mode")
 
-        if mode == "rest_push" and source_type != "http":
-            raise ValueError("source.type must be http for rest_push mode")
+        if mode == "rest_push":
+            if source_type != "http":
+                raise ValueError("source.type must be http for rest_push mode")
+            if not self.source.secret_ref:
+                raise ValueError("source.secretRef is required for rest_push mode")
+
+        if mode == "file_pull":
+            if source_type != "file":
+                raise ValueError("source.type must be file for file_pull mode")
+            if not self.source.path:
+                raise ValueError("source.path is required for file_pull mode")
+            if not self.source.glob:
+                raise ValueError("source.glob is required for file_pull mode")
+            if self.source.format != "csv":
+                raise ValueError("source.format must be csv for file_pull mode")
+            if self.source.csv is None:
+                raise ValueError("source.csv is required for file_pull mode")
 
         return self
 

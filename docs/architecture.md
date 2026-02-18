@@ -3,9 +3,10 @@
 ## Components
 
 1. **Connector Runtime (Python)**
-- Executes connector jobs in `sql_pull`, `rest_pull`, or `rest_push` mode.
+- Executes connector jobs in `sql_pull`, `rest_pull`, `file_pull`, or `rest_push` mode.
 - Produces canonical documents and reconciliation results.
 - For `rest_pull`, supports static bearer auth and OAuth client-credentials token acquisition with refresh.
+- For `file_pull`, supports deterministic local directory + glob CSV extraction with row/file document modes.
 
 2. **State Store (Postgres)**
 - `connector_checkpoints`: per-connector watermark.
@@ -66,6 +67,7 @@
 5. Publish artifacts to object storage.
 6. Import upserts and apply deletes in Gemini.
 7. Commit checkpoint + record state only on success.
+   - `file_pull` checkpoints are compact JSON summaries (row watermark + file metadata hash) stored in the existing watermark column.
 
 This ordering guarantees that failed ingestion does not advance source checkpoints.
 

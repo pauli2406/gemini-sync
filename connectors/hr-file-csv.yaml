@@ -1,0 +1,38 @@
+apiVersion: sync.gemini.io/v1alpha1
+kind: Connector
+metadata:
+  name: hr-file-csv
+spec:
+  mode: file_pull
+  schedule: "0 */2 * * *"
+  source:
+    type: file
+    path: ./runtime/sources/hr
+    glob: "*.csv"
+    format: csv
+    watermarkField: updated_at
+    csv:
+      documentMode: row
+      delimiter: ","
+      hasHeader: true
+      encoding: utf-8
+  mapping:
+    idField: employee_id
+    titleField: full_name
+    contentTemplate: "{{ full_name }} {{ department }} {{ role }}"
+    uriTemplate: "file://{{ file_name }}#{{ employee_id }}"
+    metadataFields:
+      - file_name
+      - file_path
+      - department
+      - role
+  output:
+    bucket: file://./local-bucket
+    prefix: hr-file-csv
+    format: ndjson
+  gemini:
+    projectId: my-project
+    location: global
+    dataStoreId: hr-file-ds
+  reconciliation:
+    deletePolicy: auto_delete_missing

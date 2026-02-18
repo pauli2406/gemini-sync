@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import csv
+import hashlib
+import json
 import time
 from collections.abc import Iterable
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 import httpx
@@ -52,6 +56,8 @@ def _max_watermark(
 def extract_sql_rows(source: SourceConfig, current_watermark: str | None) -> PullResult:
     if not source.query:
         raise ExtractionError("source.query is required for sql_pull mode")
+    if not source.secret_ref:
+        raise ExtractionError("source.secretRef is required for sql_pull mode")
 
     dsn = resolve_secret(source.secret_ref)
     try:
@@ -73,6 +79,158 @@ def extract_sql_rows(source: SourceConfig, current_watermark: str | None) -> Pul
 
     watermark = _max_watermark(rows, source.watermark_field, current_watermark)
     return PullResult(rows=rows, watermark=watermark)
+
+
+def _extract_row_watermark_from_checkpoint(current_watermark: str | None) -> str | None:
+    if not current_watermark:
+        return None
+
+    try:
+        payload = json.loads(current_watermark)
+    except json.JSONDecodeError:
+        return current_watermark
+
+    if isinstance(payload, dict) and payload.get("v") == 1:
+        row_watermark = payload.get("rw")
+        return row_watermark if isinstance(row_watermark, str) else None
+
+    return current_watermark
+
+
+def _file_manifest_hash(entries: list[dict[str, Any]]) -> str:
+    encoded = json.dumps(entries, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    return f"sha256:{hashlib.sha256(encoded.encode('utf-8')).hexdigest()}"
+
+
+def _build_file_checkpoint(
+    row_watermark: str | None,
+    file_count: int,
+    latest_file_mtime: str | None,
+    file_manifest_hash: str,
+) -> str:
+    payload = {
+        "v": 1,
+        "rw": row_watermark,
+        "fc": file_count,
+        "lm": latest_file_mtime,
+        "fh": file_manifest_hash,
+    }
+    encoded = json.dumps(payload, separators=(",", ":"), ensure_ascii=True)
+    if len(encoded) > 255:
+        raise ExtractionError(
+            "file_pull checkpoint exceeded 255 characters. "
+            "Use shorter file path roots or fewer nested segments."
+        )
+    return encoded
+
+
+def _resolve_source_path(path_value: str) -> Path:
+    source_path = Path(path_value).expanduser()
+    if not source_path.is_absolute():
+        source_path = Path.cwd() / source_path
+    return source_path
+
+
+def _csv_rows_from_content(
+    *,
+    content: str,
+    has_header: bool,
+    delimiter: str,
+) -> list[dict[str, Any]]:
+    if has_header:
+        reader = csv.DictReader(content.splitlines(), delimiter=delimiter)
+        return [dict(row) for row in reader]
+
+    reader = csv.reader(content.splitlines(), delimiter=delimiter)
+    rows: list[dict[str, Any]] = []
+    for row in reader:
+        rows.append({f"column_{idx + 1}": value for idx, value in enumerate(row)})
+    return rows
+
+
+def _base_file_fields(path: Path, mtime: str, size_bytes: int) -> dict[str, Any]:
+    return {
+        "file_path": str(path),
+        "file_name": path.name,
+        "file_mtime": mtime,
+        "file_size_bytes": size_bytes,
+    }
+
+
+def extract_file_rows(source: SourceConfig, current_watermark: str | None) -> PullResult:
+    if source.format != "csv":
+        raise ExtractionError("source.format must be csv for file_pull mode")
+    if not source.path:
+        raise ExtractionError("source.path is required for file_pull mode")
+    if not source.glob:
+        raise ExtractionError("source.glob is required for file_pull mode")
+    if source.csv is None:
+        raise ExtractionError("source.csv is required for file_pull mode")
+    if "**" in source.glob:
+        raise ExtractionError("source.glob must be non-recursive for file_pull mode")
+
+    source_path = _resolve_source_path(source.path)
+    if not source_path.exists():
+        raise ExtractionError(f"source.path does not exist: {source_path}")
+    if not source_path.is_dir():
+        raise ExtractionError(f"source.path must be a directory: {source_path}")
+
+    matched_files = sorted(path for path in source_path.glob(source.glob) if path.is_file())
+    rows: list[dict[str, Any]] = []
+    manifest_entries: list[dict[str, Any]] = []
+    latest_mtime_iso: str | None = None
+
+    for file_path in matched_files:
+        stat = file_path.stat()
+        mtime_iso = datetime.fromtimestamp(stat.st_mtime, tz=UTC).isoformat()
+        size_bytes = stat.st_size
+        manifest_entries.append(
+            {
+                "path": str(file_path),
+                "mtime": mtime_iso,
+                "size": size_bytes,
+            }
+        )
+        if latest_mtime_iso is None or mtime_iso > latest_mtime_iso:
+            latest_mtime_iso = mtime_iso
+
+        try:
+            content = file_path.read_text(encoding=source.csv.encoding)
+        except Exception as exc:  # noqa: BLE001
+            raise ExtractionError(f"Unable to read CSV file '{file_path}': {exc}") from exc
+
+        parsed_rows = _csv_rows_from_content(
+            content=content,
+            has_header=source.csv.has_header,
+            delimiter=source.csv.delimiter,
+        )
+        file_fields = _base_file_fields(file_path, mtime_iso, size_bytes)
+
+        if source.csv.document_mode == "row":
+            for parsed_row in parsed_rows:
+                row = dict(parsed_row)
+                row.update(file_fields)
+                rows.append(row)
+        else:
+            file_record = dict(file_fields)
+            file_record["file_content_raw"] = content
+            file_record["file_rows_json"] = json.dumps(
+                parsed_rows,
+                ensure_ascii=True,
+                separators=(",", ":"),
+            )
+            rows.append(file_record)
+
+    legacy_row_watermark = _extract_row_watermark_from_checkpoint(current_watermark)
+    row_watermark = _max_watermark(rows, source.watermark_field, legacy_row_watermark)
+    file_hash = _file_manifest_hash(manifest_entries)
+    checkpoint = _build_file_checkpoint(
+        row_watermark=row_watermark,
+        file_count=len(matched_files),
+        latest_file_mtime=latest_mtime_iso,
+        file_manifest_hash=file_hash,
+    )
+    return PullResult(rows=rows, watermark=checkpoint)
 
 
 def _extract_json_path(data: dict[str, Any], dotted_path: str) -> Any:
@@ -199,6 +357,8 @@ def extract_rest_rows(source: SourceConfig, current_watermark: str | None) -> Pu
         if source.oauth:
             oauth_provider = OAuthClientCredentialsTokenProvider(source, client)
         else:
+            if not source.secret_ref:
+                raise ExtractionError("source.secretRef is required for rest_pull mode")
             token = resolve_secret(source.secret_ref)
             headers.setdefault("Authorization", f"Bearer {token}")
 

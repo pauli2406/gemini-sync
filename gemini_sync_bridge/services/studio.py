@@ -93,6 +93,10 @@ def _prune_incompatible_source_fields(spec: dict[str, Any]) -> dict[str, Any]:
     if mode == "sql_pull":
         for key in (
             "url",
+            "path",
+            "glob",
+            "format",
+            "csv",
             "payload",
             "paginationCursorField",
             "paginationNextCursorJsonPath",
@@ -106,6 +110,10 @@ def _prune_incompatible_source_fields(spec: dict[str, Any]) -> dict[str, Any]:
     if mode == "rest_pull":
         source["type"] = "http"
         source.pop("query", None)
+        source.pop("path", None)
+        source.pop("glob", None)
+        source.pop("format", None)
+        source.pop("csv", None)
         return spec
 
     if mode == "rest_push":
@@ -113,6 +121,35 @@ def _prune_incompatible_source_fields(spec: dict[str, Any]) -> dict[str, Any]:
         for key in (
             "query",
             "watermarkField",
+            "url",
+            "path",
+            "glob",
+            "format",
+            "csv",
+            "method",
+            "payload",
+            "paginationCursorField",
+            "paginationNextCursorJsonPath",
+            "headers",
+            "oauth",
+        ):
+            source.pop(key, None)
+        return spec
+
+    if mode == "file_pull":
+        source["type"] = "file"
+        source["format"] = "csv"
+        source.setdefault(
+            "csv",
+            {
+                "documentMode": "row",
+                "delimiter": ",",
+                "hasHeader": True,
+                "encoding": "utf-8",
+            },
+        )
+        for key in (
+            "query",
             "url",
             "method",
             "payload",
@@ -147,7 +184,7 @@ def _normalize_secret_ref(secret_ref: str) -> str:
 def _connector_runtime_payload(draft: ConnectorDraft) -> dict[str, Any]:
     spec = dict(draft.spec)
     mode = spec.get("mode")
-    if mode in {"sql_pull", "rest_pull"}:
+    if mode in {"sql_pull", "rest_pull", "file_pull"}:
         spec["schedule"] = draft.schedule.cron
     elif "schedule" in spec:
         spec.pop("schedule")

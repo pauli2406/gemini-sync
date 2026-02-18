@@ -1,45 +1,44 @@
 # Risk Tier
 
-- Assigned Tier: tier_2
+- Assigned Tier: `tier_2`
 - Rationale:
-  - Runtime behavior changed in `gemini_sync_bridge/adapters/extractors.py`.
-  - Public connector contract changed in `schemas/connector.schema.json` and `gemini_sync_bridge/schemas.py`.
-  - Studio authoring/proposal behavior changed for source auth.
+  - Runtime extraction, pipeline dispatch, and Studio authoring logic changed under `gemini_sync_bridge/**`.
+  - Connector/schema/eval/docs updates are substantial but do not modify critical infra/release workflows.
+- Required Gates:
+  - connector validation
+  - lint
+  - TDD/EDD guardrail
+  - docs drift + docs consistency
+  - security policy conformance
+  - dependency vulnerability audit
+  - pytest + coverage + diff coverage
+  - scenario eval suite
+- Merge Constraints:
+  - reviewer bot required
+  - at least one human reviewer required
+  - no auto-merge without tier policy requirements satisfied
 
-## Required Gates and Outcomes
+## Gate Outcomes
 
-- Connector schema validation: pass
-- Lint (`ruff`): pass
-- Tests + coverage: pass (`106 passed`, coverage `80.87%`)
-- TDD/EDD guardrail: pass
-- Connector field reference drift gate: pass
-- OpenAPI drift gate: pass
-- Security policy check: pass
-- Dependency audit: pass (after PATH correction)
-- Scenario eval suite: pass (`100%`, critical `100%`)
+- `python scripts/validate_connectors.py` -> pass
+- `ruff check .` -> pass
+- `python scripts/check_tdd_guardrails.py` -> pass
+- `python scripts/check_docs_drift.py` -> pass
+- `python scripts/check_security_policy.py` -> pass
+- `python scripts/run_dependency_audit.py` -> pass (`No known vulnerabilities found`)
+- `pytest --cov=gemini_sync_bridge --cov-report=xml --cov-fail-under=60` -> pass
+- `diff-cover coverage.xml --compare-branch=origin/main --fail-under=92` -> pass (`100%`)
+- `python scripts/run_scenario_evals.py --registry evals/eval_registry.yaml --baseline evals/baseline.json` -> pass (`100%`, critical `100%`)
 
-## Docs Drift Gate Note
+## Rollout Plan
 
-- Default `check_docs_drift.py` invocation failed in current local state because changed-file detection considered untracked eval files without matching tracked doc files from base-ref comparison.
-- Verified rule compliance with explicit changed-file invocation including updated mapped docs.
-
-## Release/Canary Plan
-
-1. Canary one `rest_pull` connector with `source.oauth` enabled.
-2. Monitor:
-   - run failure rate
-   - source API 401 rate
-   - OAuth token endpoint 4xx/5xx errors
-3. Keep all other connectors on static bearer mode during canary.
+1. Deploy to staging with file source paths mounted.
+2. Run one `file_pull` connector in `row` mode and verify checkpoint + artifacts.
+3. Run one `file_pull` connector in `file` mode and verify synthetic template fields.
+4. Verify existing `sql_pull`, `rest_pull`, and `rest_push` canary connectors remain healthy.
 
 ## Rollback Plan
 
-1. Remove `spec.source.oauth` block from canary connector.
-2. Revert to static bearer (`spec.source.secretRef` token).
-3. Re-run connector validation and redeploy.
-4. If needed, revert commit containing OAuth runtime changes.
-
-## Merge Policy
-
-- Tier 2 requires reviewer bot + one human reviewer.
-- Tier 3 restrictions do not apply.
+1. Disable or pause new `file_pull` schedules.
+2. Revert runtime/schema/studio changes in one rollback PR.
+3. Re-run canary connectors and scenario evals to confirm baseline behavior.

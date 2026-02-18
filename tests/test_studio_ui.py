@@ -17,8 +17,17 @@ def test_studio_wizard_exposes_mode_specific_configuration_controls(client) -> N
 
     # Source controls
     assert '<option value="oracle">oracle</option>' in wizard.text
+    assert '<option value="file_pull">File Pull</option>' in wizard.text
+    assert '<option value="file">file</option>' in wizard.text
     assert 'id="draft-source-query"' in wizard.text
     assert 'id="draft-source-url"' in wizard.text
+    assert 'id="draft-source-path"' in wizard.text
+    assert 'id="draft-source-glob"' in wizard.text
+    assert 'id="draft-source-format"' in wizard.text
+    assert 'id="draft-source-csv-document-mode"' in wizard.text
+    assert 'id="draft-source-csv-delimiter"' in wizard.text
+    assert 'id="draft-source-csv-has-header"' in wizard.text
+    assert 'id="draft-source-csv-encoding"' in wizard.text
     assert 'id="draft-source-method"' in wizard.text
     assert 'id="draft-source-watermark"' in wizard.text
     assert 'id="draft-source-headers"' in wizard.text

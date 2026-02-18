@@ -27,6 +27,7 @@ Until these providers are implemented:
 1. Use currently supported providers:
    - SQL: `postgres`, `mysql`, `mssql`, `oracle`
    - API: `http`
+   - File storage: `file` (CSV via `file_pull`)
 2. If source is unsupported, create an upstream export step that writes to a supported source:
    - push canonical docs via `rest_push`, or
    - expose a compatible REST endpoint for `rest_pull`.

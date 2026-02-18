@@ -45,6 +45,7 @@ This roadmap is intentionally horizon-based and continuously updated. It is opti
 - Added `hr-employees` connector contract regression coverage (test + scenario eval).
 - Added hosted docs foundation (`website/`) with Docusaurus, Redoc API reference, OpenAPI drift gate, and Vercel preview/production deploy workflow.
 - Added mode-specific and provider-specific connector documentation with schema-generated field reference and CI drift enforcement.
+- Added `file_pull` mode for local CSV file-storage ingestion with Studio support, contract tests, and scenario eval coverage.
 
 **Exit Criteria**
 

@@ -5,6 +5,7 @@ defaults:
     - sql_pull
     - rest_pull
     - rest_push
+    - file_pull
   description: "-"
   example: "-"
   operationalNotes: "-"
@@ -31,25 +32,30 @@ fields:
   spec.mode:
     description: Connector execution mode.
     example: sql_pull
-    operationalNotes: Select sql_pull, rest_pull, or rest_push only.
+    operationalNotes: Select sql_pull, rest_pull, rest_push, or file_pull only.
   spec.schedule:
     modes:
       - sql_pull
       - rest_pull
+      - file_pull
     description: Cron schedule for pull connectors.
     example: 0 */3 * * *
-    operationalNotes: Required for sql_pull and rest_pull; omitted for rest_push.
+    operationalNotes: Required for sql_pull, rest_pull, and file_pull; omitted for rest_push.
   spec.source:
     description: Source extraction configuration.
     example: "{type: postgres, secretRef: hr-db-credentials, ...}"
   spec.source.type:
     description: Source provider type.
     example: postgres
-    operationalNotes: Use postgres/mssql/mysql/oracle for sql_pull; use http for rest_pull and rest_push.
+    operationalNotes: Use postgres/mssql/mysql/oracle for sql_pull; use http for rest_pull and rest_push; use file for file_pull.
   spec.source.secretRef:
+    modes:
+      - sql_pull
+      - rest_pull
+      - rest_push
     description: Secret reference resolved by runtime.
     example: hr-db-credentials
-    operationalNotes: Maps to environment variable SECRET_HR_DB_CREDENTIALS or managed secret; also used as OAuth client secret fallback when oauth.clientSecretRef is omitted.
+    operationalNotes: Required for sql_pull/rest_pull/rest_push. Maps to environment variable SECRET_HR_DB_CREDENTIALS or managed secret; also used as OAuth client secret fallback when oauth.clientSecretRef is omitted.
   spec.source.query:
     modes:
       - sql_pull
@@ -60,9 +66,55 @@ fields:
     modes:
       - sql_pull
       - rest_pull
+      - file_pull
     description: Field used to compute max checkpoint watermark.
     example: updated_at
     operationalNotes: Must exist in extracted rows to advance checkpoint.
+  spec.source.path:
+    modes:
+      - file_pull
+    description: Local source directory path for file discovery.
+    example: ./data
+    operationalNotes: Must exist at runtime and be readable by the connector process.
+  spec.source.glob:
+    modes:
+      - file_pull
+    description: Non-recursive file glob pattern under source.path.
+    example: "*.csv"
+    operationalNotes: v1 file_pull rejects recursive patterns (for example **/*.csv).
+  spec.source.format:
+    modes:
+      - file_pull
+    description: File parser format selector.
+    example: csv
+    operationalNotes: v1 supports only csv.
+  spec.source.csv:
+    modes:
+      - file_pull
+    description: CSV parser configuration block.
+    example: "{documentMode: row, delimiter: ',', hasHeader: true, encoding: utf-8}"
+  spec.source.csv.documentMode:
+    modes:
+      - file_pull
+    description: Controls whether records are emitted per CSV row or per file.
+    example: row
+    operationalNotes: Supported values are row and file.
+  spec.source.csv.delimiter:
+    modes:
+      - file_pull
+    description: CSV delimiter character.
+    example: ","
+    operationalNotes: Must be exactly one character.
+  spec.source.csv.hasHeader:
+    modes:
+      - file_pull
+    description: Whether first CSV row is treated as header.
+    example: "true"
+  spec.source.csv.encoding:
+    modes:
+      - file_pull
+    description: Text encoding used to decode CSV files.
+    example: utf-8
   spec.source.url:
     modes:
       - rest_pull

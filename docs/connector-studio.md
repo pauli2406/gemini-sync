@@ -35,6 +35,7 @@ Set this for managed secrets:
    - `sql_pull` exposes SQL query + watermark controls.
    - `rest_pull` exposes URL/method/payload/pagination/headers controls.
    - `rest_push` narrows source controls to push-compatible settings.
+   - `file_pull` exposes local path/glob + CSV parser controls (`row`/`file` document mode).
    - For SQL connectors, ensure selected query columns line up with mapping fields/templates (`idField`, `titleField`, `contentTemplate`, optional URI/ACL/metadata fields).
 3. Run `Validate` and `Preview`.
 4. Click `Create PR Proposal`.
@@ -53,6 +54,7 @@ Use these pages while filling wizard fields:
 - MSSQL provider: `docs/connector-provider-mssql.md`
 - Oracle provider: `docs/connector-provider-oracle.md`
 - HTTP provider: `docs/connector-provider-http.md`
+- File provider: `docs/connector-provider-file.md`
 - Full field reference: `docs/connector-field-reference.md`
 
 ## Notes

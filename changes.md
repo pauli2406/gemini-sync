@@ -1,57 +1,76 @@
 # Changes
 
-## Runtime and Contract
+## Runtime + Contract
 
-- Added OAuth config model for `rest_pull` source in `gemini_sync_bridge/schemas.py`:
-  - `grantType`, `tokenUrl`, `clientId`, `clientSecretRef`, `scopes`, `audience`, `clientAuthMethod`.
-- Extended connector JSON schema in `schemas/connector.schema.json` with optional `spec.source.oauth` contract.
-- Implemented OAuth client-credentials token provider in `gemini_sync_bridge/adapters/extractors.py`:
-  - `client_secret_post` and `client_secret_basic`
-  - token caching per run
-  - proactive refresh within 30s expiry window
-  - one forced refresh retry on 401
-  - fallback secret resolution from `source.oauth.clientSecretRef` to `source.secretRef`
-  - explicit extraction errors for invalid token endpoint responses.
-- Preserved static bearer mode behavior for connectors without `source.oauth`.
-- Enforced OAuth precedence: runtime OAuth `Authorization` header overrides static `source.headers.Authorization`.
+- Added `file_pull` connector mode and `file` source type:
+  - `schemas/connector.schema.json`
+  - `gemini_sync_bridge/schemas.py`
+- Added file-source fields:
+  - `source.path`, `source.glob`, `source.format`, `source.csv.*`
+- Added CSV extraction path with parser controls and synthetic file metadata fields:
+  - `gemini_sync_bridge/adapters/extractors.py`
+- Added compact checkpoint generation/compat parsing for file pulls:
+  - `{"v":1,"rw":...,"fc":...,"lm":...,"fh":...}`
+- Added duplicate normalized `doc_id` guard for `file_pull`:
+  - `gemini_sync_bridge/services/pipeline.py`
 
 ## Studio
 
-- Added REST pull auth controls to `gemini_sync_bridge/templates/studio/wizard.html`:
-  - auth mode selector (`static_bearer`, `oauth_client_credentials`)
-  - token URL, client ID, optional client secret ref, auth method, scopes, audience.
-- Updated `gemini_sync_bridge/static/studio.js` to:
-  - render mode/auth-mode visibility
-  - parse/serialize `source.oauth`
-  - validate required OAuth fields in wizard.
-- Updated `gemini_sync_bridge/services/studio.py` mode-pruning:
-  - remove `source.oauth` when mode is `sql_pull` or `rest_push`
-  - preserve for `rest_pull`.
+- Added `file_pull` mode controls in wizard UI:
+  - `gemini_sync_bridge/templates/studio/wizard.html`
+  - `gemini_sync_bridge/static/studio.js`
+- Added Studio source pruning/default handling for file mode switches:
+  - `gemini_sync_bridge/services/studio.py`
 
-## Tests and Evals
+## Connectors + Evals
 
-- Added OAuth extractor test suite: `tests/test_extractors_rest_pull_oauth.py`.
-- Added connector schema OAuth tests: `tests/test_connector_schema_oauth.py`.
-- Extended Studio tests:
-  - `tests/test_studio_ui.py`
+- Added sample file connector:
+  - `connectors/hr-file-csv.yaml`
+- Added scenario evals and registry updates:
+  - `evals/scenarios/file-pull-csv-contract.yaml`
+  - `evals/scenarios/studio-file-pull-mode-switch-configurability.yaml`
+  - `evals/eval_registry.yaml`
+
+## Tests
+
+- Added schema contract tests:
+  - `tests/test_connector_schema_file_pull.py`
+- Added schema validator branch tests:
+  - `tests/test_schemas_file_pull_validation.py`
+- Added extractor coverage for row/file modes, parser controls, checkpoint fallback, and error paths:
+  - `tests/test_extractors_file_pull.py`
+- Added pipeline coverage for file_pull checkpoint persistence and duplicate ID failure:
+  - `tests/test_pipeline_file_pull.py`
+- Extended Studio and connector sample coverage:
   - `tests/test_studio_draft_validation.py`
+  - `tests/test_studio_api.py`
+  - `tests/test_studio_ui.py`
   - `tests/test_studio_proposal_generation.py`
-- Added scenario: `evals/scenarios/rest-pull-oauth-client-credentials.yaml`.
-- Registered scenario in `evals/eval_registry.yaml`.
+  - `tests/test_connector_samples.py`
+  - `tests/test_connector_reference_scripts.py`
+- Security gate fix for pre-existing token-like literal in tests:
+  - `tests/test_outbound_proxy_support.py`
 
-## Docs
+## Documentation
 
-- Updated:
+- Added new docs:
+  - `docs/connector-mode-file-pull.md`
+  - `docs/connector-provider-file.md`
+- Updated contract/architecture/authoring docs:
   - `README.md`
+  - `docs/connector-authoring.md`
+  - `docs/connector-studio.md`
   - `docs/architecture.md`
-  - `docs/connector-mode-rest-pull.md`
+  - `docs/discovery-engine-cli-playbook.md`
   - `docs/connector-provider-http.md`
-  - `docs/troubleshooting.md`
+  - `docs/connector-provider-postgres.md`
+  - `docs/connector-provider-mysql.md`
+  - `docs/connector-provider-mssql.md`
+  - `docs/connector-provider-oracle.md`
+  - `docs/connector-provider-future.md`
+  - `docs/roadmap.md`
+- Updated docs nav:
+  - `website/sidebars.ts`
+- Updated docs metadata and regenerated field reference:
   - `schemas/connector.docs-meta.yaml`
-- Regenerated:
-  - `docs/connector-field-reference.md` via `python scripts/export_connector_reference.py`.
-
-## Security Notes
-
-- No secrets or tokens are logged or persisted in new runtime error messages.
-- Existing secret resolution path is reused (`resolve_secret`).
+  - `docs/connector-field-reference.md`

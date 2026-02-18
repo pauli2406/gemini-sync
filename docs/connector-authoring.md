@@ -9,6 +9,7 @@ Choose your mode first:
 - SQL Pull: `docs/connector-mode-sql-pull.md`
 - REST Pull: `docs/connector-mode-rest-pull.md`
 - REST Push: `docs/connector-mode-rest-push.md`
+- File Pull: `docs/connector-mode-file-pull.md`
 
 Then select provider specifics:
 
@@ -17,6 +18,7 @@ Then select provider specifics:
 - MSSQL: `docs/connector-provider-mssql.md`
 - Oracle: `docs/connector-provider-oracle.md`
 - HTTP: `docs/connector-provider-http.md`
+- File: `docs/connector-provider-file.md`
 - Future placeholders: `docs/connector-provider-future.md`
 
 Complete schema-level field details:
@@ -44,6 +46,7 @@ Every connector in `connectors/*.yaml` must include:
 | Poll relational DB with SQL | `sql_pull` |
 | Poll HTTP API on schedule | `rest_pull` |
 | Receive pushed canonical docs | `rest_push` |
+| Poll local file storage (CSV) | `file_pull` |
 
 ## Reconciliation safety rule
 
@@ -79,3 +82,4 @@ python scripts/check_connector_reference_drift.py
 - `connectors/hr-employees.yaml` (`sql_pull`)
 - `connectors/kb-rest.yaml` (`rest_pull`)
 - `connectors/support-push.yaml` (`rest_push`)
+- `connectors/hr-file-csv.yaml` (`file_pull`)

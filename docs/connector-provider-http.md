@@ -103,6 +103,7 @@ source:
 - `rest_pull`: supported and primary pull API use case.
 - `rest_push`: supported for push queue connectors.
 - `sql_pull`: not applicable.
+- `file_pull`: not applicable.
 
 ## Common connection errors and fixes
 

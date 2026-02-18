@@ -36,7 +36,7 @@ def test_export_connector_reference_writes_expected_sections(tmp_path: Path) -> 
     assert "# Connector Field Reference" in content
     assert table_header in content
     assert "`spec.reconciliation.deletePolicy`" in content
-    assert "enum: `postgres`, `mssql`, `mysql`, `oracle`, `http`" in content
+    assert "enum: `postgres`, `mssql`, `mysql`, `oracle`, `http`, `file`" in content
 
 
 def test_check_connector_reference_drift_passes_for_matching_target(tmp_path: Path) -> None:
