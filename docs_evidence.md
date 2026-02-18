@@ -1,28 +1,40 @@
 # Docs Evidence
 
-## Updated Documentation
+## Updated Docs
 
-- `.env.example`
-- `README.md`
-- `docs/operations-runbook.md`
-- `docs/connector-provider-http.md`
-- `docs/troubleshooting.md`
+- New:
+  - `docs/connector-mode-file-pull.md`
+  - `docs/connector-provider-file.md`
+- Updated:
+  - `README.md`
+  - `docs/connector-authoring.md`
+  - `docs/connector-studio.md`
+  - `docs/architecture.md`
+  - `docs/discovery-engine-cli-playbook.md`
+  - `docs/connector-provider-http.md`
+  - `docs/connector-provider-postgres.md`
+  - `docs/connector-provider-mysql.md`
+  - `docs/connector-provider-mssql.md`
+  - `docs/connector-provider-oracle.md`
+  - `docs/connector-provider-future.md`
+  - `docs/roadmap.md`
+  - `website/sidebars.ts`
+  - `schemas/connector.docs-meta.yaml`
+  - `docs/connector-field-reference.md` (regenerated)
 
-## Why Docs Were Required
+## Why These Docs Were Required
 
-- Runtime files changed under `gemini_sync_bridge/**` (`runtime_and_api` docs drift rule).
-- Eval files changed under `evals/**` (`governance_and_quality` docs drift rule).
-- Operators need explicit proxy and CA configuration guidance for enterprise deployments.
+- Runtime contract changed under `gemini_sync_bridge/**` and `schemas/**`:
+  - required `runtime_and_api` and `connector_contract` docs coverage.
+- Connector/eval updates changed `connectors/**` and `evals/**`:
+  - required contract/governance docs coverage.
+- Website sidebar changed under `website/**`:
+  - required docs-site navigation sync.
 
-## Coverage Added
+## Key Documentation Outcomes
 
-- Standard env proxy contract:
-  - `HTTP_PROXY`, `HTTPS_PROXY`, `NO_PROXY`
-- Custom CA env contract:
-  - `SSL_CERT_FILE`, `REQUESTS_CA_BUNDLE`
-- Outbound egress coverage clarification:
-  - REST pull/OAuth, Gemini ingestion, Splunk/Teams webhooks, GitHub PR API
-- Troubleshooting for:
-  - `407 Proxy Authentication Required`
-  - TLS certificate verification failures behind enterprise proxy
-  - `NO_PROXY` routing mistakes
+- Added complete authoring guidance for `file_pull` mode and `file` provider.
+- Documented CSV `documentMode=row|file` behavior and synthetic mapping fields.
+- Documented compact checkpoint format (`v/rw/fc/lm/fh`) and compatibility behavior.
+- Updated connector hub/navigation to include new mode/provider pages.
+- Kept generated connector field reference aligned with schema/docs-meta changes.
