@@ -9,7 +9,7 @@
 - Connector Studio UI: `GET /studio/connectors`
 - Connector Studio APIs: `GET /v1/studio/catalog`, `POST /v1/studio/connectors/propose`, `POST /v1/studio/connectors/{connector_id}/run-now`
 - Proposal endpoint behavior:
-  - With `GITHUB_TOKEN` + `GITHUB_REPO`: creates branch commits and opens a PR.
+  - With `GITHUB_TOKEN` + `GITHUB_REPO`: creates branch commits and opens a PR in the connector-config repository.
   - Without GitHub credentials: returns a local proposal URL (`local://proposal/...`).
 - Database: verify connectivity and row growth in `run_state`
 - Scheduler: verify Kestra trigger executions
@@ -19,6 +19,11 @@
 For the complete CLI workflow to onboard additional data stores/connectors, use:
 
 - `docs/discovery-engine-cli-playbook.md`
+
+For migrations from legacy staging setups where custom connectors were stored in
+this runtime repo, use:
+
+- `docs/migration-custom-connectors.md`
 
 For deletion/cleanup of test data stores, use the same playbook section:
 
@@ -64,8 +69,14 @@ Configure optional deep links in `.env`:
 - `KESTRA_RUN_URL_TEMPLATE=https://kestra.example/executions/{run_id}`
 - `MANAGED_SECRET_ENCRYPTION_KEY=<strong-random-key>`
 - `GITHUB_TOKEN=<github-pat>`
-- `GITHUB_REPO=org/repo`
+- `GITHUB_REPO=org/connector-config-repo`
 - `GITHUB_BASE_BRANCH=main`
+
+Configure connector discovery for API/Ops/Studio:
+
+- `CONNECTORS_DIR=/srv/gemini-sync/connectors`
+- Default when unset: `connectors` (repo-local sample directory)
+- Recommendation: keep user-specific connectors outside this runtime repo.
 
 ## Replay and Recovery
 
@@ -90,6 +101,7 @@ gemini-sync-bridge run --connector connectors/hr-employees.yaml
 gemini-sync-bridge serve --host 0.0.0.0 --port 8080
 python scripts/check_tdd_guardrails.py
 python scripts/check_docs_drift.py
+python scripts/check_connector_examples_only.py
 ```
 
 ## Reliability Commands

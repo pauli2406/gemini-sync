@@ -27,7 +27,7 @@ Complete schema-level field details:
 
 ## Required Baseline Structure
 
-Every connector in `connectors/*.yaml` must include:
+Every connector definition must include:
 
 - `apiVersion: sync.gemini.io/v1alpha1`
 - `kind: Connector`
@@ -74,11 +74,13 @@ Run before commit:
 python scripts/validate_connectors.py
 python scripts/check_tdd_guardrails.py
 python scripts/check_docs_drift.py
+python scripts/check_connector_examples_only.py
 python scripts/check_connector_reference_drift.py
 ```
 
 ## Working examples in repo
 
+- Keep user-specific connectors in a separate config repo or external directory and set `CONNECTORS_DIR` for API/Ops/Studio discovery.
 - `connectors/hr-employees.yaml` (`sql_pull`)
 - `connectors/kb-rest.yaml` (`rest_pull`)
 - `connectors/support-push.yaml` (`rest_push`)

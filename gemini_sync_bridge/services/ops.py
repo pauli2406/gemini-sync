@@ -21,10 +21,11 @@ from gemini_sync_bridge.ops_schemas import (
 )
 from gemini_sync_bridge.services.slo import compute_slo_metrics
 from gemini_sync_bridge.settings import get_settings
+from gemini_sync_bridge.utils.paths import configured_connectors_dir
 
 
 def _connectors_dir() -> Path:
-    return Path("connectors")
+    return configured_connectors_dir()
 
 
 def _as_utc(value: datetime | None) -> datetime | None:

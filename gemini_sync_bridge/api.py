@@ -62,6 +62,7 @@ from gemini_sync_bridge.studio_schemas import (
     ValidateDraftRequest,
 )
 from gemini_sync_bridge.utils.logging import configure_logging
+from gemini_sync_bridge.utils.paths import configured_connectors_dir
 
 
 @asynccontextmanager
@@ -79,7 +80,7 @@ app.mount("/static", StaticFiles(directory=str(PACKAGE_DIR / "static")), name="s
 
 
 def _connectors_dir() -> Path:
-    return Path("connectors")
+    return configured_connectors_dir()
 
 
 def _load_connector_mode(connector_id: str) -> str:

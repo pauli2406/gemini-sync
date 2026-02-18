@@ -1,0 +1,5 @@
+# Canonical sample connectors that may be changed in this repository.
+connectors/hr-employees.yaml
+connectors/kb-rest.yaml
+connectors/oracle-employees.yaml
+connectors/support-push.yaml

@@ -22,6 +22,7 @@
 
 ```bash
 python scripts/validate_connectors.py
+python scripts/check_connector_examples_only.py
 ruff check .
 python scripts/check_tdd_guardrails.py
 python scripts/check_docs_drift.py

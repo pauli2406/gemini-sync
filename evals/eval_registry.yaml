@@ -59,3 +59,6 @@ scenarios:
   - id: studio-file-pull-mode-switch-configurability
     path: evals/scenarios/studio-file-pull-mode-switch-configurability.yaml
     critical: false
+  - id: external-connector-directory-support
+    path: evals/scenarios/external-connector-directory-support.yaml
+    critical: false

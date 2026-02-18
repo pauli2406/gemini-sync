@@ -7,6 +7,9 @@ This guide takes you from a fresh clone to a successful local connector run.
 It uses Docker Postgres and local `file://` artifacts, so you can start without
 Google Cloud credentials.
 
+For production-style usage, keep user-specific connectors outside this repo and
+set `CONNECTORS_DIR` so API/Ops/Studio discover that external directory.
+
 ## What You Will Run
 
 - A local Postgres container for runtime state and sample source data

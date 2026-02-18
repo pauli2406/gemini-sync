@@ -14,6 +14,7 @@ Connector Studio is the guided UI for creating and managing connection profiles 
 - Validate drafts against connector schema before proposing.
 - Preview mapped document output from sample records.
 - Propose GitHub pull requests instead of writing directly to `main`.
+- Keep proposed connector file paths under `connectors/<connector-id>.yaml` for config repo consistency.
 - Manage schedule state via Helm `scheduleJobs.enabled`.
 
 ## Required Configuration
@@ -21,8 +22,12 @@ Connector Studio is the guided UI for creating and managing connection profiles 
 Set these for GitHub PR automation:
 
 - `GITHUB_TOKEN`
-- `GITHUB_REPO` (for example `org/repo`)
+- `GITHUB_REPO` (target connector-config repo, for example `org/connector-config-repo`)
 - `GITHUB_BASE_BRANCH` (default `main`)
+
+Set this to discover connectors outside this repo:
+
+- `CONNECTORS_DIR` (for example `/srv/gemini-sync/connectors`)
 
 Set this for managed secrets:
 
@@ -61,3 +66,4 @@ Use these pages while filling wizard fields:
 
 - v1 write paths intentionally have no auth; deploy in a trusted private network segment.
 - Existing manual YAML workflows remain supported.
+- Migration path for legacy staging setups is documented in `docs/migration-custom-connectors.md`.

@@ -1,52 +1,48 @@
 # Test Evidence
 
-## Red Phase Evidence
+## Red Phase (Failing First)
 
-- Baseline schema on `origin/main` rejects new file connector contract:
-  - Command:
-    - `PATH="$(pwd)/.venv/bin:$PATH" .venv/bin/python - <<'PY' ... git show origin/main:schemas/connector.schema.json ... PY`
-  - Result:
-    - `errors=4`
-    - `spec.mode: 'file_pull' is not one of ['sql_pull', 'rest_pull', 'rest_push']`
-    - `spec.source: 'secretRef' is a required property`
-    - `spec.source: Additional properties are not allowed ('csv', 'format', 'glob', 'path' were unexpected)`
-    - `spec.source.type: 'file' is not one of ['postgres', 'mssql', 'mysql', 'oracle', 'http']`
+- Command:
+  - `./.venv/bin/pytest -q tests/test_connector_directory_support.py tests/test_connector_examples_only_guard.py`
+- Result before implementation:
+  - `6 failed, 2 passed`
+- Failure categories observed:
+  - API/Ops/Studio ignored `CONNECTORS_DIR` and still read repo-local `connectors/`.
+  - `scripts/check_connector_examples_only.py` did not exist.
 
-## Green Phase Evidence
+## Green Phase
 
-- Focused new/updated suites:
-  - `.venv/bin/pytest tests/test_connector_schema_file_pull.py tests/test_extractors_file_pull.py tests/test_pipeline_file_pull.py tests/test_schemas_file_pull_validation.py -q`
+- Targeted new tests:
+  - `./.venv/bin/pytest -q tests/test_connector_directory_support.py tests/test_connector_examples_only_guard.py`
+  - Result: `8 passed`
+
+- Impacted suites:
+  - `./.venv/bin/pytest -q tests/test_api_manual_run.py tests/test_ops_api.py tests/test_studio_api.py tests/test_studio_proposal_generation.py`
   - Result: pass
-- Full test suite with coverage:
-  - `PATH="$(pwd)/.venv/bin:$PATH" .venv/bin/pytest --cov=gemini_sync_bridge --cov-report=xml --cov-fail-under=60`
-  - Result: `156 passed`, coverage `85.22%`
-- Diff coverage:
-  - `PATH="$(pwd)/.venv/bin:$PATH" diff-cover coverage.xml --compare-branch=origin/main --fail-under=92`
-  - Result: pass (`100%` diff coverage)
+
+- Full tests + coverage:
+  - `./.venv/bin/pytest --cov=gemini_sync_bridge --cov-report=xml --cov-fail-under=60`
+  - Result: pass
 
 ## Scenario Eval Evidence
 
 - Command:
-  - `PATH="$(pwd)/.venv/bin:$PATH" .venv/bin/python scripts/run_scenario_evals.py --registry evals/eval_registry.yaml --baseline evals/baseline.json`
+  - `PATH=.venv/bin:$PATH ./.venv/bin/python scripts/run_scenario_evals.py --registry evals/eval_registry.yaml --baseline evals/baseline.json`
 - Result:
   - `pass_rate_percent=100.0`
   - `critical_pass_rate_percent=100.0`
-  - New scenarios passed:
-    - `file-pull-csv-contract`
-    - `studio-file-pull-mode-switch-configurability`
+  - New scenario `external-connector-directory-support`: passed
 
 ## Gate Commands
 
-```bash
-PATH="$(pwd)/.venv/bin:$PATH" .venv/bin/python scripts/validate_connectors.py
-.venv/bin/ruff check .
-.venv/bin/python scripts/check_tdd_guardrails.py
-.venv/bin/python scripts/check_docs_drift.py
-.venv/bin/python scripts/check_security_policy.py
-PATH="$(pwd)/.venv/bin:$PATH" .venv/bin/python scripts/run_dependency_audit.py
-PATH="$(pwd)/.venv/bin:$PATH" .venv/bin/pytest --cov=gemini_sync_bridge --cov-report=xml --cov-fail-under=60
-PATH="$(pwd)/.venv/bin:$PATH" diff-cover coverage.xml --compare-branch=origin/main --fail-under=92
-PATH="$(pwd)/.venv/bin:$PATH" .venv/bin/python scripts/run_scenario_evals.py --registry evals/eval_registry.yaml --baseline evals/baseline.json
-```
-
-All commands above completed successfully.
+- `./.venv/bin/python scripts/validate_connectors.py` -> pass
+- `./.venv/bin/python scripts/check_connector_examples_only.py` -> pass
+- `./.venv/bin/ruff check .` -> pass
+- `./.venv/bin/python scripts/check_tdd_guardrails.py` -> pass
+- `./.venv/bin/python scripts/check_docs_drift.py --changed-file ...` -> pass
+- `./.venv/bin/python scripts/check_openapi_drift.py` -> pass
+- `./.venv/bin/python scripts/check_connector_reference_drift.py` -> pass
+- `./.venv/bin/python scripts/check_security_policy.py` -> pass
+- `PATH=.venv/bin:$PATH ./.venv/bin/python scripts/run_dependency_audit.py` -> pass
+- `./.venv/bin/diff-cover coverage.xml --compare-branch=origin/main --fail-under=92` -> pass
+- `npm --prefix website run build` -> pass
