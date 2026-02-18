@@ -152,6 +152,30 @@ python scripts/generate_slo_report.py --database-url \"$DATABASE_URL\" --output 
 python scripts/check_slo_gate.py --metrics slo-metrics.json
 ```
 
+## Outbound Proxy Support
+
+Gemini Sync Bridge supports standard environment-based proxy routing for all outbound HTTP egress:
+
+- REST pull API calls and OAuth token acquisition
+- Gemini ingestion (Discovery Engine API calls)
+- Teams and Splunk webhooks
+- GitHub API calls from Connector Studio proposal flow
+
+Set standard environment variables:
+
+```bash
+export HTTP_PROXY="http://proxy.example:8080"
+export HTTPS_PROXY="http://proxy.example:8443"
+export NO_PROXY="localhost,127.0.0.1,.internal"
+export SSL_CERT_FILE="/etc/ssl/certs/company-ca-bundle.pem"
+export REQUESTS_CA_BUNDLE="/etc/ssl/certs/company-ca-bundle.pem"
+```
+
+Notes:
+
+- If proxy credentials contain special characters, URL-encode username/password components.
+- Include internal hosts and local services in `NO_PROXY` (for example `localhost`, `127.0.0.1`, `postgres`, `.internal`).
+
 ## CI Checks
 
 - Connector schema validation

@@ -88,6 +88,47 @@ Fix:
 - Verify token endpoint returns JSON object with `access_token`.
 - Check upstream auth proxy/IdP response transformation.
 
+## Proxy Authentication Required (407)
+
+Error pattern:
+
+- `407 Proxy Authentication Required`
+
+Fix:
+
+- Verify `HTTP_PROXY`/`HTTPS_PROXY` include valid proxy credentials (if required).
+- URL-encode special characters in credential components.
+- Confirm outbound destination is intended to route through proxy and not bypassed by `NO_PROXY`.
+
+## TLS Verification Fails Behind Enterprise Proxy
+
+Error pattern:
+
+- `certificate verify failed`
+- `unable to get local issuer certificate`
+
+Fix:
+
+- Set `SSL_CERT_FILE` to the enterprise CA bundle path.
+- Set `REQUESTS_CA_BUNDLE` to the same CA bundle path.
+- Ensure the CA bundle file is readable by the runtime process/container.
+
+## NO_PROXY Misconfiguration
+
+Error pattern:
+
+- Internal host calls unexpectedly routed to proxy.
+- Local services fail only when proxy env vars are enabled.
+
+Fix:
+
+- Add local/internal hosts to `NO_PROXY`, for example:
+  - `localhost`
+  - `127.0.0.1`
+  - `postgres`
+  - `.internal`
+- Restart process/container after env updates.
+
 ## Runtime DB Not Initialized
 
 Error pattern:

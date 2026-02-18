@@ -1,0 +1,9 @@
+id: outbound-proxy-env-support
+name: Outbound proxy env support
+description: Ensures all outbound HTTP clients explicitly honor environment-based proxy and CA settings.
+critical: false
+pytest_selector: tests/test_outbound_proxy_support.py
+acceptance:
+  - REST pull and OAuth token calls use shared env-trusting HTTP client construction.
+  - Splunk, Teams, and GitHub outbound calls use env-trusting HTTP client construction.
+  - Gemini ingestion authorized session explicitly enables trust_env for env proxy/CA support.

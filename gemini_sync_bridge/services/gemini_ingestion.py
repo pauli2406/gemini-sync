@@ -26,6 +26,7 @@ class GeminiIngestionClient:
             return self._session
         credentials, _ = google.auth.default(scopes=["https://www.googleapis.com/auth/cloud-platform"])
         self._session = AuthorizedSession(credentials)
+        self._session.trust_env = True
         return self._session
 
     @staticmethod
