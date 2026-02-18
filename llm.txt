@@ -1,0 +1,86 @@
+Gemini Sync Bridge - Agent Operating Guide
+
+Purpose
+- This file tells AI agents and automation tools how to use Gemini Sync Bridge correctly.
+- Primary rule: keep this repository clean (runtime/tooling + curated examples), and keep use-case-specific connectors outside this repo.
+
+Core Model (must follow)
+1. Runtime/tooling repo:
+   - Contains code, docs, tests, and curated sample connectors under connectors/.
+2. Use-case connector repo (or external directory):
+   - Contains environment/team-specific connectors.
+3. Discovery:
+   - API/Ops/Studio discover connectors from CONNECTORS_DIR.
+   - If CONNECTORS_DIR is unset, default discovery is connectors/ in this repo.
+
+Critical Environment Variables
+- CONNECTORS_DIR: external connector directory for API/Ops/Studio discovery.
+- GITHUB_REPO: connector-config repo target for Studio PR proposals.
+- GITHUB_TOKEN, GITHUB_BASE_BRANCH: Studio PR auth/branch settings.
+
+How To Run The Tool
+1. Local bootstrap:
+   - cp .env.example .env
+   - docker compose up -d postgres
+   - gemini-sync-bridge init-db
+2. Validate connector contracts:
+   - python scripts/validate_connectors.py
+3. Run a connector explicitly:
+   - gemini-sync-bridge run --connector /absolute/path/to/connector.yaml
+4. Run API + UIs:
+   - gemini-sync-bridge serve --host 0.0.0.0 --port 8080
+
+How To Add A New Connector For A Use Case (default path)
+1. Do NOT add it to this repo unless it is a curated sample.
+2. Create the connector in your connector-config repo under connectors/<name>.yaml.
+3. Choose mode:
+   - sql_pull, rest_pull, rest_push, file_pull
+4. Use existing samples as template:
+   - connectors/hr-employees.yaml
+   - connectors/oracle-employees.yaml
+   - connectors/kb-rest.yaml
+   - connectors/support-push.yaml
+   - connectors/hr-file-csv.yaml
+5. Configure runtime to discover external connectors:
+   - export CONNECTORS_DIR=/path/to/connector-config-repo/connectors
+6. Validate and test:
+   - python scripts/validate_connectors.py
+   - gemini-sync-bridge run --connector /path/to/connector-config-repo/connectors/<name>.yaml
+7. If using Studio, create/propose and ensure PR targets GITHUB_REPO (connector-config repo).
+
+How To Add/Change A Curated Sample In This Repo (exception path)
+1. Add/update connector file in connectors/.
+2. Update connectors/examples-allowlist.txt in same change.
+3. Ensure guardrails pass:
+   - python scripts/check_connector_examples_allowlist_drift.py
+   - python scripts/check_connector_examples_only.py
+4. Update docs + tests as needed:
+   - docs/connector-authoring.md sample list
+   - tests/test_connector_samples.py
+   - add scenario in evals/scenarios/ if behavior changes
+
+Non-Negotiable Guardrails
+- Do not commit custom/customer-specific connectors to this repo.
+- Do not bypass allowlist drift checks or examples-only checks.
+- Keep connector schema/API contracts backward compatible unless explicitly planned.
+
+Release-Readiness Command Set
+- python scripts/validate_connectors.py
+- python scripts/check_connector_examples_allowlist_drift.py
+- python scripts/check_connector_examples_only.py
+- ruff check .
+- python scripts/check_tdd_guardrails.py
+- python scripts/check_docs_drift.py
+- python scripts/check_security_policy.py
+- python scripts/run_dependency_audit.py
+- pytest --cov=gemini_sync_bridge --cov-report=xml --cov-fail-under=60
+- diff-cover coverage.xml --compare-branch=origin/main --fail-under=92
+- python scripts/run_scenario_evals.py --registry evals/eval_registry.yaml --baseline evals/baseline.json
+- npm --prefix website run build
+
+Primary Docs For Agents
+- docs/start-here.md
+- docs/connector-authoring.md
+- docs/connector-studio.md
+- docs/migration-custom-connectors.md
+- docs/operations-runbook.md

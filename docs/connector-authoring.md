@@ -72,6 +72,7 @@ Run before commit:
 
 ```bash
 python scripts/validate_connectors.py
+python scripts/check_connector_examples_allowlist_drift.py
 python scripts/check_tdd_guardrails.py
 python scripts/check_docs_drift.py
 python scripts/check_connector_examples_only.py
@@ -82,6 +83,7 @@ python scripts/check_connector_reference_drift.py
 
 - Keep user-specific connectors in a separate config repo or external directory and set `CONNECTORS_DIR` for API/Ops/Studio discovery.
 - `connectors/hr-employees.yaml` (`sql_pull`)
+- `connectors/oracle-employees.yaml` (`sql_pull`)
 - `connectors/kb-rest.yaml` (`rest_pull`)
 - `connectors/support-push.yaml` (`rest_push`)
 - `connectors/hr-file-csv.yaml` (`file_pull`)

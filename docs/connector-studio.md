@@ -66,4 +66,5 @@ Use these pages while filling wizard fields:
 
 - v1 write paths intentionally have no auth; deploy in a trusted private network segment.
 - Existing manual YAML workflows remain supported.
+- Guided onboarding paths are indexed in `docs/start-here.md`.
 - Migration path for legacy staging setups is documented in `docs/migration-custom-connectors.md`.

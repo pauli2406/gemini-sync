@@ -1,55 +1,56 @@
 # Changes
 
-## Runtime Configuration and Discovery
+## Examples and Guardrails
 
-- Added shared connector path helper:
-  - `gemini_sync_bridge/utils/paths.py`
-  - `configured_connectors_dir()` resolves connector discovery from `CONNECTORS_DIR` with fallback `connectors`.
-- Added settings contract:
-  - `gemini_sync_bridge/settings.py` now includes `CONNECTORS_DIR` via `connectors_dir`.
-- Replaced hardcoded connector directory resolution in:
-  - `gemini_sync_bridge/api.py`
-  - `gemini_sync_bridge/services/ops.py`
-  - `gemini_sync_bridge/services/studio.py`
-
-## Connector Commit Guardrail
-
-- Added connector examples allowlist file:
+- Updated canonical sample allowlist:
   - `connectors/examples-allowlist.txt`
-- Added CI/local guard script:
-  - `scripts/check_connector_examples_only.py`
-  - Fails when non-allowlisted files under `connectors/` are changed.
-- Added CI step:
+  - added missing core sample: `connectors/hr-file-csv.yaml`
+- Added strict allowlist drift gate:
+  - `scripts/check_connector_examples_allowlist_drift.py`
+  - validates missing/stale entries, malformed lines, and duplicates.
+- CI integration:
   - `.github/workflows/ci.yaml`
-- Added contributing command:
+  - added `python scripts/check_connector_examples_allowlist_drift.py`.
+- Local contributor workflow updates:
   - `CONTRIBUTING.md`
+  - `README.md`
+  - added allowlist drift gate command.
 
 ## Tests and Evals
 
-- Added connector discovery regression tests:
-  - `tests/test_connector_directory_support.py`
-  - Covers API/Ops/Studio env-driven discovery, default fallback behavior, and Studio proposal path contract.
-- Added guard script tests:
+- Added unit tests for allowlist drift gate:
+  - `tests/test_connector_examples_allowlist_drift.py`
+- Existing examples-only guard behavior remains covered:
   - `tests/test_connector_examples_only_guard.py`
 - Added scenario eval:
-  - `evals/scenarios/external-connector-directory-support.yaml`
+  - `evals/scenarios/connector-examples-allowlist-drift-gate.yaml`
 - Registered scenario:
   - `evals/eval_registry.yaml`
 
-## Documentation
+## Docs UX Overhaul (Targeted IA Revamp)
 
-- Updated env/config and workflow guidance:
-  - `.env.example`
+- Added onboarding hub:
+  - `docs/start-here.md`
+- Reorganized docs navigation IA:
+  - `website/sidebars.ts`
+  - categories now emphasize Start Here, Build Connectors, Migrate & Operate, API & Governance.
+- Updated docs homepage entry points:
+  - `website/src/pages/index.tsx`
+  - added Start Here and Migration Checklist cards and primary CTA changes.
+- Upgraded migration guide to strict checklist style:
+  - `docs/migration-custom-connectors.md`
+  - added preflight, expected outcomes, verification commands, and rollback checks.
+- Added cross-links and command updates:
   - `README.md`
   - `docs/operations-runbook.md`
-  - `docs/connector-authoring.md`
   - `docs/connector-studio.md`
-  - `docs/getting-started-local.mdx`
+  - `docs/connector-authoring.md`
+
+## Docs Drift Mapping
+
+- Updated `docs/doc_sync_map.yaml` to include:
+  - `docs/start-here.md`
   - `docs/migration-custom-connectors.md`
-  - `docs/roadmap.md`
-  - `website/sidebars.ts`
-- Clarified:
-  - `CONNECTORS_DIR` controls API/Ops/Studio discovery path.
-  - `GITHUB_REPO` is the connector-config repository target for Studio proposals.
-  - This repo’s `connectors/` directory is for curated examples.
-  - Existing staging users can migrate with a step-by-step cutover playbook.
+  - `docs/connector-mode-file-pull.md`
+  - `docs/connector-provider-file.md`
+  in relevant rules (`runtime_and_api`, `connector_contract`, `governance_and_quality`, `docs_site`).

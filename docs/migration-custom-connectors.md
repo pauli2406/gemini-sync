@@ -8,7 +8,9 @@ repository.
 
 1. API, Ops, and Studio connector discovery now supports `CONNECTORS_DIR`.
 2. This repo keeps curated examples under `connectors/`.
-3. CI now blocks non-allowlisted connector file changes in `connectors/`.
+3. CI enforces:
+   - allowlist drift check (`check_connector_examples_allowlist_drift.py`)
+   - examples-only change guard (`check_connector_examples_only.py`)
 4. Studio PR proposals should target a dedicated connector-config repository via `GITHUB_REPO`.
 
 ## Migration Goal
@@ -17,9 +19,23 @@ Move custom connector profiles to a separate connector-config repository (or an
 external connectors directory) without changing connector schema or runtime
 behavior.
 
-## Step 1: Inventory Custom Connector Files
+## Preflight (Required)
 
-Run this from the runtime repo root:
+Run from this runtime repo root:
+
+```bash
+python scripts/check_connector_examples_allowlist_drift.py
+python scripts/check_connector_examples_only.py --changed-file connectors/examples-allowlist.txt
+python scripts/validate_connectors.py
+```
+
+Expected:
+
+1. allowlist drift check passes with empty `missing_in_allowlist` and `stale_allowlist_entries`.
+2. examples-only guard passes for allowlist file touch.
+3. connector schema validation passes.
+
+## Step 1: Inventory Custom Connector Files
 
 ```bash
 python - <<'PY'
@@ -43,6 +59,11 @@ if not custom:
     print("- (none)")
 PY
 ```
+
+Expected:
+
+1. Output lists only use-case-specific connector files under `Custom connectors to migrate`.
+2. Curated examples (from allowlist) are not listed.
 
 ## Step 2: Create Connector-Config Repository Layout
 
@@ -83,6 +104,11 @@ for source in sorted(Path("connectors").glob("*.yaml")):
 PY
 ```
 
+Expected:
+
+1. Each migrated connector is copied once.
+2. No curated examples are copied.
+
 ## Step 4: Point Runtime Discovery to External Connectors
 
 Set environment variables in staging deployment:
@@ -96,7 +122,7 @@ Notes:
 1. `gemini-sync-bridge run --connector <path>` already accepts explicit file paths.
 2. Studio proposal payload paths remain `connectors/<connector-id>.yaml`, which aligns with the new connector-config repo structure.
 
-## Step 5: Validate in Staging
+## Step 5: Staging Verification Checklist
 
 Validate at least one flow in each surface:
 
@@ -105,6 +131,20 @@ Validate at least one flow in each surface:
 3. Manual run path resolves migrated connector definitions.
 4. Studio proposal creates PRs in the connector-config repo.
 
+Recommended verification commands:
+
+```bash
+curl -s http://localhost:8080/v1/studio/catalog | jq '.items | length'
+curl -s http://localhost:8080/v1/ops/connectors/<connector_id> | jq '.connector_id'
+gemini-sync-bridge run --connector /srv/gemini-sync-connectors/connectors/<connector_id>.yaml
+```
+
+Expected:
+
+1. Studio returns items from external connector directory.
+2. Ops connector detail resolves migrated connector IDs.
+3. Manual run succeeds for migrated connector path.
+
 ## Step 6: Clean Runtime Repo Connector Folder
 
 After staging verification:
@@ -112,6 +152,13 @@ After staging verification:
 1. Remove migrated custom connectors from this runtime repo.
 2. Keep only curated examples listed in `connectors/examples-allowlist.txt`.
 3. Keep future environment-specific connector edits in the connector-config repo.
+
+Post-cleanup local checks:
+
+```bash
+python scripts/check_connector_examples_allowlist_drift.py
+python scripts/check_connector_examples_only.py --changed-file connectors/examples-allowlist.txt
+```
 
 ## Rollback
 
@@ -128,5 +175,7 @@ If issues appear after cutover:
 `CONNECTORS_DIR` path is incorrect or not mounted in runtime environment.
 2. Studio PR goes to wrong repo:
 `GITHUB_REPO` is still set to runtime repo instead of connector-config repo.
-3. CI fails with examples-only connector guard:
+3. CI fails with allowlist drift:
+curated examples in `connectors/*.yaml` and `connectors/examples-allowlist.txt` are out of sync.
+4. CI fails with examples-only connector guard:
 custom connector edits are still being made under this repo `connectors/` folder.
