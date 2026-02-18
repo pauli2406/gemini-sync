@@ -7,10 +7,22 @@ import styles from './index.module.css';
 
 const entryPoints = [
   {
+    title: 'Start Here',
+    description:
+      'Choose the fastest path: first local run, staging migration, connector authoring, or operations.',
+    to: '/docs/start-here',
+  },
+  {
     title: 'Local Getting Started',
     description:
       'Run a full local setup with Docker Postgres, seeded source data, and a successful first connector run.',
     to: '/docs/getting-started-local',
+  },
+  {
+    title: 'Migration Checklist',
+    description:
+      'Move custom connectors out of this runtime repo with a staged, command-driven cutover and rollback plan.',
+    to: '/docs/migration-custom-connectors',
   },
   {
     title: 'Quickstart CLI Playbook',
@@ -48,18 +60,18 @@ export default function Home(): ReactNode {
         <section className={styles.hero}>
           <p className={styles.kicker}>Gemini Sync Bridge</p>
           <Heading as="h1" className={styles.title}>
-            Documentation For Connector Reliability At Scale
+            Docs For Building, Migrating, And Operating Connectors
           </Heading>
           <p className={styles.subtitle}>
             Build, operate, and evolve connectors from on-prem systems to Gemini Enterprise with
             one canonical playbook.
           </p>
           <div className={styles.heroActions}>
-            <Link className="button button--primary button--lg" to="/docs/getting-started-local">
-              Start Local Setup
+            <Link className="button button--primary button--lg" to="/docs/start-here">
+              Open Start Here
             </Link>
-            <Link className="button button--secondary button--lg" to="/docs/discovery-engine-cli-playbook">
-              Open CLI Playbook
+            <Link className="button button--secondary button--lg" to="/docs/migration-custom-connectors">
+              Open Migration Guide
             </Link>
           </div>
         </section>

@@ -61,6 +61,7 @@ Agentic development is governed by `AGENTS.md` and roadmap outcomes are tracked 
 ## Connector Storage Model
 
 - Keep this repository focused on runtime/tooling and sample connectors.
+- Canonical in-repo samples are defined in `connectors/examples-allowlist.txt`.
 - Store user-specific connectors in a separate config repository or external directory.
 - Set `CONNECTORS_DIR` so API/Ops/Studio discover connectors from that external location.
 - Keep Studio PR automation pointed at the connector-config repository via `GITHUB_REPO`.
@@ -80,6 +81,8 @@ gemini-sync-bridge run --connector /opt/gemini-sync/connectors/hr-employees.yaml
 
 ## Getting Started Guides
 
+- Role-based entry hub (local setup, migration, authoring, operations):
+  `docs/start-here.md`
 - Full local setup (Docker Postgres + sample source data + first successful run):
   `docs/getting-started-local.mdx`
 - Full end-to-end GCP onboarding (datastore + IAM + import verification):
@@ -133,6 +136,7 @@ Automated deploy workflow:
 
 Use the full onboarding guide for first-time setup:
 
+- `docs/start-here.md`
 - `docs/getting-started-local.mdx`
 
 Fast path (after first-time setup):
@@ -158,6 +162,7 @@ Optional local governance gates:
 ```bash
 python scripts/check_tdd_guardrails.py
 python scripts/check_docs_drift.py
+python scripts/check_connector_examples_allowlist_drift.py
 python scripts/check_connector_examples_only.py
 python scripts/check_openapi_drift.py
 python scripts/check_connector_reference_drift.py
@@ -202,6 +207,7 @@ Notes:
 ## CI Checks
 
 - Connector schema validation
+- Connector examples allowlist drift gate (`python scripts/check_connector_examples_allowlist_drift.py`)
 - Connector examples-only guard (`python scripts/check_connector_examples_only.py`)
 - Pytest suite
 - Ruff linting
@@ -221,6 +227,7 @@ Notes:
 - Canonical runtime command: `gemini-sync-bridge run --connector connectors/hr-employees.yaml`
 - Canonical API command: `gemini-sync-bridge serve --host 0.0.0.0 --port 8080`
 - Governance gate commands: `python scripts/check_tdd_guardrails.py` and `python scripts/check_docs_drift.py`
+- Connector example inventory gate: `python scripts/check_connector_examples_allowlist_drift.py`
 - OpenAPI drift gate command: `python scripts/check_openapi_drift.py`
 
 ## License

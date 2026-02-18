@@ -1,0 +1,8 @@
+id: connector-examples-allowlist-drift-gate
+name: Connector examples allowlist drift gate
+description: Ensures connector allowlist gate fails on inventory drift between connectors and allowlist.
+critical: false
+pytest_selector: tests/test_connector_examples_allowlist_drift.py
+expected_behavior:
+  - Gate passes when allowlist exactly matches connectors/*.yaml inventory.
+  - Gate fails for missing allowlist entries, stale entries, duplicates, or invalid paths.

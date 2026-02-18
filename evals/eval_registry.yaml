@@ -53,6 +53,9 @@ scenarios:
   - id: connector-reference-drift-gate
     path: evals/scenarios/connector-reference-drift-gate.yaml
     critical: false
+  - id: connector-examples-allowlist-drift-gate
+    path: evals/scenarios/connector-examples-allowlist-drift-gate.yaml
+    critical: false
   - id: file-pull-csv-contract
     path: evals/scenarios/file-pull-csv-contract.yaml
     critical: false

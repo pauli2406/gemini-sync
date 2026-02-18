@@ -4,20 +4,20 @@ const sidebars: SidebarsConfig = {
   docsSidebar: [
     {
       type: 'category',
-      label: 'Getting Started',
+      label: 'Start Here',
       items: [
+        'start-here',
         'getting-started-local',
         'migration-custom-connectors',
         'discovery-engine-cli-playbook',
-        'connector-studio',
-        'troubleshooting',
       ],
     },
     {
       type: 'category',
-      label: 'Connector Authoring',
+      label: 'Build Connectors',
       items: [
         'connector-authoring',
+        'connector-studio',
         'connector-mode-sql-pull',
         'connector-mode-rest-pull',
         'connector-mode-rest-push',
@@ -34,18 +34,18 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Operations',
-      items: ['operations-runbook', 'architecture'],
+      label: 'Migrate & Operate',
+      items: [
+        'operations-runbook',
+        'architecture',
+        'troubleshooting',
+        'reliability-phase',
+      ],
     },
     {
       type: 'category',
-      label: 'API Reference',
-      items: ['api-reference'],
-    },
-    {
-      type: 'category',
-      label: 'Governance & Quality',
-      items: ['roadmap', 'reliability-phase', 'load-testing', 'splunk-dashboard-queries'],
+      label: 'API & Governance',
+      items: ['api-reference', 'roadmap', 'load-testing', 'splunk-dashboard-queries'],
     },
   ],
 };
