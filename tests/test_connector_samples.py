@@ -58,3 +58,31 @@ def test_oracle_employees_sample_connector_sql_contract() -> None:
 
     reconciliation = connector["spec"]["reconciliation"]
     assert reconciliation["deletePolicy"] == "auto_delete_missing"
+
+
+def test_hr_file_csv_sample_connector_contract() -> None:
+    connector = _load_connector("connectors/hr-file-csv.yaml")
+    assert connector["metadata"]["name"] == "hr-file-csv"
+    assert connector["spec"]["mode"] == "file_pull"
+
+    source = connector["spec"]["source"]
+    assert source["type"] == "file"
+    assert source["path"] == "./runtime/sources/hr"
+    assert source["glob"] == "*.csv"
+    assert source["format"] == "csv"
+    assert source["csv"]["documentMode"] == "row"
+    assert source["csv"]["delimiter"] == ","
+    assert source["csv"]["hasHeader"] is True
+    assert source["csv"]["encoding"] == "utf-8"
+
+    mapping = connector["spec"]["mapping"]
+    assert mapping["idField"] == "employee_id"
+    assert mapping["titleField"] == "full_name"
+    assert "file_name" in mapping["metadataFields"]
+
+    output = connector["spec"]["output"]
+    assert output["bucket"].startswith("file://")
+    assert output["prefix"] == "hr-file-csv"
+
+    reconciliation = connector["spec"]["reconciliation"]
+    assert reconciliation["deletePolicy"] == "auto_delete_missing"

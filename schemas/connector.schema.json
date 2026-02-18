@@ -26,22 +26,44 @@
       "properties": {
         "mode": {
           "type": "string",
-          "enum": ["sql_pull", "rest_pull", "rest_push"]
+          "enum": ["sql_pull", "rest_pull", "rest_push", "file_pull"]
         },
         "schedule": {"type": ["string", "null"]},
         "source": {
           "type": "object",
-          "required": ["type", "secretRef"],
+          "required": ["type"],
           "additionalProperties": false,
           "properties": {
             "type": {
               "type": "string",
-              "enum": ["postgres", "mssql", "mysql", "oracle", "http"]
+              "enum": ["postgres", "mssql", "mysql", "oracle", "http", "file"]
             },
             "secretRef": {"type": "string", "minLength": 1},
             "query": {"type": ["string", "null"]},
             "watermarkField": {"type": ["string", "null"]},
             "url": {"type": ["string", "null"]},
+            "path": {"type": ["string", "null"]},
+            "glob": {"type": ["string", "null"]},
+            "format": {"type": ["string", "null"], "enum": ["csv", null]},
+            "csv": {
+              "type": ["object", "null"],
+              "additionalProperties": false,
+              "properties": {
+                "documentMode": {
+                  "type": "string",
+                  "enum": ["row", "file"],
+                  "default": "row"
+                },
+                "delimiter": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1,
+                  "default": ","
+                },
+                "hasHeader": {"type": "boolean", "default": true},
+                "encoding": {"type": "string", "default": "utf-8"}
+              }
+            },
             "method": {"type": "string"},
             "payload": {"type": ["object", "null"]},
             "paginationCursorField": {"type": ["string", "null"]},
@@ -134,7 +156,7 @@
         {
           "if": {
             "properties": {
-              "mode": {"enum": ["sql_pull", "rest_pull"]}
+              "mode": {"enum": ["sql_pull", "rest_pull", "file_pull"]}
             }
           },
           "then": {
@@ -155,7 +177,7 @@
                     "enum": ["postgres", "mssql", "mysql", "oracle"]
                   }
                 },
-                "required": ["query"]
+                "required": ["query", "secretRef"]
               }
             }
           }
@@ -172,7 +194,7 @@
                 "properties": {
                   "type": {"const": "http"}
                 },
-                "required": ["url"]
+                "required": ["url", "secretRef"]
               }
             }
           }
@@ -188,7 +210,26 @@
               "source": {
                 "properties": {
                   "type": {"const": "http"}
-                }
+                },
+                "required": ["secretRef"]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {"const": "file_pull"}
+            }
+          },
+          "then": {
+            "properties": {
+              "source": {
+                "properties": {
+                  "type": {"const": "file"},
+                  "format": {"const": "csv"}
+                },
+                "required": ["path", "glob", "format", "csv"]
               }
             }
           }

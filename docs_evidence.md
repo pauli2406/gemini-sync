@@ -1,26 +1,40 @@
 # Docs Evidence
 
-## Updated Documentation
+## Updated Docs
 
-- `README.md`
-- `docs/architecture.md`
-- `docs/connector-mode-rest-pull.md`
-- `docs/connector-provider-http.md`
-- `docs/troubleshooting.md`
-- `schemas/connector.docs-meta.yaml`
-- `docs/connector-field-reference.md` (generated)
+- New:
+  - `docs/connector-mode-file-pull.md`
+  - `docs/connector-provider-file.md`
+- Updated:
+  - `README.md`
+  - `docs/connector-authoring.md`
+  - `docs/connector-studio.md`
+  - `docs/architecture.md`
+  - `docs/discovery-engine-cli-playbook.md`
+  - `docs/connector-provider-http.md`
+  - `docs/connector-provider-postgres.md`
+  - `docs/connector-provider-mysql.md`
+  - `docs/connector-provider-mssql.md`
+  - `docs/connector-provider-oracle.md`
+  - `docs/connector-provider-future.md`
+  - `docs/roadmap.md`
+  - `website/sidebars.ts`
+  - `schemas/connector.docs-meta.yaml`
+  - `docs/connector-field-reference.md` (regenerated)
 
-## Why Docs Were Required
+## Why These Docs Were Required
 
-- `gemini_sync_bridge/**` and `schemas/**` changed (`runtime_and_api` + `connector_contract` rules in `docs/doc_sync_map.yaml`).
-- `evals/scenarios/**` changed (`governance_and_quality` rule).
-- Updated docs now cover:
-  - OAuth client-credentials contract for `rest_pull`.
-  - Studio OAuth configuration behavior.
-  - Token refresh and 401 retry behavior.
-  - Troubleshooting for OAuth token endpoint and payload errors.
+- Runtime contract changed under `gemini_sync_bridge/**` and `schemas/**`:
+  - required `runtime_and_api` and `connector_contract` docs coverage.
+- Connector/eval updates changed `connectors/**` and `evals/**`:
+  - required contract/governance docs coverage.
+- Website sidebar changed under `website/**`:
+  - required docs-site navigation sync.
 
-## Generation Step
+## Key Documentation Outcomes
 
-- Ran: `./.venv/bin/python scripts/export_connector_reference.py`
-- Output updated: `docs/connector-field-reference.md`
+- Added complete authoring guidance for `file_pull` mode and `file` provider.
+- Documented CSV `documentMode=row|file` behavior and synthetic mapping fields.
+- Documented compact checkpoint format (`v/rw/fc/lm/fh`) and compatibility behavior.
+- Updated connector hub/navigation to include new mode/provider pages.
+- Kept generated connector field reference aligned with schema/docs-meta changes.

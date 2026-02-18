@@ -31,6 +31,7 @@
               <option value="sql_pull">SQL Pull</option>
               <option value="rest_pull">REST Pull</option>
               <option value="rest_push">REST Push</option>
+              <option value="file_pull">File Pull</option>
             </select>
           </label>
           <label>Schedule (cron) <input id="draft-schedule" type="text" value="*/30 * * * *" /></label>
@@ -46,6 +47,7 @@
               <option value="mysql">mysql</option>
               <option value="oracle">oracle</option>
               <option value="http">http</option>
+              <option value="file">file</option>
             </select>
           </label>
           <label>Secret Ref <input id="draft-secret-ref" type="text" value="source-secret" /></label>
@@ -55,6 +57,33 @@
           <label data-visible-modes="rest_pull">Source URL
             <input id="draft-source-url" type="text" value="https://source.example/api/items" />
           </label>
+          <label data-visible-modes="file_pull">Source Path (directory)
+            <input id="draft-source-path" type="text" value="./data" />
+          </label>
+          <label data-visible-modes="file_pull">Source Glob
+            <input id="draft-source-glob" type="text" value="*.csv" />
+          </label>
+          <label data-visible-modes="file_pull">Source Format
+            <select id="draft-source-format">
+              <option value="csv">csv</option>
+            </select>
+          </label>
+          <label data-visible-modes="file_pull">CSV Document Mode
+            <select id="draft-source-csv-document-mode">
+              <option value="row">row</option>
+              <option value="file">file</option>
+            </select>
+          </label>
+          <label data-visible-modes="file_pull">CSV Delimiter
+            <input id="draft-source-csv-delimiter" type="text" value="," />
+          </label>
+          <label data-visible-modes="file_pull">
+            <input id="draft-source-csv-has-header" type="checkbox" checked />
+            CSV Has Header
+          </label>
+          <label data-visible-modes="file_pull">CSV Encoding
+            <input id="draft-source-csv-encoding" type="text" value="utf-8" />
+          </label>
           <label data-visible-modes="rest_pull">HTTP Method
             <select id="draft-source-method">
               <option value="GET">GET</option>
@@ -63,7 +92,7 @@
               <option value="PATCH">PATCH</option>
             </select>
           </label>
-          <label data-visible-modes="sql_pull rest_pull">Watermark Field
+          <label data-visible-modes="sql_pull rest_pull file_pull">Watermark Field
             <input id="draft-source-watermark" type="text" value="updated_at" />
           </label>
           <label data-visible-modes="rest_pull">Payload JSON

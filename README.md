@@ -7,10 +7,11 @@ Agentic development is governed by `AGENTS.md` and roadmap outcomes are tracked 
 ## What v1 Includes
 
 - Connector definitions in Git (`connectors/*.yaml`) validated by JSON Schema.
-- Python runtime with three connector modes:
+- Python runtime with four connector modes:
   - `sql_pull`
   - `rest_pull`
   - `rest_push`
+  - `file_pull`
 - `rest_pull` authentication supports:
   - static bearer token from `spec.source.secretRef`
   - OAuth client credentials (`spec.source.oauth`) with token refresh and 401 retry
@@ -70,6 +71,7 @@ Agentic development is governed by `AGENTS.md` and roadmap outcomes are tracked 
 - SQL Pull: `docs/connector-mode-sql-pull.md`
 - REST Pull: `docs/connector-mode-rest-pull.md`
 - REST Push: `docs/connector-mode-rest-push.md`
+- File Pull: `docs/connector-mode-file-pull.md`
 - Field reference (generated): `docs/connector-field-reference.md`
 - Providers:
   - `docs/connector-provider-postgres.md`
@@ -77,6 +79,7 @@ Agentic development is governed by `AGENTS.md` and roadmap outcomes are tracked 
   - `docs/connector-provider-mssql.md`
   - `docs/connector-provider-oracle.md`
   - `docs/connector-provider-http.md`
+  - `docs/connector-provider-file.md`
   - `docs/connector-provider-future.md`
 
 ## Hosted Documentation

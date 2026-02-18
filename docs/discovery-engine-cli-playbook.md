@@ -4,7 +4,7 @@ Use this runbook to onboard any new connector/data store pair end-to-end using C
 
 ## Scope
 
-- Source systems: SQL (`sql_pull`) or REST (`rest_pull`/`rest_push`).
+- Source systems: SQL (`sql_pull`), REST (`rest_pull`/`rest_push`), or local files (`file_pull`).
 - Cloud handoff: GCS.
 - Ingestion target: Discovery Engine data store in Gemini Enterprise.
 
@@ -115,6 +115,23 @@ spec:
 ```
 
 If you need incremental SQL (`WHERE updated_at > :watermark`), do not use full-delete reconciliation.
+
+For file-based CSV connectors, configure local file source fields:
+
+```yaml
+spec:
+  mode: file_pull
+  source:
+    type: file
+    path: ./runtime/sources/hr
+    glob: "*.csv"
+    format: csv
+    csv:
+      documentMode: row
+      delimiter: ","
+      hasHeader: true
+      encoding: utf-8
+```
 
 ## 7) Configure Runtime DB vs Source DB Separately
 

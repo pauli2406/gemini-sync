@@ -31,6 +31,41 @@ def _valid_rest_draft(name: str = "api-kb") -> dict:
     }
 
 
+def _valid_file_draft(name: str = "api-file") -> dict:
+    return {
+        "metadata": {"name": name},
+        "spec": {
+            "mode": "file_pull",
+            "source": {
+                "type": "file",
+                "path": "./runtime/sources/hr",
+                "glob": "*.csv",
+                "format": "csv",
+                "watermarkField": "updated_at",
+                "csv": {
+                    "documentMode": "row",
+                    "delimiter": ",",
+                    "hasHeader": True,
+                    "encoding": "utf-8",
+                },
+            },
+            "mapping": {
+                "idField": "employee_id",
+                "titleField": "full_name",
+                "contentTemplate": "{{ full_name }}",
+            },
+            "output": {
+                "bucket": "file://./local-bucket",
+                "prefix": name,
+                "format": "ndjson",
+            },
+            "gemini": {"projectId": "p", "location": "global", "dataStoreId": "ds"},
+            "reconciliation": {"deletePolicy": "auto_delete_missing"},
+        },
+        "schedule": {"cron": "*/30 * * * *", "enabled": True},
+    }
+
+
 def test_studio_catalog_endpoint_returns_items(client) -> None:
     response = client.get("/v1/studio/catalog")
     assert response.status_code == 200
@@ -69,6 +104,12 @@ def test_studio_validate_endpoint_returns_valid_payload(client) -> None:
     }
 
     response = client.post("/v1/studio/connectors/validate", json={"draft": draft})
+    assert response.status_code == 200
+    assert response.json()["valid"] is True
+
+
+def test_studio_validate_endpoint_accepts_file_pull_payload(client) -> None:
+    response = client.post("/v1/studio/connectors/validate", json={"draft": _valid_file_draft()})
     assert response.status_code == 200
     assert response.json()["valid"] is True
 

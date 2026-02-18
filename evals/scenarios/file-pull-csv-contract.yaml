@@ -1,0 +1,10 @@
+id: file-pull-csv-contract
+name: File pull CSV sample connector contract
+description: Ensures the sample file_pull connector keeps CSV source and mapping contract fields.
+critical: false
+pytest_selector: tests/test_connector_samples.py::test_hr_file_csv_sample_connector_contract
+acceptance:
+  - mode remains file_pull with source.type=file.
+  - source.path and source.glob remain set for deterministic discovery.
+  - source.format stays csv with csv parser controls present.
+  - reconciliation policy stays auto_delete_missing.

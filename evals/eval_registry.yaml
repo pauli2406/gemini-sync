@@ -50,3 +50,9 @@ scenarios:
   - id: connector-reference-drift-gate
     path: evals/scenarios/connector-reference-drift-gate.yaml
     critical: false
+  - id: file-pull-csv-contract
+    path: evals/scenarios/file-pull-csv-contract.yaml
+    critical: false
+  - id: studio-file-pull-mode-switch-configurability
+    path: evals/scenarios/studio-file-pull-mode-switch-configurability.yaml
+    critical: false

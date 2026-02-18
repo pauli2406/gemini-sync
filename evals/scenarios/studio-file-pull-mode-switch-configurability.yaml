@@ -1,0 +1,7 @@
+id: studio-file-pull-mode-switch-configurability
+name: Studio file_pull mode switch updates source configuration
+critical: false
+pytest_selector: tests/test_studio_proposal_generation.py::test_edit_file_pull_prunes_rest_source_fields_and_sets_csv_defaults
+acceptance:
+  - Switching a connector draft mode from REST pull to file_pull removes stale REST source fields.
+  - Studio-generated source configuration enforces file source type and csv format defaults.

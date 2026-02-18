@@ -730,3 +730,130 @@ def test_edit_rest_pull_sparse_draft_preserves_existing_oauth_fields() -> None:
         oauth = rendered["spec"]["source"]["oauth"]
         assert oauth["grantType"] == "client_credentials"
         assert oauth["tokenUrl"].endswith("/protocol/openid-connect/token")
+
+
+def test_edit_file_pull_prunes_rest_source_fields_and_sets_csv_defaults() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        connectors_dir = root / "connectors"
+        connectors_dir.mkdir(parents=True)
+        connector_path = connectors_dir / "kb-rest.yaml"
+        connector_path.write_text(
+            yaml.safe_dump(
+                {
+                    "apiVersion": "sync.gemini.io/v1alpha1",
+                    "kind": "Connector",
+                    "metadata": {"name": "kb-rest"},
+                    "spec": {
+                        "mode": "rest_pull",
+                        "schedule": "*/30 * * * *",
+                        "source": {
+                            "type": "http",
+                            "secretRef": "kb-api-token",
+                            "url": "https://kb.local/articles",
+                            "method": "GET",
+                            "payload": {"scope": "internal"},
+                            "paginationCursorField": "cursor",
+                            "paginationNextCursorJsonPath": "paging.next_cursor",
+                            "headers": {"X-Tenant": "internal"},
+                            "oauth": {
+                                "grantType": "client_credentials",
+                                "tokenUrl": (
+                                    "https://auth.local/realms/acme/"
+                                    "protocol/openid-connect/token"
+                                ),
+                                "clientId": "bridge-client",
+                            },
+                        },
+                        "mapping": {
+                            "idField": "article_id",
+                            "titleField": "title",
+                            "contentTemplate": "{{ title }}",
+                        },
+                        "output": {
+                            "bucket": "gs://company-gemini-sync",
+                            "prefix": "kb-rest",
+                            "format": "ndjson",
+                        },
+                        "gemini": {
+                            "projectId": "my-project",
+                            "location": "global",
+                            "dataStoreId": "kb-ds",
+                        },
+                        "reconciliation": {"deletePolicy": "auto_delete_missing"},
+                    },
+                },
+                sort_keys=False,
+            ),
+            encoding="utf-8",
+        )
+
+        helm_values = root / "values.yaml"
+        helm_values.write_text(
+            yaml.safe_dump(
+                {
+                    "scheduleJobs": [
+                        {
+                            "name": "kb-rest",
+                            "schedule": "*/30 * * * *",
+                            "connectorPath": "connectors/kb-rest.yaml",
+                            "enabled": True,
+                        }
+                    ]
+                },
+                sort_keys=False,
+            ),
+            encoding="utf-8",
+        )
+
+        switch_to_file_pull_draft = {
+            "metadata": {"name": "kb-rest"},
+            "spec": {
+                "mode": "file_pull",
+                "source": {
+                    "type": "http",
+                    "path": "./runtime/sources/kb",
+                    "glob": "*.csv",
+                    "format": "csv",
+                },
+                "mapping": {
+                    "idField": "article_id",
+                    "titleField": "title",
+                    "contentTemplate": "{{ title }}",
+                },
+                "output": {
+                    "bucket": "gs://company-gemini-sync",
+                    "prefix": "kb-rest",
+                    "format": "ndjson",
+                },
+                "gemini": {
+                    "projectId": "my-project",
+                    "location": "global",
+                    "dataStoreId": "kb-ds",
+                },
+                "reconciliation": {"deletePolicy": "auto_delete_missing"},
+            },
+            "schedule": {"cron": "*/30 * * * *", "enabled": True},
+        }
+
+        changes = build_proposed_file_changes(
+            action="edit",
+            connector_id="kb-rest",
+            draft=switch_to_file_pull_draft,
+            connectors_dir=connectors_dir,
+            helm_values_path=helm_values,
+        )
+
+        rendered = yaml.safe_load(changes["connectors/kb-rest.yaml"])
+        source = rendered["spec"]["source"]
+        assert rendered["spec"]["mode"] == "file_pull"
+        assert source["type"] == "file"
+        assert source["format"] == "csv"
+        assert source["csv"]["documentMode"] == "row"
+        assert "url" not in source
+        assert "method" not in source
+        assert "payload" not in source
+        assert "paginationCursorField" not in source
+        assert "paginationNextCursorJsonPath" not in source
+        assert "headers" not in source
+        assert "oauth" not in source

@@ -9,7 +9,11 @@ from datetime import UTC, datetime
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from gemini_sync_bridge.adapters.extractors import extract_rest_rows, extract_sql_rows
+from gemini_sync_bridge.adapters.extractors import (
+    extract_file_rows,
+    extract_rest_rows,
+    extract_sql_rows,
+)
 from gemini_sync_bridge.connector_loader import load_connector_config
 from gemini_sync_bridge.db import SessionLocal
 from gemini_sync_bridge.models import ConnectorCheckpoint, PushBatch, PushEvent, RunState
@@ -154,6 +158,21 @@ def _split_push_docs(
     return upserts, deletes
 
 
+def _ensure_unique_doc_ids(docs: list[CanonicalDocument]) -> None:
+    seen: set[str] = set()
+    duplicates: set[str] = set()
+    for doc in docs:
+        if doc.doc_id in seen:
+            duplicates.add(doc.doc_id)
+        seen.add(doc.doc_id)
+    if duplicates:
+        ordered = sorted(duplicates)
+        raise ValueError(
+            "Duplicate document IDs detected in file_pull extraction: "
+            f"{', '.join(ordered)}"
+        )
+
+
 def run_connector(connector_path: str, push_run_id: str | None = None) -> PipelineResult:
     settings = get_settings()
     connector = load_connector_config(connector_path)
@@ -188,6 +207,17 @@ def run_connector(connector_path: str, push_run_id: str | None = None) -> Pipeli
                     connector.spec.source.watermark_field,
                     pulled.rows,
                 )
+                watermark = pulled.watermark
+                push_batch_id = None
+            elif connector.spec.mode == "file_pull":
+                pulled = extract_file_rows(connector.spec.source, checkpoint)
+                docs = normalize_records(
+                    connector_id,
+                    connector.spec.mapping,
+                    connector.spec.source.watermark_field,
+                    pulled.rows,
+                )
+                _ensure_unique_doc_ids(docs)
                 watermark = pulled.watermark
                 push_batch_id = None
             elif connector.spec.mode == "rest_push":

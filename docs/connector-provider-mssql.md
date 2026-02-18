@@ -53,6 +53,7 @@ source:
 - `sql_pull`: supported and primary use case.
 - `rest_pull`: not applicable.
 - `rest_push`: not applicable.
+- `file_pull`: not applicable.
 
 ## Common connection errors and fixes
 

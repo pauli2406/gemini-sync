@@ -115,6 +115,12 @@
   var loadedDraft = null;
   var DEFAULT_SQL_QUERY = "SELECT * FROM source_table WHERE updated_at > :watermark";
   var DEFAULT_REST_URL = "https://source.example/api/items";
+  var DEFAULT_FILE_PATH = "./data";
+  var DEFAULT_FILE_GLOB = "*.csv";
+  var DEFAULT_FILE_FORMAT = "csv";
+  var DEFAULT_CSV_DOCUMENT_MODE = "row";
+  var DEFAULT_CSV_DELIMITER = ",";
+  var DEFAULT_CSV_ENCODING = "utf-8";
   var DEFAULT_WATERMARK_FIELD = "updated_at";
   var DEFAULT_REST_AUTH_MODE = "static_bearer";
   var DEFAULT_OAUTH_TOKEN_URL =
@@ -122,6 +128,7 @@
   var DEFAULT_OAUTH_CLIENT_AUTH_METHOD = "client_secret_post";
   var SQL_SOURCE_TYPES = ["postgres", "mssql", "mysql", "oracle"];
   var REST_SOURCE_TYPES = ["http"];
+  var FILE_SOURCE_TYPES = ["file"];
 
   function input(id) {
     return document.getElementById(id);
@@ -221,6 +228,10 @@
       setSelectOptions("draft-source-type", SQL_SOURCE_TYPES, input("draft-source-type").value);
       return;
     }
+    if (modeValue === "file_pull") {
+      setSelectOptions("draft-source-type", FILE_SOURCE_TYPES, "file");
+      return;
+    }
     setSelectOptions("draft-source-type", REST_SOURCE_TYPES, "http");
   }
 
@@ -231,8 +242,26 @@
     if (modeValue === "rest_pull" && !input("draft-source-url").value.trim()) {
       input("draft-source-url").value = DEFAULT_REST_URL;
     }
+    if (modeValue === "file_pull" && !input("draft-source-path").value.trim()) {
+      input("draft-source-path").value = DEFAULT_FILE_PATH;
+    }
+    if (modeValue === "file_pull" && !input("draft-source-glob").value.trim()) {
+      input("draft-source-glob").value = DEFAULT_FILE_GLOB;
+    }
+    if (modeValue === "file_pull" && !input("draft-source-format").value) {
+      input("draft-source-format").value = DEFAULT_FILE_FORMAT;
+    }
+    if (modeValue === "file_pull" && !input("draft-source-csv-document-mode").value) {
+      input("draft-source-csv-document-mode").value = DEFAULT_CSV_DOCUMENT_MODE;
+    }
+    if (modeValue === "file_pull" && !input("draft-source-csv-delimiter").value.trim()) {
+      input("draft-source-csv-delimiter").value = DEFAULT_CSV_DELIMITER;
+    }
+    if (modeValue === "file_pull" && !input("draft-source-csv-encoding").value.trim()) {
+      input("draft-source-csv-encoding").value = DEFAULT_CSV_ENCODING;
+    }
     if (
-      (modeValue === "sql_pull" || modeValue === "rest_pull") &&
+      (modeValue === "sql_pull" || modeValue === "rest_pull" || modeValue === "file_pull") &&
       !input("draft-source-watermark").value.trim()
     ) {
       input("draft-source-watermark").value = DEFAULT_WATERMARK_FIELD;
@@ -292,14 +321,34 @@
     var authMode = source.oauth ? "oauth_client_credentials" : DEFAULT_REST_AUTH_MODE;
     input("draft-source-auth-mode").value = authMode;
     refreshModeState(draft.spec.mode, authMode);
+    var sourceTypeChoices = REST_SOURCE_TYPES;
+    if (draft.spec.mode === "sql_pull") {
+      sourceTypeChoices = SQL_SOURCE_TYPES;
+    } else if (draft.spec.mode === "file_pull") {
+      sourceTypeChoices = FILE_SOURCE_TYPES;
+    }
     setSelectOptions(
       "draft-source-type",
-      draft.spec.mode === "sql_pull" ? SQL_SOURCE_TYPES : REST_SOURCE_TYPES,
+      sourceTypeChoices,
       source.type
     );
     input("draft-secret-ref").value = valueOrEmpty(source.secretRef);
     input("draft-source-query").value = valueOrEmpty(source.query || DEFAULT_SQL_QUERY);
     input("draft-source-url").value = valueOrEmpty(source.url || DEFAULT_REST_URL);
+    input("draft-source-path").value = valueOrEmpty(source.path || DEFAULT_FILE_PATH);
+    input("draft-source-glob").value = valueOrEmpty(source.glob || DEFAULT_FILE_GLOB);
+    input("draft-source-format").value = valueOrEmpty(source.format || DEFAULT_FILE_FORMAT);
+    input("draft-source-csv-document-mode").value = valueOrEmpty(
+      (source.csv || {}).documentMode || DEFAULT_CSV_DOCUMENT_MODE
+    );
+    input("draft-source-csv-delimiter").value = valueOrEmpty(
+      (source.csv || {}).delimiter || DEFAULT_CSV_DELIMITER
+    );
+    input("draft-source-csv-has-header").checked =
+      typeof (source.csv || {}).hasHeader === "boolean" ? source.csv.hasHeader : true;
+    input("draft-source-csv-encoding").value = valueOrEmpty(
+      (source.csv || {}).encoding || DEFAULT_CSV_ENCODING
+    );
     input("draft-source-method").value = valueOrEmpty(source.method || "GET");
     input("draft-source-watermark").value = valueOrEmpty(
       source.watermarkField || DEFAULT_WATERMARK_FIELD
@@ -345,14 +394,22 @@
   function buildSourceConfig(modeValue) {
     var source = {
       type: input("draft-source-type").value,
-      secretRef: input("draft-secret-ref").value.trim(),
     };
+    var secretRef = input("draft-secret-ref").value.trim();
+    if (secretRef) {
+      source.secretRef = secretRef;
+    }
 
     if (modeValue === "sql_pull") {
+      source.type = input("draft-source-type").value;
       source.query = input("draft-source-query").value.trim() || DEFAULT_SQL_QUERY;
       source.watermarkField =
         input("draft-source-watermark").value.trim() || DEFAULT_WATERMARK_FIELD;
       source.url = null;
+      source.path = null;
+      source.glob = null;
+      source.format = null;
+      source.csv = null;
       source.method = "GET";
       source.payload = null;
       source.paginationCursorField = null;
@@ -362,6 +419,7 @@
     }
 
     if (modeValue === "rest_pull") {
+      source.type = "http";
       var payload = parseJsonField("draft-source-payload", "Payload JSON", null);
       if (payload !== null && (typeof payload !== "object" || Array.isArray(payload))) {
         throw new Error("Payload JSON must be an object or null");
@@ -378,6 +436,10 @@
 
       source.query = null;
       source.url = input("draft-source-url").value.trim() || DEFAULT_REST_URL;
+      source.path = null;
+      source.glob = null;
+      source.format = null;
+      source.csv = null;
       source.method = input("draft-source-method").value || "GET";
       source.watermarkField =
         input("draft-source-watermark").value.trim() || DEFAULT_WATERMARK_FIELD;
@@ -414,8 +476,40 @@
       return source;
     }
 
+    if (modeValue === "file_pull") {
+      var delimiter = input("draft-source-csv-delimiter").value;
+      if (!delimiter || delimiter.length !== 1) {
+        throw new Error("CSV delimiter must be exactly one character");
+      }
+      source.type = "file";
+      source.query = null;
+      source.url = null;
+      source.path = input("draft-source-path").value.trim() || DEFAULT_FILE_PATH;
+      source.glob = input("draft-source-glob").value.trim() || DEFAULT_FILE_GLOB;
+      source.format = input("draft-source-format").value || DEFAULT_FILE_FORMAT;
+      source.csv = {
+        documentMode:
+          input("draft-source-csv-document-mode").value || DEFAULT_CSV_DOCUMENT_MODE,
+        delimiter: delimiter,
+        hasHeader: input("draft-source-csv-has-header").checked,
+        encoding: input("draft-source-csv-encoding").value.trim() || DEFAULT_CSV_ENCODING,
+      };
+      source.method = "GET";
+      source.watermarkField =
+        input("draft-source-watermark").value.trim() || DEFAULT_WATERMARK_FIELD;
+      source.payload = null;
+      source.paginationCursorField = null;
+      source.paginationNextCursorJsonPath = null;
+      source.headers = {};
+      return source;
+    }
+
     source.type = "http";
     source.query = null;
+    source.path = null;
+    source.glob = null;
+    source.format = null;
+    source.csv = null;
     source.watermarkField = null;
     source.url = null;
     source.method = "GET";

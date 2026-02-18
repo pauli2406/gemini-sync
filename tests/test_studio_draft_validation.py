@@ -103,6 +103,45 @@ def _valid_rest_oauth_draft() -> dict:
     }
 
 
+def _valid_file_pull_draft() -> dict:
+    return {
+        "metadata": {"name": "studio-file"},
+        "spec": {
+            "mode": "file_pull",
+            "source": {
+                "type": "file",
+                "path": "./runtime/sources/hr",
+                "glob": "*.csv",
+                "format": "csv",
+                "watermarkField": "updated_at",
+                "csv": {
+                    "documentMode": "row",
+                    "delimiter": ",",
+                    "hasHeader": True,
+                    "encoding": "utf-8",
+                },
+            },
+            "mapping": {
+                "idField": "employee_id",
+                "titleField": "full_name",
+                "contentTemplate": "{{ full_name }}",
+            },
+            "output": {
+                "bucket": "file://./local-bucket",
+                "prefix": "studio-file",
+                "format": "ndjson",
+            },
+            "gemini": {
+                "projectId": "my-project",
+                "location": "global",
+                "dataStoreId": "file-ds",
+            },
+            "reconciliation": {"deletePolicy": "auto_delete_missing"},
+        },
+        "schedule": {"cron": "*/30 * * * *", "enabled": True},
+    }
+
+
 def test_validate_connector_draft_accepts_rest_pull_oauth_client_credentials() -> None:
     response = validate_connector_draft(_valid_rest_oauth_draft())
     assert response.valid is True
@@ -151,6 +190,21 @@ def test_validate_connector_draft_rejects_rest_push_with_non_http_source_type() 
         "secretRef": "oracle-push-secret",
     }
     draft["schedule"]["cron"] = "*/5 * * * *"
+
+    response = validate_connector_draft(draft)
+    assert response.valid is False
+    assert response.errors
+
+
+def test_validate_connector_draft_accepts_file_pull() -> None:
+    response = validate_connector_draft(_valid_file_pull_draft())
+    assert response.valid is True
+    assert response.errors == []
+
+
+def test_validate_connector_draft_rejects_file_pull_missing_path() -> None:
+    draft = _valid_file_pull_draft()
+    draft["spec"]["source"].pop("path")
 
     response = validate_connector_draft(draft)
     assert response.valid is False
