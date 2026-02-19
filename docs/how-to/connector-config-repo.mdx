@@ -1,0 +1,211 @@
+---
+title: Connector Config Repository
+---
+
+This guide covers the full setup and day-to-day use of a dedicated **connector-config repository** — a separate git repo that holds your connector YAML files, tests, and evals, keeping them independent from the `gemini-sync-bridge` runtime repo.
+
+If you currently store connectors inside the runtime repo and want to move them out, see [Migrate Custom Connectors](/docs/how-to/migrate-custom-connectors) first, then return here for the ongoing workflow.
+
+## Why a Separate Repo?
+
+| Runtime repo (`gemini-sync`) | Connector-config repo (`my-connectors`) |
+|---|---|
+| Runtime code, tests, and docs | Connector YAML files only |
+| Owned by platform team | Owned by each product/domain team |
+| Versioned and released as a service | Versioned independently per connector |
+| Contains only curated examples | Contains all environment-specific connectors |
+
+This separation keeps environment credentials, connector schedules, and data store IDs out of the runtime codebase while allowing each team to own and evolve their connectors via pull requests.
+
+## Recommended Directory Layout
+
+```
+my-connectors/
+├── .agent/
+│   └── tasks/
+│       └── <connector-id>/       ← handoff artifacts per connector
+│           ├── task.md
+│           ├── changes.md
+│           ├── risk_tier.md
+│           ├── test_evidence.md
+│           └── docs_evidence.md
+├── connectors/
+│   ├── hr-employees.yaml         ← one file per connector
+│   └── process-catalog.yaml
+├── evals/
+│   ├── eval_registry.yaml
+│   └── scenarios/
+│       ├── hr-employees-contract.yaml
+│       └── process-catalog-contract.yaml
+├── scripts/
+│   └── run_scenario_evals.py
+├── tests/
+│   └── test_connector_samples.py
+└── pyproject.toml
+```
+
+`connectors/` is the only required directory. All other directories are part of the recommended governance structure that mirrors the runtime repo's EDD + TDD workflow.
+
+## Setup
+
+### 1. Install the runtime as a dependency
+
+Your connector-config repo needs `gemini-sync-bridge` installed to run the validation scripts and tests. Add it to `pyproject.toml`:
+
+```toml
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "my-connectors"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "gemini-sync-bridge",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "jsonschema",
+    "pyyaml",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+```
+
+Then install:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -e .[dev]
+```
+
+### 2. Copy the schema
+
+The validator script in the runtime repo reads from `schemas/connector.schema.json`. The simplest approach is to run validation from the runtime repo, pointing it at your external connectors directory (see [Validation](#validation) below). If you need self-contained validation, copy or symlink the schema into your repo.
+
+## Running a Connector
+
+### Single connector run
+
+```bash
+gemini-sync-bridge run --connector /path/to/my-connectors/connectors/hr-employees.yaml
+```
+
+`--connector` requires a path to a **single YAML file**. Both absolute and relative paths (relative to your current working directory) are accepted.
+
+On Windows, use forward slashes to avoid escape issues:
+
+```bash
+gemini-sync-bridge run --connector C:/dev/tools/gemini-sync-connectors/connectors/hr-employees.yaml
+```
+
+### Running multiple connectors
+
+There is no multi-connector flag. Loop at the shell level:
+
+```bash
+# bash / macOS / Linux
+for f in /path/to/my-connectors/connectors/*.yaml; do
+  gemini-sync-bridge run --connector "$f"
+done
+```
+
+```powershell
+# PowerShell (Windows)
+Get-ChildItem C:\dev\tools\gemini-sync-connectors\connectors\*.yaml | ForEach-Object {
+    gemini-sync-bridge run --connector $_.FullName
+}
+```
+
+### Pointing Ops UI and Studio at your connectors
+
+`CONNECTORS_DIR` controls which directory the API server (`gemini-sync-bridge serve`) scans for connectors to display in the Ops UI and Studio. Set it before starting the server:
+
+```bash
+export CONNECTORS_DIR=/path/to/my-connectors/connectors
+gemini-sync-bridge serve --host 0.0.0.0 --port 8080
+```
+
+On Windows in a `.env` file, use forward slashes:
+
+```
+CONNECTORS_DIR=C:/dev/tools/gemini-sync-connectors/connectors
+```
+
+Important behaviour of `CONNECTORS_DIR`:
+
+- Scans the **top-level only** — subdirectories are not traversed.
+- Accepts only `.yaml` files at that level.
+- Only one directory is supported (no colon-separated list).
+- Default when unset: `connectors/` relative to the process working directory.
+- **Only affects `serve`** (Ops UI + Studio discovery). The `run` command always requires an explicit `--connector` path regardless of `CONNECTORS_DIR`.
+
+## `source.path` for `file_pull` Connectors
+
+For `file_pull` connectors, `source.path` is resolved relative to the **working directory of the process at the time you run `gemini-sync-bridge`** — not relative to the connector YAML file itself.
+
+Example: if you run `gemini-sync-bridge` from `C:\dev\tools\gemini-sync` and your connector YAML contains:
+
+```yaml
+source:
+  path: ./runtime/sources/signavio
+```
+
+The resolved path will be `C:\dev\tools\gemini-sync\runtime\sources\signavio`, regardless of where the YAML file lives.
+
+**Recommendation:** Use absolute paths in `source.path` when the connector YAML is stored in an external repo:
+
+```yaml
+source:
+  type: file
+  path: C:/data/signavio-exports
+  glob: "*.csv"
+  format: csv
+```
+
+This makes the connector portable across invocation contexts and avoids silent resolution mismatches.
+
+## Validation
+
+Run the runtime repo's schema validator against your external connectors directory using the `--connectors` flag:
+
+```bash
+# From the runtime repo root
+python scripts/validate_connectors.py --connectors /path/to/my-connectors/connectors
+```
+
+Full preflight check before any PR:
+
+```bash
+python scripts/validate_connectors.py --connectors /path/to/my-connectors/connectors
+pytest /path/to/my-connectors/tests/
+```
+
+## Agent Task Artifacts
+
+For every connector PR, place the required handoff artifacts under `.agent/tasks/<connector-id>/` in your connector-config repo:
+
+```
+.agent/tasks/hr-employees/
+├── task.md
+├── changes.md
+├── risk_tier.md
+├── test_evidence.md
+└── docs_evidence.md
+```
+
+Use the templates from the runtime repo's `.agent/templates/` as the starting point. Risk tier for connector YAML changes is **Tier 1** by default (see `.agent/risk_policy.yaml` in the runtime repo).
+
+## Related
+
+- [Connector Authoring](/docs/how-to/connector-authoring) — field-by-field YAML authoring guide
+- [Migrate Custom Connectors](/docs/how-to/migrate-custom-connectors) — moving connectors out of the runtime repo
+- [File Pull](/docs/how-to/connectors/file-pull) — `file_pull` mode reference including `source.path` behaviour
+- [Connector Fields](/docs/reference/connector-fields) — full field reference table
+- [Connector Model](/docs/concepts/connector-model) — conceptual overview of the storage model

@@ -7,8 +7,24 @@ Connector files are declarative contracts validated by schema.
 ## Storage Model
 
 - This runtime repo contains code plus curated examples.
-- Environment-specific connectors should live in a connector-config repo.
-- API/Ops/Studio discovery uses `CONNECTORS_DIR`.
+- Environment-specific connectors should live in a dedicated connector-config repo.
+- The API server, Ops UI, and Studio discover connectors from the directory set by `CONNECTORS_DIR`.
+
+### `CONNECTORS_DIR`
+
+The `CONNECTORS_DIR` environment variable tells the API server where to look for connector YAML files:
+
+- Scans the top level of the configured directory only — subdirectories are not traversed.
+- Accepts `.yaml` files at that level.
+- Supports one directory (no colon-separated list).
+- Default when unset: `connectors/` relative to the process working directory.
+- **Only affects the `serve` command** (Ops UI + Studio). The `run` command always requires an explicit `--connector <path>` argument.
+
+### `--connector` flag
+
+The `gemini-sync-bridge run --connector <path>` flag accepts a path to a **single YAML file**. Both absolute paths and paths relative to the current working directory are supported. Passing a directory raises an error.
+
+For a complete guide to setting up and using a connector-config repo, see [Connector Config Repository](/docs/how-to/connector-config-repo).
 
 ## Contract Shape
 

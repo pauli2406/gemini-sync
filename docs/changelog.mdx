@@ -12,3 +12,4 @@ This project tracks notable changes to runtime, docs, and governance.
 - `file_pull` connector: added `normalizeHeaders` CSV option — converts headers with special characters (spaces, slashes, parentheses, accented letters) to safe `snake_case` identifiers for use in Jinja templates.
 - `file_pull` connector: added `cleanErrors` CSV option — replaces cell values starting with `#ERROR` with empty strings.
 - `file_pull` connector: CSV parser now handles multi-line quoted fields correctly (RFC 4180-compliant parsing via `io.StringIO`).
+- Added `docs/how-to/connector-config-repo.mdx` documenting the external connector repository workflow: directory layout, setup, `CONNECTORS_DIR` semantics, `--connector` path behaviour, `source.path` resolution for `file_pull`, validation, and agent task artifacts.

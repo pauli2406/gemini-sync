@@ -42,6 +42,14 @@ Grant the bridge service account and Discovery service agent access to the artif
 gemini-sync-bridge run --connector connectors/hr-employees.yaml
 ```
 
+If your connector YAML lives in a separate connector-config repo, pass the absolute path instead:
+
+```bash
+gemini-sync-bridge run --connector /path/to/my-connectors/connectors/hr-employees.yaml
+```
+
+The `--connector` flag accepts any path to a single YAML file — the connector does not need to be inside the runtime repo. See [Connector Config Repository](/docs/how-to/connector-config-repo) for the full external repo setup guide.
+
 Verify:
 
 - Artifact files in `gs://<bucket>/connectors/<connector-id>/runs/<run-id>/`

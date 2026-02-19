@@ -95,3 +95,4 @@ spec:
 - `documentMode` supports `row` and `file`.
 - `normalizeHeaders` and `cleanErrors` default to `false` and are independent — either or both can be enabled.
 - When `normalizeHeaders` is enabled, use the normalized (snake_case) header names in `contentTemplate` and `idField`/`titleField`.
+- **`source.path` is resolved relative to the working directory of the process**, not relative to the connector YAML file. When the YAML lives in an external connector-config repo, use an absolute path (e.g. `path: C:/data/signavio-exports`) to avoid silent resolution mismatches. See [Connector Config Repository](/docs/how-to/connector-config-repo) for details.
