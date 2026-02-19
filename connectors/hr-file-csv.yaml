@@ -16,6 +16,8 @@ spec:
       delimiter: ","
       hasHeader: true
       encoding: utf-8
+      # normalizeHeaders: true  # enable when headers contain spaces, slashes, parentheses, or non-ASCII characters
+      # cleanErrors: true        # enable to replace #ERROR cell values (e.g. from formula failures) with empty strings
   mapping:
     idField: employee_id
     titleField: full_name

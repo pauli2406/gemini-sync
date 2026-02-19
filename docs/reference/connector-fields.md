@@ -26,6 +26,8 @@
 | `spec.source.csv.delimiter` | `string` | No | `,` | - | `file_pull` | CSV delimiter character. | `,` | Must be exactly one character. |
 | `spec.source.csv.hasHeader` | `boolean` | No | `true` | - | `file_pull` | Whether first CSV row is treated as header. | `true` | - |
 | `spec.source.csv.encoding` | `string` | No | `utf-8` | - | `file_pull` | Text encoding used to decode CSV files. | `utf-8` | - |
+| `spec.source.csv.normalizeHeaders` | `boolean` | No | `false` | - | `file_pull` | Normalize CSV headers to safe snake_case identifiers (strips accents, replaces special characters). | `true` | Enable when CSV headers contain spaces, slashes, parentheses, or non-ASCII characters that are incompatible with Jinja template variable syntax. |
+| `spec.source.csv.cleanErrors` | `boolean` | No | `false` | - | `file_pull` | Replace cell values starting with #ERROR with empty strings. | `true` | Useful for cleaning export artifacts from tools like Signavio or Excel that emit #ERROR values on formula failures. |
 | `spec.source.method` | `string` | No | - | - | `rest_pull` | HTTP method used for REST pull requests. | `GET` | GET is default; POST can be used for query APIs. |
 | `spec.source.payload` | `object | null` | No | - | - | `rest_pull` | Optional JSON body for REST requests. | `{includeArchived: false}` | Sent as request JSON. |
 | `spec.source.paginationCursorField` | `string | null` | No | - | - | `rest_pull` | Query parameter key used for cursor pagination requests. | `cursor` | - |

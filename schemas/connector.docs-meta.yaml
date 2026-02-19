@@ -115,6 +115,18 @@ fields:
       - file_pull
     description: Text encoding used to decode CSV files.
     example: utf-8
+  spec.source.csv.normalizeHeaders:
+    modes:
+      - file_pull
+    description: Normalize CSV headers to safe snake_case identifiers (strips accents, replaces special characters).
+    example: "true"
+    operationalNotes: Enable when CSV headers contain spaces, slashes, parentheses, or non-ASCII characters that are incompatible with Jinja template variable syntax.
+  spec.source.csv.cleanErrors:
+    modes:
+      - file_pull
+    description: "Replace cell values starting with #ERROR with empty strings."
+    example: "true"
+    operationalNotes: "Useful for cleaning export artifacts from tools like Signavio or Excel that emit #ERROR values on formula failures."
   spec.source.url:
     modes:
       - rest_pull

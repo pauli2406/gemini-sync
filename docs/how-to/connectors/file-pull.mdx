@@ -41,8 +41,57 @@ spec:
     deletePolicy: auto_delete_missing
 ```
 
+## CSV Header and Value Cleanup
+
+When source CSV files contain headers with special characters (spaces, slashes, parentheses, accented letters) or cells with error values from upstream tools, use the `normalizeHeaders` and `cleanErrors` options:
+
+```yaml
+apiVersion: sync.gemini.io/v1alpha1
+kind: Connector
+metadata:
+  name: process-catalog-csv
+spec:
+  mode: file_pull
+  schedule: "0 6 * * *"
+  source:
+    type: file
+    path: ./runtime/sources/process-catalog
+    glob: "*.csv"
+    format: csv
+    watermarkField: updated_at
+    csv:
+      documentMode: row
+      delimiter: ";"
+      hasHeader: true
+      encoding: utf-8
+      normalizeHeaders: true
+      cleanErrors: true
+  mapping:
+    idField: process_id
+    titleField: process_name
+    contentTemplate: "{{ process_name }} {{ owner }} {{ scope }}"
+  output:
+    bucket: file://./local-bucket
+    prefix: process-catalog-csv
+    format: ndjson
+  gemini:
+    projectId: my-project
+    location: global
+    dataStoreId: process-catalog-ds
+  reconciliation:
+    deletePolicy: auto_delete_missing
+```
+
+**`normalizeHeaders: true`** — Converts every CSV column header to a safe `snake_case` identifier before mapping. Accented characters are decomposed to their ASCII base (e.g. `ü` → `u`), and any run of non-alphanumeric characters is replaced with `_`. This ensures headers are valid Jinja template variables regardless of the source format.
+
+**`cleanErrors: true`** — Replaces any cell value that starts with `#ERROR` with an empty string. Useful when upstream CSV exports contain formula error markers that would otherwise be written verbatim into document content.
+
+**Multi-line quoted fields** — The CSV parser uses RFC 4180-compliant parsing, so cell values containing embedded newlines (quoted fields spanning multiple lines) are handled correctly.
+
 ## Notes
 
 - `glob` is non-recursive in v1.
 - Only CSV format is supported in v1.
 - `documentMode` supports `row` and `file`.
+- `normalizeHeaders` and `cleanErrors` default to `false` and are independent — either or both can be enabled.
+- When `normalizeHeaders` is enabled, use the normalized (snake_case) header names in `contentTemplate` and `idField`/`titleField`.

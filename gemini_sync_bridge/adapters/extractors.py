@@ -2,8 +2,11 @@ from __future__ import annotations
 
 import csv
 import hashlib
+import io
 import json
+import re
 import time
+import unicodedata
 from collections.abc import Iterable
 from datetime import UTC, datetime
 from pathlib import Path
@@ -64,9 +67,7 @@ def extract_sql_rows(source: SourceConfig, current_watermark: str | None) -> Pul
     try:
         engine = create_engine(dsn, future=True)
     except Exception as exc:  # noqa: BLE001
-        raise ExtractionError(
-            f"Invalid DSN for SQL source type '{source.type}': {exc}"
-        ) from exc
+        raise ExtractionError(f"Invalid DSN for SQL source type '{source.type}': {exc}") from exc
     params = {"watermark": current_watermark}
 
     try:
@@ -132,21 +133,68 @@ def _resolve_source_path(path_value: str) -> Path:
     return source_path
 
 
+def _normalize_header(name: str) -> str:
+    """Normalize a CSV header to a safe snake_case identifier.
+
+    Decomposes unicode (ä→a, ö→o, ü→u, ß→ss via NFKD), replaces
+    non-alphanumeric runs with ``_``, strips edges, and lowercases.
+    """
+    nfkd = unicodedata.normalize("NFKD", name)
+    ascii_str = nfkd.encode("ascii", "ignore").decode("ascii")
+    cleaned = re.sub(r"[^a-zA-Z0-9]+", "_", ascii_str)
+    return cleaned.strip("_").lower()
+
+
+_ERROR_PATTERN = re.compile(r"^#ERROR\b")
+
+
+def _clean_cell_value(value: str) -> str:
+    """Replace ``#ERROR …`` export artifacts with an empty string."""
+    if _ERROR_PATTERN.match(value):
+        return ""
+    return value
+
+
 def _csv_rows_from_content(
     *,
     content: str,
     has_header: bool,
     delimiter: str,
+    normalize_headers: bool = False,
+    clean_errors: bool = False,
 ) -> list[dict[str, Any]]:
     if has_header:
-        reader = csv.DictReader(content.splitlines(), delimiter=delimiter)
+        reader = csv.DictReader(io.StringIO(content), delimiter=delimiter)
+        if normalize_headers:
+            header_map: dict[str, str] | None = None
+            rows: list[dict[str, Any]] = []
+            for raw_row in reader:
+                if header_map is None:
+                    header_map = {k: _normalize_header(k) for k in raw_row}
+                row = {header_map[k]: v for k, v in raw_row.items()}
+                if clean_errors:
+                    row = {
+                        k: _clean_cell_value(v) if isinstance(v, str) else v for k, v in row.items()
+                    }
+                rows.append(row)
+            return rows
+        if clean_errors:
+            return [
+                {k: _clean_cell_value(v) if isinstance(v, str) else v for k, v in dict(row).items()}
+                for row in reader
+            ]
         return [dict(row) for row in reader]
 
-    reader = csv.reader(content.splitlines(), delimiter=delimiter)
-    rows: list[dict[str, Any]] = []
-    for row in reader:
-        rows.append({f"column_{idx + 1}": value for idx, value in enumerate(row)})
-    return rows
+    reader_raw = csv.reader(io.StringIO(content), delimiter=delimiter)
+    rows_out: list[dict[str, Any]] = []
+    for row in reader_raw:
+        mapped = {f"column_{idx + 1}": value for idx, value in enumerate(row)}
+        if clean_errors:
+            mapped = {
+                k: _clean_cell_value(v) if isinstance(v, str) else v for k, v in mapped.items()
+            }
+        rows_out.append(mapped)
+    return rows_out
 
 
 def _base_file_fields(path: Path, mtime: str, size_bytes: int) -> dict[str, Any]:
@@ -204,6 +252,8 @@ def extract_file_rows(source: SourceConfig, current_watermark: str | None) -> Pu
             content=content,
             has_header=source.csv.has_header,
             delimiter=source.csv.delimiter,
+            normalize_headers=source.csv.normalize_headers,
+            clean_errors=source.csv.clean_errors,
         )
         file_fields = _base_file_fields(file_path, mtime_iso, size_bytes)
 

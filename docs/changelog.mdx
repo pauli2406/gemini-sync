@@ -9,3 +9,6 @@ This project tracks notable changes to runtime, docs, and governance.
 - Hard-cutover docs rewrite to Diataxis structure.
 - Docusaurus navigation updated to separate tutorials/how-to/concepts/reference.
 - Connector field reference moved to `docs/reference/connector-fields.md`.
+- `file_pull` connector: added `normalizeHeaders` CSV option — converts headers with special characters (spaces, slashes, parentheses, accented letters) to safe `snake_case` identifiers for use in Jinja templates.
+- `file_pull` connector: added `cleanErrors` CSV option — replaces cell values starting with `#ERROR` with empty strings.
+- `file_pull` connector: CSV parser now handles multi-line quoted fields correctly (RFC 4180-compliant parsing via `io.StringIO`).

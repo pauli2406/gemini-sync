@@ -12,3 +12,16 @@ Required source fields:
 - optional `csv` parser block
 
 `glob` is non-recursive in v1.
+
+## CSV Parser Options
+
+The optional `csv` block supports the following fields:
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `documentMode` | string | `row` | Emit one record per CSV row (`row`) or one record per file (`file`). |
+| `delimiter` | string | `,` | Column delimiter character. Must be exactly one character. |
+| `hasHeader` | boolean | `true` | Whether the first row is treated as the header row. |
+| `encoding` | string | `utf-8` | Text encoding used to decode the file. |
+| `normalizeHeaders` | boolean | `false` | Convert headers to `snake_case`. Strips accents and replaces non-alphanumeric runs with `_`. Enable when headers contain spaces, slashes, parentheses, or non-ASCII characters. |
+| `cleanErrors` | boolean | `false` | Replace any cell value starting with `#ERROR` with an empty string. |

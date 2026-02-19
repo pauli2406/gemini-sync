@@ -38,6 +38,8 @@ class CsvConfig(BaseModel):
     delimiter: str = ","
     has_header: bool = Field(default=True, alias="hasHeader")
     encoding: str = "utf-8"
+    normalize_headers: bool = Field(default=False, alias="normalizeHeaders")
+    clean_errors: bool = Field(default=False, alias="cleanErrors")
 
     @field_validator("delimiter")
     @classmethod

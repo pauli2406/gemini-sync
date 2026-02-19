@@ -18,6 +18,8 @@ def _file_source(
     has_header: bool = True,
     encoding: str = "utf-8",
     watermark_field: str | None = "updated_at",
+    normalize_headers: bool = False,
+    clean_errors: bool = False,
 ) -> SourceConfig:
     return SourceConfig(
         type="file",
@@ -30,6 +32,8 @@ def _file_source(
             "delimiter": delimiter,
             "hasHeader": has_header,
             "encoding": encoding,
+            "normalizeHeaders": normalize_headers,
+            "cleanErrors": clean_errors,
         },
     )
 
@@ -259,3 +263,110 @@ def test_file_checkpoint_builder_enforces_compact_length_limit() -> None:
 def test_resolve_source_path_normalizes_relative_paths() -> None:
     resolved = extractors._resolve_source_path("./runtime/sources/hr")  # noqa: SLF001
     assert resolved.is_absolute()
+
+
+def test_extract_file_rows_preserves_multiline_quoted_fields(tmp_path) -> None:
+    """Multi-line values inside quoted CSV fields must be preserved, not stripped."""
+    source_dir = tmp_path / "source"
+    source_dir.mkdir()
+    csv_content = 'id,title,children\n1,Root,"Child A\nChild B\nChild C"\n2,Leaf,""\n'
+    (source_dir / "procs.csv").write_text(csv_content, encoding="utf-8")
+
+    result = extractors.extract_file_rows(
+        _file_source(path=str(source_dir), watermark_field=None), None
+    )
+
+    assert len(result.rows) == 2
+    assert result.rows[0]["children"] == "Child A\nChild B\nChild C"
+    assert result.rows[1]["children"] == ""
+
+
+def test_extract_file_rows_normalize_headers_converts_to_snake_case(tmp_path) -> None:
+    source_dir = tmp_path / "source"
+    source_dir.mkdir()
+    csv_content = (
+        "Element-Typ;Verantwortliche/r;Geltungsbereich(e);Technische ID\nBPMN;Max;Global;abc123\n"
+    )
+    (source_dir / "data.csv").write_text(csv_content, encoding="utf-8")
+
+    result = extractors.extract_file_rows(
+        _file_source(
+            path=str(source_dir),
+            delimiter=";",
+            normalize_headers=True,
+            watermark_field=None,
+        ),
+        None,
+    )
+
+    assert len(result.rows) == 1
+    row = result.rows[0]
+    assert row["element_typ"] == "BPMN"
+    assert row["verantwortliche_r"] == "Max"
+    assert row["geltungsbereich_e"] == "Global"
+    assert row["technische_id"] == "abc123"
+    # Original headers must not appear
+    assert "Element-Typ" not in row
+    assert "Verantwortliche/r" not in row
+
+
+def test_extract_file_rows_clean_errors_replaces_error_values(tmp_path) -> None:
+    source_dir = tmp_path / "source"
+    source_dir.mkdir()
+    csv_content = "id,name,systems\n1,Process A,#ERROR ('name')\n2,Process B,SAP\n"
+    (source_dir / "data.csv").write_text(csv_content, encoding="utf-8")
+
+    result = extractors.extract_file_rows(
+        _file_source(
+            path=str(source_dir),
+            clean_errors=True,
+            watermark_field=None,
+        ),
+        None,
+    )
+
+    assert len(result.rows) == 2
+    assert result.rows[0]["systems"] == ""
+    assert result.rows[1]["systems"] == "SAP"
+
+
+def test_extract_file_rows_normalize_headers_and_clean_errors_combined(tmp_path) -> None:
+    source_dir = tmp_path / "source"
+    source_dir.mkdir()
+    csv_content = "IT Systeme;Risiken\n#ERROR ('name');valid\n"
+    (source_dir / "data.csv").write_text(csv_content, encoding="utf-8")
+
+    result = extractors.extract_file_rows(
+        _file_source(
+            path=str(source_dir),
+            delimiter=";",
+            normalize_headers=True,
+            clean_errors=True,
+            watermark_field=None,
+        ),
+        None,
+    )
+
+    assert len(result.rows) == 1
+    row = result.rows[0]
+    assert row["it_systeme"] == ""
+    assert row["risiken"] == "valid"
+
+
+def test_extract_file_rows_multiline_with_semicolon_delimiter(tmp_path) -> None:
+    """Semicolon-delimited CSV with multi-line quoted fields (Signavio-like)."""
+    source_dir = tmp_path / "source"
+    source_dir.mkdir()
+    csv_content = (
+        'id;titel;kinder\nabc;"Root Process";"Child 1\nChild 2\nChild 3"\ndef;"Leaf Process";""\n'
+    )
+    (source_dir / "procs.csv").write_text(csv_content, encoding="utf-8")
+
+    result = extractors.extract_file_rows(
+        _file_source(path=str(source_dir), delimiter=";", watermark_field=None),
+        None,
+    )
+
+    assert len(result.rows) == 2
+    assert result.rows[0]["kinder"] == "Child 1\nChild 2\nChild 3"
+    assert result.rows[0]["titel"] == "Root Process"

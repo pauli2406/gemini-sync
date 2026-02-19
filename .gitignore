@@ -16,3 +16,7 @@ build/
 dist/
 *.egg-info/
 .kestra/
+.idea/
+runtime/sources/
+example/
+dev.db

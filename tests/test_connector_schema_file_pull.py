@@ -88,3 +88,13 @@ def test_connector_schema_rejects_invalid_csv_delimiter_length() -> None:
 
     assert errors
     assert any("is too long" in err.message or "maxLength" in err.message for err in errors)
+
+
+def test_connector_schema_accepts_csv_normalize_headers_and_clean_errors() -> None:
+    payload = _valid_file_pull_connector()
+    payload["spec"]["source"]["csv"]["normalizeHeaders"] = True
+    payload["spec"]["source"]["csv"]["cleanErrors"] = True
+
+    validator = jsonschema.Draft202012Validator(_schema())
+    errors = list(validator.iter_errors(payload))
+    assert errors == []

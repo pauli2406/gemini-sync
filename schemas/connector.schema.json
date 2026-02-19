@@ -61,7 +61,9 @@
                   "default": ","
                 },
                 "hasHeader": {"type": "boolean", "default": true},
-                "encoding": {"type": "string", "default": "utf-8"}
+                "encoding": {"type": "string", "default": "utf-8"},
+                "normalizeHeaders": {"type": "boolean", "default": false},
+                "cleanErrors": {"type": "boolean", "default": false}
               }
             },
             "method": {"type": "string"},
