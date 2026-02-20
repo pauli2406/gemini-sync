@@ -13,10 +13,18 @@ Every connector must define:
 - `metadata.name`
 - `spec.mode`
 - `spec.source`
-- `spec.mapping`
 - `spec.output`
-- `spec.gemini`
 - `spec.reconciliation`
+
+`spec.mapping` is required for `spec.output.format: ndjson`. For raw SQL CSV exports (`spec.output.format: csv`), mapping can be omitted.
+
+`spec.gemini` is required by default. You can omit it only when `spec.ingestion.enabled: false` (bucket-only mode).
+
+## Optional Delivery Controls
+
+- `spec.ingestion.enabled: false` disables Discovery Engine ingestion and keeps runs bucket-only.
+- `spec.output.format: csv` exports raw SQL rows directly to a CSV file in object storage (sql_pull only).
+- `spec.output.publishLatestAlias: true` overwrites stable files under `connectors/<prefix>/latest/` while preserving historical `runs/<run_id>/` artifacts.
 
 ## Choose Mode First
 

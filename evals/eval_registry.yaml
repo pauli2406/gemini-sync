@@ -65,3 +65,6 @@ scenarios:
   - id: external-connector-directory-support
     path: evals/scenarios/external-connector-directory-support.yaml
     critical: false
+  - id: bucket-only-sql-pull-contract
+    path: evals/scenarios/bucket-only-sql-pull-contract.yaml
+    critical: false

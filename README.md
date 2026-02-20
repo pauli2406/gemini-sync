@@ -9,6 +9,9 @@ It combines connector execution, reconciliation, artifact publishing, ingestion,
 - Build connectors once, run them in a repeatable contract-driven runtime.
 - Support four connector modes: `sql_pull`, `rest_pull`, `rest_push`, `file_pull`.
 - Preserve deterministic upsert/delete behavior through canonical NDJSON artifacts.
+- Run connectors in bucket-only mode via `spec.ingestion.enabled: false` when no datastore target exists yet.
+- Export raw SQL rows as CSV via `spec.output.format: csv` (sql_pull, bucket-only).
+- Optionally publish stable latest aliases (`spec.output.publishLatestAlias: true`) for downstream consumers.
 - Operate with clear visibility in Ops UI and guided authoring in Connector Studio.
 - Enforce governance gates (tests, docs drift, security, evals) before merge.
 

@@ -11,6 +11,7 @@ DeletePolicy = Literal["auto_delete_missing", "soft_delete_only", "never_delete"
 OAuthClientAuthMethod = Literal["client_secret_post", "client_secret_basic"]
 SourceFormat = Literal["csv"]
 CsvDocumentMode = Literal["row", "file"]
+OutputFormat = Literal["ndjson", "csv"]
 
 
 class Metadata(BaseModel):
@@ -83,13 +84,18 @@ class MappingConfig(BaseModel):
 class OutputConfig(BaseModel):
     bucket: str
     prefix: str
-    format: Literal["ndjson"] = "ndjson"
+    format: OutputFormat = "ndjson"
+    publish_latest_alias: bool = Field(default=False, alias="publishLatestAlias")
 
 
 class GeminiConfig(BaseModel):
     project_id: str = Field(alias="projectId")
     location: str
     data_store_id: str = Field(alias="dataStoreId")
+
+
+class IngestionConfig(BaseModel):
+    enabled: bool = True
 
 
 class ReconciliationConfig(BaseModel):
@@ -100,9 +106,10 @@ class ConnectorSpec(BaseModel):
     mode: Mode
     schedule: str | None = None
     source: SourceConfig
-    mapping: MappingConfig
+    mapping: MappingConfig | None = None
     output: OutputConfig
-    gemini: GeminiConfig
+    gemini: GeminiConfig | None = None
+    ingestion: IngestionConfig = Field(default_factory=IngestionConfig)
     reconciliation: ReconciliationConfig = Field(default_factory=ReconciliationConfig)
 
     @field_validator("schedule")
@@ -154,6 +161,20 @@ class ConnectorSpec(BaseModel):
             if self.source.csv is None:
                 raise ValueError("source.csv is required for file_pull mode")
 
+        if self.ingestion.enabled and self.gemini is None:
+            raise ValueError("spec.gemini is required when spec.ingestion.enabled is true")
+
+        if self.output.format == "ndjson" and self.mapping is None:
+            raise ValueError("spec.mapping is required when spec.output.format is ndjson")
+
+        if self.output.format == "csv":
+            if self.mode != "sql_pull":
+                raise ValueError("spec.output.format=csv is only supported for sql_pull mode")
+            if self.ingestion.enabled:
+                raise ValueError(
+                    "spec.ingestion.enabled must be false when spec.output.format is csv"
+                )
+
         return self
 
 
@@ -186,11 +207,12 @@ class RunManifest(BaseModel):
     started_at: datetime
     completed_at: datetime
     manifest_path: str
-    upserts_path: str
+    upserts_path: str | None = None
     import_upserts_path: str | None = None
-    deletes_path: str
-    upserts_count: int
-    deletes_count: int
+    deletes_path: str | None = None
+    csv_path: str | None = None
+    upserts_count: int = 0
+    deletes_count: int = 0
     watermark: str | None = None
 
 

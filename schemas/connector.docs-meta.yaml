@@ -211,6 +211,7 @@ fields:
   spec.mapping:
     description: Mapping from source row fields to canonical document.
     example: "{idField: employee_id, titleField: full_name, ...}"
+    operationalNotes: Required when spec.output.format is ndjson. Optional for sql_pull CSV exports.
   spec.mapping.idField:
     description: Source field used for unique record key.
     example: employee_id
@@ -239,7 +240,7 @@ fields:
     example: "[department, role]"
   spec.output:
     description: Artifact publishing destination settings.
-    example: "{bucket: gs://company-gemini-sync, prefix: hr-employees, format: ndjson}"
+    example: "{bucket: gs://company-gemini-sync, prefix: hr-employees, format: ndjson, publishLatestAlias: false}"
   spec.output.bucket:
     description: Object store URI prefix for artifacts.
     example: gs://company-gemini-sync
@@ -249,11 +250,16 @@ fields:
     example: hr-employees
   spec.output.format:
     description: Output serialization format.
-    example: ndjson
-    operationalNotes: Only ndjson is supported in v1.
+    example: csv
+    operationalNotes: Use ndjson for canonical document ingestion flows; use csv for raw sql_pull exports to object storage.
+  spec.output.publishLatestAlias:
+    description: Overwrites stable latest alias artifacts under connectors/<prefix>/latest/.
+    example: "true"
+    operationalNotes: Enable when downstream consumers should always read a fixed latest path while historical run artifacts stay preserved.
   spec.gemini:
     description: Gemini/Discovery Engine target data store configuration.
     example: "{projectId: my-project, location: eu, dataStoreId: hr-ds}"
+    operationalNotes: Required unless spec.ingestion.enabled is false.
   spec.gemini.projectId:
     description: GCP project ID containing target data store.
     example: gemini-enterprise-test-487620
@@ -264,6 +270,13 @@ fields:
   spec.gemini.dataStoreId:
     description: Target Discovery Engine data store ID.
     example: hr-ds
+  spec.ingestion:
+    description: Controls whether artifacts are ingested into Discovery Engine after publishing.
+    example: "{enabled: false}"
+  spec.ingestion.enabled:
+    description: Enables or disables Discovery Engine ingestion for this connector.
+    example: "false"
+    operationalNotes: When false, spec.gemini can be omitted and the run is bucket-only. Must be false when spec.output.format is csv.
   spec.reconciliation:
     description: Reconciliation and delete strategy settings.
     example: "{deletePolicy: auto_delete_missing}"

@@ -57,6 +57,10 @@ class GeminiIngestionClient:
         if self.settings.gemini_ingestion_dry_run:
             return
         import_uri = manifest.import_upserts_path or manifest.upserts_path
+        if not import_uri:
+            raise GeminiIngestionError(
+                "Run manifest does not include importable NDJSON paths for Gemini ingestion."
+            )
         if import_uri.startswith("file://"):
             return
 

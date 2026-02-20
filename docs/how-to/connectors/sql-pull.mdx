@@ -52,3 +52,40 @@ See provider references under [/docs/reference/providers/postgres](/docs/referen
 
 - Use snapshot extraction queries when `deletePolicy=auto_delete_missing`.
 - Avoid mixing incremental extraction with auto-delete unless downstream deletes are explicitly controlled.
+
+## Bucket-Only SQL Pull (No Datastore Yet)
+
+When you only want artifacts in GCS, disable ingestion. You can export either canonical NDJSON or raw SQL CSV.
+
+### Option A: Bucket-Only NDJSON
+
+```yaml
+spec:
+  output:
+    bucket: gs://company-gemini-sync
+    prefix: oracle-qn-data-march-2025
+    format: ndjson
+    publishLatestAlias: true
+  ingestion:
+    enabled: false
+```
+
+### Option B: Raw CSV Export (No Mapping)
+
+```yaml
+spec:
+  mode: sql_pull
+  source:
+    type: oracle
+    secretRef: oracle-sample-credentials
+    query: SELECT * FROM pda.QN_DATA
+  output:
+    bucket: gs://company-gemini-sync
+    prefix: oracle-qn-data-raw
+    format: csv
+    publishLatestAlias: true
+  ingestion:
+    enabled: false
+```
+
+For `output.format: csv`, the runtime writes all SQL row fields into `rows.csv` in run and latest paths. Mapping is optional in this mode.

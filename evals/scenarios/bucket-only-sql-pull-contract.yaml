@@ -1,0 +1,9 @@
+id: bucket-only-sql-pull-contract
+name: Bucket-only SQL pull connector contract
+description: Ensures bucket-only SQL csv_export mode skips Gemini ingestion and still advances run state and checkpoints.
+pytest_selector: tests/test_pipeline_bucket_only.py::test_run_connector_bucket_only_skips_gemini_ingestion
+expected_behavior:
+  - Connector can disable ingestion with spec.ingestion.enabled=false and output.format=csv.
+  - SQL rows are published via CSV artifact writer without normalization.
+  - Pipeline does not instantiate Gemini ingestion client for bucket-only mode.
+  - Run succeeds and checkpoint watermark is advanced.

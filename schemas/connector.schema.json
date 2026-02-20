@@ -21,7 +21,7 @@
     },
     "spec": {
       "type": "object",
-      "required": ["mode", "source", "mapping", "output", "gemini", "reconciliation"],
+      "required": ["mode", "source", "output", "reconciliation"],
       "additionalProperties": false,
       "properties": {
         "mode": {
@@ -129,7 +129,8 @@
               "pattern": "^(gs|file)://"
             },
             "prefix": {"type": "string"},
-            "format": {"type": "string", "const": "ndjson"}
+            "format": {"type": "string", "enum": ["ndjson", "csv"]},
+            "publishLatestAlias": {"type": "boolean", "default": false}
           }
         },
         "gemini": {
@@ -140,6 +141,13 @@
             "projectId": {"type": "string"},
             "location": {"type": "string"},
             "dataStoreId": {"type": "string"}
+          }
+        },
+        "ingestion": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {"type": "boolean", "default": true}
           }
         },
         "reconciliation": {
@@ -155,6 +163,61 @@
         }
       },
       "allOf": [
+        {
+          "if": {
+            "properties": {
+              "ingestion": {
+                "properties": {
+                  "enabled": {"const": false}
+                },
+                "required": ["enabled"]
+              }
+            },
+            "required": ["ingestion"]
+          },
+          "else": {
+            "required": ["gemini"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "output": {
+                "properties": {
+                  "format": {"const": "ndjson"}
+                },
+                "required": ["format"]
+              }
+            }
+          },
+          "then": {
+            "required": ["mapping"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "output": {
+                "properties": {
+                  "format": {"const": "csv"}
+                },
+                "required": ["format"]
+              }
+            }
+          },
+          "then": {
+            "required": ["ingestion"],
+            "properties": {
+              "mode": {"const": "sql_pull"},
+              "ingestion": {
+                "required": ["enabled"],
+                "properties": {
+                  "enabled": {"const": false}
+                }
+              }
+            }
+          }
+        },
         {
           "if": {
             "properties": {

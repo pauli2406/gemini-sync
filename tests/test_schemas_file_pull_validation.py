@@ -144,3 +144,138 @@ def test_file_pull_requires_csv_block() -> None:
                 "format": "csv",
             },
         )
+
+
+def test_connector_config_allows_missing_gemini_when_ingestion_disabled() -> None:
+    payload = {
+        "apiVersion": "sync.gemini.io/v1alpha1",
+        "kind": "Connector",
+        "metadata": {"name": "sample"},
+        "spec": {
+            "mode": "sql_pull",
+            "schedule": "*/30 * * * *",
+            "source": {
+                "type": "oracle",
+                "secretRef": "oracle-sample-credentials",
+                "query": "SELECT 1 AS id, 'title' AS title",
+            },
+            "mapping": {
+                "idField": "id",
+                "titleField": "title",
+                "contentTemplate": "{{ title }}",
+            },
+            "output": {
+                "bucket": "gs://sample-bucket",
+                "prefix": "sample",
+                "format": "ndjson",
+                "publishLatestAlias": True,
+            },
+            "ingestion": {"enabled": False},
+            "reconciliation": {"deletePolicy": "auto_delete_missing"},
+        },
+    }
+
+    connector = ConnectorConfig.model_validate(payload)
+    assert connector.spec.gemini is None
+    assert connector.spec.ingestion.enabled is False
+    assert connector.spec.output.publish_latest_alias is True
+
+
+def test_connector_config_requires_gemini_when_ingestion_enabled() -> None:
+    payload = {
+        "apiVersion": "sync.gemini.io/v1alpha1",
+        "kind": "Connector",
+        "metadata": {"name": "sample"},
+        "spec": {
+            "mode": "sql_pull",
+            "schedule": "*/30 * * * *",
+            "source": {
+                "type": "oracle",
+                "secretRef": "oracle-sample-credentials",
+                "query": "SELECT 1 AS id, 'title' AS title",
+            },
+            "mapping": {
+                "idField": "id",
+                "titleField": "title",
+                "contentTemplate": "{{ title }}",
+            },
+            "output": {
+                "bucket": "gs://sample-bucket",
+                "prefix": "sample",
+                "format": "ndjson",
+            },
+            "ingestion": {"enabled": True},
+            "reconciliation": {"deletePolicy": "auto_delete_missing"},
+        },
+    }
+
+    with pytest.raises(
+        ValueError,
+        match="spec.gemini is required when spec.ingestion.enabled is true",
+    ):
+        ConnectorConfig.model_validate(payload)
+
+
+def test_connector_config_allows_sql_pull_csv_export_without_mapping() -> None:
+    payload = {
+        "apiVersion": "sync.gemini.io/v1alpha1",
+        "kind": "Connector",
+        "metadata": {"name": "sample"},
+        "spec": {
+            "mode": "sql_pull",
+            "schedule": "*/30 * * * *",
+            "source": {
+                "type": "oracle",
+                "secretRef": "oracle-sample-credentials",
+                "query": "SELECT 1 AS id, 'title' AS title",
+            },
+            "output": {
+                "bucket": "gs://sample-bucket",
+                "prefix": "sample",
+                "format": "csv",
+                "publishLatestAlias": True,
+            },
+            "ingestion": {"enabled": False},
+            "reconciliation": {"deletePolicy": "auto_delete_missing"},
+        },
+    }
+
+    connector = ConnectorConfig.model_validate(payload)
+    assert connector.spec.mapping is None
+    assert connector.spec.output.format == "csv"
+    assert connector.spec.ingestion.enabled is False
+
+
+def test_connector_config_rejects_sql_pull_csv_export_with_ingestion_enabled() -> None:
+    payload = {
+        "apiVersion": "sync.gemini.io/v1alpha1",
+        "kind": "Connector",
+        "metadata": {"name": "sample"},
+        "spec": {
+            "mode": "sql_pull",
+            "schedule": "*/30 * * * *",
+            "source": {
+                "type": "oracle",
+                "secretRef": "oracle-sample-credentials",
+                "query": "SELECT 1 AS id, 'title' AS title",
+            },
+            "output": {
+                "bucket": "gs://sample-bucket",
+                "prefix": "sample",
+                "format": "csv",
+            },
+            "ingestion": {"enabled": True},
+            "gemini": {
+                "projectId": "my-project",
+                "location": "global",
+                "dataStoreId": "sample-ds",
+            },
+            "reconciliation": {"deletePolicy": "auto_delete_missing"},
+        },
+    }
+
+    with pytest.raises(
+        ValueError,
+        match="spec.ingestion.enabled must be false when spec.output.format is csv",
+    ):
+        ConnectorConfig.model_validate(payload)
