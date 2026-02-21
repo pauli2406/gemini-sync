@@ -14,7 +14,6 @@ const sidebars: SidebarsConfig = {
       items: [
         'how-to/connector-authoring',
         'how-to/connector-studio',
-        'how-to/migrate-custom-connectors',
         'how-to/operate-runs',
         'how-to/troubleshooting',
         'how-to/load-testing',

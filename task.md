@@ -1,35 +1,33 @@
 # Task
 
-- Task ID: stage2-module-hard-cutover
-- Title: Full Python module rename from gemini_sync_bridge to ingest_relay
+- Task ID: docs-remove-migrate-custom-connectors
+- Title: Remove unpublished migration docs and fix Vercel preview workflow
 - Owner Role: planner
-- Risk Tier: tier_3
+- Risk Tier: tier_0
 
 ## Intent
 
-Complete stage 2 of the IngestRelay rename by hard-cutover renaming the Python package directory and namespace from `gemini_sync_bridge` to `ingest_relay`, including imports, packaging metadata, workflow paths, coverage flags, and governance gate patterns.
+Remove the standalone migration guide and all references to it, because version 1 is not published and there are no users who need migration instructions yet. Also fix docs preview/prod deployment workflow to avoid local `vercel build` failures (`spawn sh ENOENT`) in CI.
 
 ## Acceptance Criteria
 
-1. Package directory is renamed to `ingest_relay/` and no active runtime/tests/scripts import `gemini_sync_bridge`.
-2. `pyproject.toml` console script points to `ingest_relay.cli:app` and wheel package/include paths use `ingest_relay/**`.
-3. Uvicorn app path in CLI uses `ingest_relay.api:app`.
-4. CI/docs/workflows use `--cov=ingest_relay` and docs deploy trigger path `ingest_relay/api.py`.
-5. Governance patterns are updated from `gemini_sync_bridge/**` to `ingest_relay/**` in gate/policy mapping files.
-6. Red phase evidence captures expected failure before package move; full gate suite is green after cutover.
-7. Historical `.agent/tasks/*` files remain unchanged.
+1. `docs/how-to/migrate-custom-connectors.mdx` is removed.
+2. No docs navigation or cross-links reference `/docs/how-to/migrate-custom-connectors`.
+3. Docs mapping/index files do not reference the removed page.
+4. Docs site build passes after removal.
+5. Vercel preview/production jobs avoid `vercel build` and deploy successfully via `vercel deploy`.
 
 ## Specialist Role Mapping
 
 1. Planner Agent
-   - Sequenced hard-cutover namespace migration and governed scope (active files only).
+   - Scoped this as a Tier 0 docs-only removal and defined acceptance criteria around link/navigation cleanup.
 2. Implementer Agent
-   - Renamed package directory, updated imports/references, and migrated packaging/workflow paths.
+   - Removed the migration page and updated docs content, sidebars, and doc maps; patched docs deploy workflow commands.
 3. Test/Eval Agent
-   - Updated tests first, captured failing-first import error, then validated green test/eval gates.
+   - Verified no dangling references remain, docs build stays green, and the failing `vercel build` command path is no longer used.
 4. Docs Agent
-   - Updated active docs and references to `ingest_relay` paths and coverage commands.
+   - Updated start pages and related guides to remove migration-specific links.
 5. Security Agent
-   - Re-ran security policy and dependency audit checks after namespace migration.
+   - Confirmed no policy/security surface change from this documentation-only edit.
 6. Release Agent
-   - Maintained Tier 3 classification and verified all required gates for release readiness.
+   - Marked as Tier 0 and ready for normal docs-only review flow.
