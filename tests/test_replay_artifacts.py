@@ -4,8 +4,8 @@ from datetime import UTC, datetime
 
 import pytest
 
-from gemini_sync_bridge.schemas import CanonicalDocument
-from gemini_sync_bridge.services.replay import FaultInjectionError, replay_artifacts
+from ingest_relay.schemas import CanonicalDocument
+from ingest_relay.services.replay import FaultInjectionError, replay_artifacts
 
 
 def _write_ndjson(path, docs: list[CanonicalDocument]) -> None:

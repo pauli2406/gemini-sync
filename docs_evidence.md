@@ -3,24 +3,19 @@
 ## Updated Docs
 
 - `README.md`
+- `CONTRIBUTING.md`
 - `llm.txt`
-- `docs/start-here.mdx`
-- `docs/tutorials/*`
-- `docs/how-to/*`
-- `docs/concepts/*`
-- `docs/reference/*`
-- `docs/contributing/*`
-- `docs/roadmap.mdx`
-- `docs/changelog.mdx`
+- `docs/contributing/testing-ci.mdx`
+- `docs/reference/api-reference.mdx`
 - `docs/doc_sync_map.yaml`
-- `website/sidebars.ts`
-- `website/docusaurus.config.ts`
-- `website/src/pages/index.tsx`
-- `website/src/pages/index.module.css`
+- `runtime/README.md`
+- `test_evidence.md`
+- `task.md`
+- `changes.md`
 
-## Why Required
+## Why these docs were required
 
-- `website/**` changed (docs site mapping rule).
-- `scripts/**` changed for reference export/check defaults.
-- docs IA and public routes changed by design (hard cutover).
-- consistency-required docs changed to new canonical files.
+- Runtime source mapping changed from `gemini_sync_bridge/**` to `ingest_relay/**`, requiring doc-sync mapping updates.
+- Public contributor guidance needed to reflect new coverage command (`--cov=ingest_relay`).
+- API reference source path changed to `ingest_relay/api.py`.
+- Stage-2 handoff artifacts required updated implementation/test/docs evidence aligned to module hard-cutover.

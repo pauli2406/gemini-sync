@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from gemini_sync_bridge.quality_gates import evaluate_tdd_edd_guardrails
+from ingest_relay.quality_gates import evaluate_tdd_edd_guardrails
 
 
 def test_tdd_guardrail_fails_without_test_updates() -> None:
-    result = evaluate_tdd_edd_guardrails(["gemini_sync_bridge/services/pipeline.py"])
+    result = evaluate_tdd_edd_guardrails(["ingest_relay/services/pipeline.py"])
 
     assert not result.passed
     assert any("test updates" in error for error in result.errors)
@@ -13,7 +13,7 @@ def test_tdd_guardrail_fails_without_test_updates() -> None:
 def test_tdd_guardrail_fails_without_eval_updates_for_behavior_change() -> None:
     result = evaluate_tdd_edd_guardrails(
         [
-            "gemini_sync_bridge/services/normalizer.py",
+            "ingest_relay/services/normalizer.py",
             "tests/test_normalizer.py",
         ]
     )
@@ -25,7 +25,7 @@ def test_tdd_guardrail_fails_without_eval_updates_for_behavior_change() -> None:
 def test_tdd_guardrail_passes_with_source_test_and_eval_updates() -> None:
     result = evaluate_tdd_edd_guardrails(
         [
-            "gemini_sync_bridge/services/normalizer.py",
+            "ingest_relay/services/normalizer.py",
             "tests/test_normalizer.py",
             "evals/scenarios/prompt-injection-rest-pull.yaml",
         ]

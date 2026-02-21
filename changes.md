@@ -1,37 +1,38 @@
 # Changes
 
-## Docs Hard-Cutover
+## Files Changed
 
-- Replaced legacy flat docs with Diataxis structure:
-  - `docs/tutorials/**`
-  - `docs/how-to/**`
-  - `docs/concepts/**`
-  - `docs/reference/**`
-  - `docs/contributing/**`
-  - `docs/start-here.mdx`, `docs/roadmap.mdx`, `docs/changelog.mdx`
-- Removed legacy docs files under `docs/*.md(x)` after migration.
+- Package/module hard cutover:
+  - renamed `gemini_sync_bridge/` -> `ingest_relay/`
+  - updated imports and dotted runtime references across runtime, scripts, and tests
+- Packaging/runtime entrypoints:
+  - `pyproject.toml` (`ingest_relay.cli:app`, wheel package/include paths)
+  - `ingest_relay/cli.py` (`uvicorn.run("ingest_relay.api:app", ...)`)
+  - `Dockerfile` (`COPY ingest_relay /app/ingest_relay`)
+- Governance/gate mappings:
+  - `ingest_relay/quality_gates.py`
+  - `.agent/risk_policy.yaml`
+  - `docs/doc_sync_map.yaml`
+- CI/docs workflow and coverage references:
+  - `.github/workflows/ci.yaml`
+  - `.github/workflows/release-canary.yaml`
+  - `.github/workflows/docs-deploy-vercel.yaml`
+  - `.github/pull_request_template.md`
+  - `README.md`, `CONTRIBUTING.md`, `llm.txt`, `docs/contributing/testing-ci.mdx`, `test_evidence.md`
+- Active documentation/code path updates:
+  - `docs/reference/api-reference.mdx`
+  - `runtime/README.md`
+  - `docs_evidence.md`, `task.md`, `changes.md`
 
-## Docusaurus
+## Behavior Changes
 
-- Updated `website/sidebars.ts` to Diataxis categories.
-- Updated `website/docusaurus.config.ts` navbar/footer links.
-- Rewrote `website/src/pages/index.tsx` and `website/src/pages/index.module.css` for new IA entry points.
+- Python import namespace is now `ingest_relay` (hard cutover).
+- CLI package entrypoint now resolves to `ingest_relay.cli:app`.
+- CI coverage target now measures `ingest_relay`.
+- Docs deploy workflow now tracks `ingest_relay/api.py` for OpenAPI/docs-triggered deploys.
 
-## Tooling and Gates
+## Non-Functional Changes
 
-- Updated connector reference script defaults:
-  - `scripts/export_connector_reference.py` default output -> `docs/reference/connector-fields.md`
-  - `scripts/check_connector_reference_drift.py` default target -> `docs/reference/connector-fields.md`
-- Regenerated `docs/reference/connector-fields.md`.
-- Rewrote `docs/doc_sync_map.yaml` for new paths and consistency files/tokens.
-
-## Readme and Agent Guide
-
-- Fully rewrote `README.md` for 2-minute pitch + quickstart + audience split + gate summary.
-- Fully rewrote `llm.txt` as contributor/agent contract aligned to the new docs map.
-
-## Tests and Evals
-
-- Expanded `tests/test_connector_reference_scripts.py` with default-path behavior tests.
-- Updated `evals/scenarios/connector-reference-drift-gate.yaml` for new default target path.
-- Updated docs/tdd gate tests to use new architecture doc path.
+- Historical records under `.agent/tasks/*` intentionally left unchanged.
+- Existing stage-1 product branding (`IngestRelay`, `ingest-relay`) preserved.
+- OpenAPI artifact regenerated and connector reference drift revalidated post-cutover.

@@ -3,7 +3,7 @@ from __future__ import annotations
 import httpx
 from tenacity import stop_after_attempt, wait_none
 
-from gemini_sync_bridge.adapters.extractors import _request_with_retry
+from ingest_relay.adapters.extractors import _request_with_retry
 
 
 class FakeClient:

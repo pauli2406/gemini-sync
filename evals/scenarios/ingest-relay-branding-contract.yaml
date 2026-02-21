@@ -1,0 +1,10 @@
+id: ingest-relay-branding-contract
+name: IngestRelay branding contract
+description: Ensures package identity and observability source fields are updated to IngestRelay naming.
+critical: false
+pytest_selector: tests/test_project_identity.py
+acceptance:
+  - Python project package name is ingest-relay and CLI script is ingest-relay.
+  - Runtime Python module namespace is ingest_relay.
+  - Legacy gemini-sync-bridge CLI script entrypoint is removed.
+  - Splunk event source payload uses ingest-relay.

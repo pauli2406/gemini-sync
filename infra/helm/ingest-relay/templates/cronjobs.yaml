@@ -1,0 +1,38 @@
+{{- range .Values.scheduleJobs }}
+{{- if (default true .enabled) }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ printf "%s-%s" (include "ingest-relay.fullname" $) .name | trunc 63 | trimSuffix "-" }}
+spec:
+  schedule: {{ .schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: runner
+              image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
+              imagePullPolicy: {{ $.Values.image.pullPolicy }}
+              command: ["ingest-relay", "run", "--connector", "{{ .connectorPath }}"]
+              env:
+                {{- range $key, $value := $.Values.env }}
+                - name: {{ $key }}
+                  value: {{ $value | quote }}
+                {{- end }}
+                {{- range $key, $_ := $.Values.secrets }}
+                - name: {{ $key }}
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ include "ingest-relay.fullname" $ }}
+                      key: {{ $key }}
+                {{- end }}
+              resources:
+                {{- toYaml $.Values.resources.cronjob | nindent 16 }}
+---
+{{- end }}
+{{- end }}

@@ -10,7 +10,7 @@ exempt_sources:
 rules:
   - name: runtime_and_api
     sources:
-      - "gemini_sync_bridge/**"
+      - "ingest_relay/**"
     docs_any_of:
       - "README.md"
       - "docs/start-here.mdx"
@@ -113,7 +113,7 @@ consistency:
     - "docs/concepts/architecture.mdx"
     - "docs/how-to/operate-runs.mdx"
   required_tokens:
-    - "gemini-sync-bridge run --connector"
-    - "gemini-sync-bridge serve --host 0.0.0.0 --port 8080"
+    - "ingest-relay run --connector"
+    - "ingest-relay serve --host 0.0.0.0 --port 8080"
     - "python scripts/check_tdd_guardrails.py"
     - "python scripts/check_docs_drift.py"

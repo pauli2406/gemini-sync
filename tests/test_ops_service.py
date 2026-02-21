@@ -3,8 +3,8 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 
-from gemini_sync_bridge.models import ConnectorCheckpoint, PushBatch, RunState
-from gemini_sync_bridge.services import ops
+from ingest_relay.models import ConnectorCheckpoint, PushBatch, RunState
+from ingest_relay.services import ops
 
 
 def test_build_ops_snapshot_empty_db_returns_zeroes_and_empty_lists(

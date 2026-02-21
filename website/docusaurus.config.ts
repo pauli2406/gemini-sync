@@ -3,13 +3,13 @@ import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
-  title: 'Gemini Sync Bridge Docs',
+  title: 'IngestRelay Docs',
   tagline: 'Build connectors from on-prem systems to Gemini Enterprise with confidence.',
   favicon: 'img/favicon.ico',
-  url: 'https://gemini-sync-bridge-docs.vercel.app',
+  url: 'https://ingest-relay-docs.vercel.app',
   baseUrl: '/',
   organizationName: 'pauli2406',
-  projectName: 'gemini-sync',
+  projectName: 'ingest-relay',
 
   onBrokenLinks: 'throw',
   markdown: {
@@ -31,7 +31,7 @@ const config: Config = {
           routeBasePath: 'docs',
           sidebarPath: './sidebars.ts',
           editUrl:
-            'https://github.com/pauli2406/gemini-sync/edit/main/',
+            'https://github.com/pauli2406/ingest-relay/edit/main/',
         },
         blog: false,
         theme: {
@@ -49,9 +49,9 @@ const config: Config = {
       respectPrefersColorScheme: true,
     },
     navbar: {
-      title: 'Gemini Sync Bridge',
+      title: 'IngestRelay',
       logo: {
-        alt: 'Gemini Sync Bridge',
+        alt: 'IngestRelay',
         src: 'img/logo.svg',
       },
       items: [
@@ -65,7 +65,7 @@ const config: Config = {
         {to: '/docs/contributing/contributing', label: 'Contributing', position: 'left'},
         {to: '/docs/changelog', label: 'Changelog', position: 'left'},
         {
-          href: 'https://github.com/pauli2406/gemini-sync',
+          href: 'https://github.com/pauli2406/ingest-relay',
           label: 'GitHub',
           position: 'right',
         },
@@ -104,12 +104,12 @@ const config: Config = {
             },
             {
               label: 'GitHub',
-              href: 'https://github.com/pauli2406/gemini-sync',
+              href: 'https://github.com/pauli2406/ingest-relay',
             },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Gemini Sync Bridge contributors.`,
+      copyright: `Copyright © ${new Date().getFullYear()} IngestRelay contributors.`,
     },
     prism: {
       theme: prismThemes.github,

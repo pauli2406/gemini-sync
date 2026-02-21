@@ -2,7 +2,7 @@
 title: Architecture
 ---
 
-Gemini Sync Bridge is a GitOps-managed ingestion runtime that normalizes source records, computes reconciliation deltas, publishes artifacts, and ingests into Discovery Engine.
+IngestRelay is a GitOps-managed ingestion runtime that normalizes source records, computes reconciliation deltas, publishes artifacts, and ingests into Discovery Engine.
 
 ## Main Components
 
@@ -23,8 +23,8 @@ Gemini Sync Bridge is a GitOps-managed ingestion runtime that normalizes source 
 
 ## Runtime Entry Points
 
-- `gemini-sync-bridge run --connector connectors/hr-employees.yaml`
-- `gemini-sync-bridge serve --host 0.0.0.0 --port 8080`
+- `ingest-relay run --connector connectors/hr-employees.yaml`
+- `ingest-relay serve --host 0.0.0.0 --port 8080`
 
 ## Governance Gates
 

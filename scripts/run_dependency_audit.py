@@ -10,6 +10,7 @@ EXCLUDED_PACKAGES = {
     "setuptools",
     "wheel",
     "gemini-sync-bridge",
+    "ingest-relay",
 }
 
 

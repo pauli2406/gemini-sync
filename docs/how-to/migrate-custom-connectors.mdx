@@ -35,8 +35,8 @@ export CONNECTORS_DIR=/path/to/connector-config-repo/connectors
 ## Verification
 
 ```bash
-gemini-sync-bridge run --connector /path/to/connector-config-repo/connectors/<id>.yaml
-gemini-sync-bridge serve --host 0.0.0.0 --port 8080
+ingest-relay run --connector /path/to/connector-config-repo/connectors/<id>.yaml
+ingest-relay serve --host 0.0.0.0 --port 8080
 ```
 
 Verify expected connector and run visibility in `/ops` and `/studio/connectors`.

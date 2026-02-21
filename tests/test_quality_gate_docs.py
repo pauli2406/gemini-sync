@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from gemini_sync_bridge.quality_gates import evaluate_docs_consistency, evaluate_docs_drift
+from ingest_relay.quality_gates import evaluate_docs_consistency, evaluate_docs_drift
 
 
 def _mapping() -> dict:
@@ -9,7 +9,7 @@ def _mapping() -> dict:
         "rules": [
             {
                 "name": "runtime",
-                "sources": ["gemini_sync_bridge/**"],
+                "sources": ["ingest_relay/**"],
                 "docs_any_of": ["README.md", "docs/concepts/architecture.mdx"],
             }
         ],
@@ -21,7 +21,7 @@ def _mapping() -> dict:
 
 
 def test_docs_drift_fails_when_runtime_changes_without_docs() -> None:
-    result = evaluate_docs_drift(["gemini_sync_bridge/services/pipeline.py"], _mapping())
+    result = evaluate_docs_drift(["ingest_relay/services/pipeline.py"], _mapping())
 
     assert not result.passed
     assert any("no docs were updated" in error for error in result.errors)
@@ -30,7 +30,7 @@ def test_docs_drift_fails_when_runtime_changes_without_docs() -> None:
 def test_docs_drift_passes_when_mapped_doc_changes() -> None:
     result = evaluate_docs_drift(
         [
-            "gemini_sync_bridge/services/pipeline.py",
+            "ingest_relay/services/pipeline.py",
             "docs/concepts/architecture.mdx",
         ],
         _mapping(),

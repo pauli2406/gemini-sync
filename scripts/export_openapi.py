@@ -5,7 +5,7 @@ import argparse
 import json
 from pathlib import Path
 
-from gemini_sync_bridge.api import app
+from ingest_relay.api import app
 
 
 def render_openapi_json() -> str:

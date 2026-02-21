@@ -3,9 +3,9 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from types import SimpleNamespace
 
-from gemini_sync_bridge.schemas import CanonicalDocument, GeminiConfig, RunManifest
-from gemini_sync_bridge.services.gemini_ingestion import GeminiIngestionClient
-from gemini_sync_bridge.utils.doc_ids import to_discovery_doc_id
+from ingest_relay.schemas import CanonicalDocument, GeminiConfig, RunManifest
+from ingest_relay.services.gemini_ingestion import GeminiIngestionClient
+from ingest_relay.utils.doc_ids import to_discovery_doc_id
 
 
 def _client(dry_run: bool = False) -> GeminiIngestionClient:

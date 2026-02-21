@@ -1,6 +1,0 @@
-apiVersion: v2
-name: gemini-sync-bridge
-description: Sync bridge for on-prem connectors to GCS and Gemini Enterprise
-type: application
-version: 0.1.0
-appVersion: "0.1.0"

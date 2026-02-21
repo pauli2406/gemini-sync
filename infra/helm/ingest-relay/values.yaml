@@ -1,0 +1,32 @@
+image:
+  repository: ghcr.io/example/ingest-relay
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+
+env:
+  DATABASE_URL: postgresql+psycopg2://postgres:postgres@postgres:5432/ingest_relay
+  GEMINI_INGESTION_DRY_RUN: "true"
+
+secrets: {}
+
+scheduleJobs:
+  - name: hr-employees
+    schedule: "0 */3 * * *"
+    connectorPath: connectors/hr-employees.yaml
+    enabled: true
+  - name: kb-rest
+    schedule: "*/30 * * * *"
+    connectorPath: connectors/kb-rest.yaml
+    enabled: true
+  - name: support-push
+    schedule: "*/5 * * * *"
+    connectorPath: connectors/support-push.yaml
+    enabled: true
+
+resources:
+  api: {}
+  cronjob: {}

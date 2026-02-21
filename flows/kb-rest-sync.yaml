@@ -10,7 +10,7 @@ tasks:
   - id: run_connector
     type: io.kestra.plugin.scripts.shell.Commands
     commands:
-      - gemini-sync-bridge run --connector connectors/kb-rest.yaml
+      - ingest-relay run --connector connectors/kb-rest.yaml
     retry:
       type: constant
       interval: PT2M

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This repository is operated with an AI-agent-first workflow. This document defines the mandatory operating contract for autonomous and semi-autonomous agents contributing to Gemini Sync Bridge.
+This repository is operated with an AI-agent-first workflow. This document defines the mandatory operating contract for autonomous and semi-autonomous agents contributing to IngestRelay.
 
 ## Scope and Boundaries
 

@@ -7,9 +7,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from gemini_sync_bridge.models import Base
-from gemini_sync_bridge.services.secrets_registry import ManagedSecretsRegistry
-from gemini_sync_bridge.utils import secrets as secrets_utils
+from ingest_relay.models import Base
+from ingest_relay.services.secrets_registry import ManagedSecretsRegistry
+from ingest_relay.utils import secrets as secrets_utils
 
 
 def _session_factory():

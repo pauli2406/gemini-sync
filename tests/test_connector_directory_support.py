@@ -5,10 +5,10 @@ from pathlib import Path
 import pytest
 import yaml
 
-from gemini_sync_bridge import api
-from gemini_sync_bridge.services import ops, studio
-from gemini_sync_bridge.services.studio import build_proposed_file_changes
-from gemini_sync_bridge.settings import get_settings
+from ingest_relay import api
+from ingest_relay.services import ops, studio
+from ingest_relay.services.studio import build_proposed_file_changes
+from ingest_relay.settings import get_settings
 
 
 def _write_connector(connectors_dir: Path, connector_id: str, mode: str) -> Path:

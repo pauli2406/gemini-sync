@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from gemini_sync_bridge.services.secrets_registry import ManagedSecretsRegistry
+from ingest_relay.services.secrets_registry import ManagedSecretsRegistry
 
 
 def test_managed_secret_create_and_list_and_resolve(db_session_factory) -> None:

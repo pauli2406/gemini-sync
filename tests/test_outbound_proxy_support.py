@@ -5,10 +5,10 @@ from typing import Any
 
 import httpx
 
-from gemini_sync_bridge.adapters import extractors
-from gemini_sync_bridge.schemas import SourceConfig
-from gemini_sync_bridge.services import gemini_ingestion, github_pr, observability
-from gemini_sync_bridge.utils.http_clients import create_httpx_client
+from ingest_relay.adapters import extractors
+from ingest_relay.schemas import SourceConfig
+from ingest_relay.services import gemini_ingestion, github_pr, observability
+from ingest_relay.utils.http_clients import create_httpx_client
 
 
 class _NoopContextClient:
@@ -166,7 +166,7 @@ def test_github_pr_service_uses_shared_httpx_client_factory(monkeypatch) -> None
     monkeypatch.setattr(github_pr.httpx, "Client", lambda *args, **kwargs: _NoopContextClient())
 
     service = github_pr.GitHubPRService(
-        github_repo="acme/gemini-sync",
+        github_repo="acme/ingest-relay",
         github_token="github-token-test",
         github_base_branch="main",
     )
@@ -179,7 +179,7 @@ def test_github_pr_service_uses_shared_httpx_client_factory(monkeypatch) -> None
     monkeypatch.setattr(
         service,
         "_create_pull_request",
-        lambda *args, **kwargs: "https://github.com/acme/gemini-sync/pull/1",
+        lambda *args, **kwargs: "https://github.com/acme/ingest-relay/pull/1",
     )
 
     result = service.create_proposal(

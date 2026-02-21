@@ -62,7 +62,7 @@ jobs:
         run: npm --prefix website run build
 
       - name: Unit and integration tests with coverage
-        run: pytest --cov=gemini_sync_bridge --cov-report=xml --cov-fail-under=60
+        run: pytest --cov=ingest_relay --cov-report=xml --cov-fail-under=60
 
       - name: Diff coverage
         run: diff-cover coverage.xml --compare-branch=origin/main --fail-under=92

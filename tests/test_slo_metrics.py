@@ -5,8 +5,8 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from gemini_sync_bridge.models import Base, ConnectorCheckpoint, RunState
-from gemini_sync_bridge.services.slo import compute_slo_metrics
+from ingest_relay.models import Base, ConnectorCheckpoint, RunState
+from ingest_relay.services.slo import compute_slo_metrics
 
 
 def test_compute_slo_metrics_from_run_state() -> None:

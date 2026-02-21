@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from gemini_sync_bridge.schemas import MappingConfig
-from gemini_sync_bridge.services.normalizer import normalize_records
+from ingest_relay.schemas import MappingConfig
+from ingest_relay.services.normalizer import normalize_records
 
 
 def test_normalize_records_builds_canonical_docs() -> None:

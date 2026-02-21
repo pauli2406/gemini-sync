@@ -1,37 +1,35 @@
 # Task
 
-- Task ID: docs-hard-cutover-diataxis
-- Title: Full docs hard-cutover rewrite (Diataxis + Docusaurus + README + llm)
+- Task ID: stage2-module-hard-cutover
+- Title: Full Python module rename from gemini_sync_bridge to ingest_relay
 - Owner Role: planner
-- Risk Tier: tier_2
+- Risk Tier: tier_3
 
 ## Intent
 
-Execute a full, English-only docs rewrite with hard URL cutover to Diataxis structure, while keeping generated reference artifacts and drift gates intact.
+Complete stage 2 of the IngestRelay rename by hard-cutover renaming the Python package directory and namespace from `gemini_sync_bridge` to `ingest_relay`, including imports, packaging metadata, workflow paths, coverage flags, and governance gate patterns.
 
 ## Acceptance Criteria
 
-1. Docs are fully reorganized into tutorials/how-to/concepts/reference/contributing sections.
-2. Legacy flat docs files are removed after migration.
-3. Docusaurus nav uses `Docs`, `Reference`, `Contributing`, `Changelog`.
-4. Connector reference export/check defaults point to `docs/reference/connector-fields.md`.
-5. README and llm.txt are fully rewritten to the new model.
-6. Docs drift mapping is updated to new paths and required consistency tokens remain enforced.
-7. Required quality/security/docs checks pass.
+1. Package directory is renamed to `ingest_relay/` and no active runtime/tests/scripts import `gemini_sync_bridge`.
+2. `pyproject.toml` console script points to `ingest_relay.cli:app` and wheel package/include paths use `ingest_relay/**`.
+3. Uvicorn app path in CLI uses `ingest_relay.api:app`.
+4. CI/docs/workflows use `--cov=ingest_relay` and docs deploy trigger path `ingest_relay/api.py`.
+5. Governance patterns are updated from `gemini_sync_bridge/**` to `ingest_relay/**` in gate/policy mapping files.
+6. Red phase evidence captures expected failure before package move; full gate suite is green after cutover.
+7. Historical `.agent/tasks/*` files remain unchanged.
 
 ## Specialist Role Mapping
 
 1. Planner Agent
-   - Finalized cutover scope, constraints, and acceptance criteria.
-2. Test/Eval Agent
-   - Added default-path tests for connector reference scripts.
-   - Updated connector reference drift scenario expectations.
-3. Implementer Agent
-   - Rewrote docs tree and Docusaurus navigation/homepage.
-   - Updated script defaults and governance map.
+   - Sequenced hard-cutover namespace migration and governed scope (active files only).
+2. Implementer Agent
+   - Renamed package directory, updated imports/references, and migrated packaging/workflow paths.
+3. Test/Eval Agent
+   - Updated tests first, captured failing-first import error, then validated green test/eval gates.
 4. Docs Agent
-   - Reauthored all pages under new IA and added changelog page.
+   - Updated active docs and references to `ingest_relay` paths and coverage commands.
 5. Security Agent
-   - Runs policy and dependency audit in validation set.
+   - Re-ran security policy and dependency audit checks after namespace migration.
 6. Release Agent
-   - Confirms docs build and gate outcomes; tier 2 merge constraints apply.
+   - Maintained Tier 3 classification and verified all required gates for release readiness.

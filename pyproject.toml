@@ -3,14 +3,14 @@ requires = ["hatchling>=1.27.0"]
 build-backend = "hatchling.build"
 
 [project]
-name = "gemini-sync-bridge"
+name = "ingest-relay"
 version = "0.1.0"
 description = "GitOps-managed sync bridge for on-prem connectors to GCS and Gemini Enterprise"
 readme = "README.md"
 license = {text = "Apache-2.0"}
 requires-python = ">=3.11"
 authors = [
-  {name = "Gemini Sync Bridge Contributors"}
+  {name = "IngestRelay Contributors"}
 ]
 dependencies = [
   "fastapi>=0.115.0",
@@ -44,13 +44,13 @@ dev = [
 ]
 
 [project.scripts]
-gemini-sync-bridge = "gemini_sync_bridge.cli:app"
+ingest-relay = "ingest_relay.cli:app"
 
 [tool.hatch.build.targets.wheel]
-packages = ["gemini_sync_bridge"]
+packages = ["ingest_relay"]
 include = [
-  "gemini_sync_bridge/templates/**",
-  "gemini_sync_bridge/static/**",
+  "ingest_relay/templates/**",
+  "ingest_relay/static/**",
 ]
 
 [tool.pytest.ini_options]

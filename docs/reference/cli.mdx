@@ -2,7 +2,7 @@
 title: CLI Reference
 ---
 
-CLI entrypoint: `gemini-sync-bridge`.
+CLI entrypoint: `ingest-relay`.
 
 ## Commands
 
@@ -11,7 +11,7 @@ CLI entrypoint: `gemini-sync-bridge`.
 Initialize runtime database tables.
 
 ```bash
-gemini-sync-bridge init-db
+ingest-relay init-db
 ```
 
 ### `run`
@@ -19,7 +19,7 @@ gemini-sync-bridge init-db
 Execute one connector run.
 
 ```bash
-gemini-sync-bridge run --connector /absolute/path/to/connector.yaml
+ingest-relay run --connector /absolute/path/to/connector.yaml
 ```
 
 Options:
@@ -32,7 +32,7 @@ Options:
 Start API + Ops UI + Studio UI.
 
 ```bash
-gemini-sync-bridge serve --host 0.0.0.0 --port 8080
+ingest-relay serve --host 0.0.0.0 --port 8080
 ```
 
 Options:

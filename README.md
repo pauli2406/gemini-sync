@@ -1,6 +1,6 @@
-# Gemini Sync Bridge
+# IngestRelay
 
-Gemini Sync Bridge is an open-source ingestion bridge for syncing enterprise source systems into Google Cloud Storage and Discovery Engine data stores used by Gemini Enterprise.
+IngestRelay is an open-source ingestion bridge for syncing enterprise source systems into Google Cloud Storage and Discovery Engine data stores used by Gemini Enterprise.
 
 It combines connector execution, reconciliation, artifact publishing, ingestion, and operator visibility in one GitOps-friendly runtime.
 
@@ -23,10 +23,10 @@ source .venv/bin/activate
 pip install -e .[dev]
 cp .env.example .env
 docker compose up -d postgres
-gemini-sync-bridge init-db
+ingest-relay init-db
 python scripts/validate_connectors.py
-gemini-sync-bridge run --connector connectors/hr-employees-local.yaml
-gemini-sync-bridge serve --host 0.0.0.0 --port 8080
+ingest-relay run --connector connectors/hr-employees-local.yaml
+ingest-relay serve --host 0.0.0.0 --port 8080
 ```
 
 Open:
@@ -75,9 +75,9 @@ npm --prefix website run start
 Example:
 
 ```bash
-export CONNECTORS_DIR=/opt/gemini-sync/connectors
-gemini-sync-bridge serve --host 0.0.0.0 --port 8080
-gemini-sync-bridge run --connector /opt/gemini-sync/connectors/hr-employees.yaml
+export CONNECTORS_DIR=/opt/ingest-relay/connectors
+ingest-relay serve --host 0.0.0.0 --port 8080
+ingest-relay run --connector /opt/ingest-relay/connectors/hr-employees.yaml
 ```
 
 ## Governance Gates Summary
@@ -95,7 +95,7 @@ python scripts/check_openapi_drift.py
 python scripts/check_connector_reference_drift.py
 python scripts/check_security_policy.py
 python scripts/run_dependency_audit.py
-pytest --cov=gemini_sync_bridge --cov-report=xml --cov-fail-under=60
+pytest --cov=ingest_relay --cov-report=xml --cov-fail-under=60
 diff-cover coverage.xml --compare-branch=origin/main --fail-under=92
 python scripts/run_scenario_evals.py --registry evals/eval_registry.yaml --baseline evals/baseline.json
 npm --prefix website run build
@@ -103,7 +103,7 @@ npm --prefix website run build
 
 ## Repository Layout
 
-- `gemini_sync_bridge/`: runtime, API, and services
+- `ingest_relay/`: runtime, API, and services
 - `connectors/`: curated sample connectors
 - `schemas/`: connector schema and docs metadata
 - `scripts/`: quality gates, exports, and tooling

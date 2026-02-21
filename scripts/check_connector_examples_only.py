@@ -6,7 +6,7 @@ import json
 import sys
 from pathlib import Path
 
-from gemini_sync_bridge.quality_gates import changed_files
+from ingest_relay.quality_gates import changed_files
 
 
 def _normalize(path: str) -> str:

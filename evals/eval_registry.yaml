@@ -68,3 +68,6 @@ scenarios:
   - id: bucket-only-sql-pull-contract
     path: evals/scenarios/bucket-only-sql-pull-contract.yaml
     critical: false
+  - id: ingest-relay-branding-contract
+    path: evals/scenarios/ingest-relay-branding-contract.yaml
+    critical: false

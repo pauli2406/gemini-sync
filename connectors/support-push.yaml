@@ -15,7 +15,7 @@ spec:
     aclUsersField: allowed_users
     aclGroupsField: allowed_groups
   output:
-    bucket: gs://company-gemini-sync
+    bucket: gs://company-ingest-relay
     prefix: support-push
     format: ndjson
   gemini:

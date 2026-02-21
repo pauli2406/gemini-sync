@@ -6,7 +6,7 @@ import json
 import sys
 from pathlib import Path
 
-from gemini_sync_bridge.services.replay import FaultInjectionError, replay_artifacts
+from ingest_relay.services.replay import FaultInjectionError, replay_artifacts
 
 
 def main() -> int:

@@ -7,7 +7,7 @@ on:
     paths:
       - "docs/**"
       - "website/**"
-      - "gemini_sync_bridge/api.py"
+      - "ingest_relay/api.py"
       - "scripts/export_openapi.py"
       - "scripts/check_openapi_drift.py"
       - ".github/workflows/docs-deploy-vercel.yaml"
@@ -15,7 +15,7 @@ on:
     paths:
       - "docs/**"
       - "website/**"
-      - "gemini_sync_bridge/api.py"
+      - "ingest_relay/api.py"
       - "scripts/export_openapi.py"
       - "scripts/check_openapi_drift.py"
       - ".github/workflows/docs-deploy-vercel.yaml"

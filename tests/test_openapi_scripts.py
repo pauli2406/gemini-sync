@@ -22,7 +22,7 @@ def test_export_openapi_writes_expected_file(tmp_path: Path) -> None:
 
     assert result.returncode == 0, result.stderr
     payload = json.loads(target.read_text(encoding="utf-8"))
-    assert payload["info"]["title"] == "Gemini Sync Bridge"
+    assert payload["info"]["title"] == "IngestRelay"
     assert payload["openapi"].startswith("3.")
 
 

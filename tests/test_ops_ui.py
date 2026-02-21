@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from gemini_sync_bridge.models import RunState
+from ingest_relay.models import RunState
 
 
 def test_ops_dashboard_renders_with_polling_hooks(client) -> None:
