@@ -26,7 +26,7 @@ spec:
     titleField: full_name
     contentTemplate: "{{ full_name }}"
   output:
-    bucket: gs://company-gemini-sync
+    bucket: gs://company-ingest-relay
     prefix: hr-employees
     format: ndjson
   gemini:
@@ -62,7 +62,7 @@ When you only want artifacts in GCS, disable ingestion. You can export either ca
 ```yaml
 spec:
   output:
-    bucket: gs://company-gemini-sync
+    bucket: gs://company-ingest-relay
     prefix: oracle-qn-data-march-2025
     format: ndjson
     publishLatestAlias: true
@@ -80,7 +80,7 @@ spec:
     secretRef: oracle-sample-credentials
     query: SELECT * FROM pda.QN_DATA
   output:
-    bucket: gs://company-gemini-sync
+    bucket: gs://company-ingest-relay
     prefix: oracle-qn-data-raw
     format: csv
     publishLatestAlias: true

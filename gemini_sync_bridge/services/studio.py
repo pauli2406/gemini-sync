@@ -42,7 +42,7 @@ def _connectors_dir() -> Path:
 
 
 def _helm_values_path() -> Path:
-    return _repo_root() / "infra/helm/gemini-sync-bridge/values.yaml"
+    return _repo_root() / "infra/helm/ingest-relay/values.yaml"
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
@@ -415,7 +415,7 @@ def build_proposed_file_changes(
     rendered_payload = yaml.safe_load(rendered_values)
     normalized_rendered = rendered_payload if isinstance(rendered_payload, dict) else {}
     if current_values_payload != normalized_rendered:
-        changes["infra/helm/gemini-sync-bridge/values.yaml"] = rendered_values
+        changes["infra/helm/ingest-relay/values.yaml"] = rendered_values
 
     if not changes:
         raise ValueError("No effective changes detected for proposal")

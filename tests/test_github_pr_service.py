@@ -21,18 +21,18 @@ def test_create_proposal_result_uses_repo_when_present() -> None:
         action="edit",
         connector_id="kb-rest",
         changed_files=["connectors/kb-rest.yaml"],
-        github_repo="acme/gemini-sync",
+        github_repo="acme/ingest-relay",
         branch_name="studio/edit/kb-rest/20260216-120000",
     )
 
     assert result.action == "edit"
     assert result.connector_id == "kb-rest"
     assert result.changed_files == ["connectors/kb-rest.yaml"]
-    assert "github.com/acme/gemini-sync/pull/new/" in result.pr_url
+    assert "github.com/acme/ingest-relay/pull/new/" in result.pr_url
 
 
 def test_github_service_falls_back_when_token_missing() -> None:
-    service = GitHubPRService(github_repo="acme/gemini-sync", github_token="")
+    service = GitHubPRService(github_repo="acme/ingest-relay", github_token="")
     result = service.create_proposal(
         action="edit",
         connector_id="kb-rest",
@@ -43,4 +43,4 @@ def test_github_service_falls_back_when_token_missing() -> None:
     )
 
     assert result.proposal_id == "p-1"
-    assert "github.com/acme/gemini-sync/pull/new/" in result.pr_url
+    assert "github.com/acme/ingest-relay/pull/new/" in result.pr_url

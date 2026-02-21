@@ -23,14 +23,14 @@ docker compose up -d postgres
 ## 2. Initialize Runtime State
 
 ```bash
-gemini-sync-bridge init-db
+ingest-relay init-db
 python scripts/validate_connectors.py
 ```
 
 ## 3. Execute First Connector Run
 
 ```bash
-gemini-sync-bridge run --connector connectors/hr-employees-local.yaml
+ingest-relay run --connector connectors/hr-employees-local.yaml
 ```
 
 Expected result: JSON output with a successful run summary.
@@ -38,7 +38,7 @@ Expected result: JSON output with a successful run summary.
 ## 4. Start API and UIs
 
 ```bash
-gemini-sync-bridge serve --host 0.0.0.0 --port 8080
+ingest-relay serve --host 0.0.0.0 --port 8080
 ```
 
 Open:

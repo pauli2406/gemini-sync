@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Report a defect in Gemini Sync Bridge
+about: Report a defect in IngestRelay
 title: "[Bug] "
 labels: bug
 assignees: ''

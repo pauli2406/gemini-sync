@@ -1,6 +1,6 @@
-# Gemini Sync Bridge
+# IngestRelay
 
-Gemini Sync Bridge is an open-source ingestion bridge for syncing enterprise source systems into Google Cloud Storage and Discovery Engine data stores used by Gemini Enterprise.
+IngestRelay is an open-source ingestion bridge for syncing enterprise source systems into Google Cloud Storage and Discovery Engine data stores used by Gemini Enterprise.
 
 It combines connector execution, reconciliation, artifact publishing, ingestion, and operator visibility in one GitOps-friendly runtime.
 
@@ -23,10 +23,10 @@ source .venv/bin/activate
 pip install -e .[dev]
 cp .env.example .env
 docker compose up -d postgres
-gemini-sync-bridge init-db
+ingest-relay init-db
 python scripts/validate_connectors.py
-gemini-sync-bridge run --connector connectors/hr-employees-local.yaml
-gemini-sync-bridge serve --host 0.0.0.0 --port 8080
+ingest-relay run --connector connectors/hr-employees-local.yaml
+ingest-relay serve --host 0.0.0.0 --port 8080
 ```
 
 Open:
@@ -75,9 +75,9 @@ npm --prefix website run start
 Example:
 
 ```bash
-export CONNECTORS_DIR=/opt/gemini-sync/connectors
-gemini-sync-bridge serve --host 0.0.0.0 --port 8080
-gemini-sync-bridge run --connector /opt/gemini-sync/connectors/hr-employees.yaml
+export CONNECTORS_DIR=/opt/ingest-relay/connectors
+ingest-relay serve --host 0.0.0.0 --port 8080
+ingest-relay run --connector /opt/ingest-relay/connectors/hr-employees.yaml
 ```
 
 ## Governance Gates Summary

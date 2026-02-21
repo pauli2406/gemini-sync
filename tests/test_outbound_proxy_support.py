@@ -166,7 +166,7 @@ def test_github_pr_service_uses_shared_httpx_client_factory(monkeypatch) -> None
     monkeypatch.setattr(github_pr.httpx, "Client", lambda *args, **kwargs: _NoopContextClient())
 
     service = github_pr.GitHubPRService(
-        github_repo="acme/gemini-sync",
+        github_repo="acme/ingest-relay",
         github_token="github-token-test",
         github_base_branch="main",
     )
@@ -179,7 +179,7 @@ def test_github_pr_service_uses_shared_httpx_client_factory(monkeypatch) -> None
     monkeypatch.setattr(
         service,
         "_create_pull_request",
-        lambda *args, **kwargs: "https://github.com/acme/gemini-sync/pull/1",
+        lambda *args, **kwargs: "https://github.com/acme/ingest-relay/pull/1",
     )
 
     result = service.create_proposal(

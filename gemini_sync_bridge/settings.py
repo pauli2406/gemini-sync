@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     database_url: str = Field(
-        default="postgresql+psycopg2://postgres:postgres@localhost:5432/gemini_sync_bridge",
+        default="postgresql+psycopg2://postgres:postgres@localhost:5432/ingest_relay",
         alias="DATABASE_URL",
     )
     connectors_dir: str = Field(default="connectors", alias="CONNECTORS_DIR")

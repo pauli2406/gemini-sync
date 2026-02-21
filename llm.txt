@@ -1,4 +1,4 @@
-Gemini Sync Bridge - Contributor and Agent Contract
+IngestRelay - Contributor and Agent Contract
 
 Purpose
 - Define the default operating rules for contributors and AI agents.
@@ -91,5 +91,5 @@ Required Handoff Artifacts
 - risk_tier.md
 
 Runtime Commands
-- gemini-sync-bridge run --connector /absolute/path/to/connector.yaml
-- gemini-sync-bridge serve --host 0.0.0.0 --port 8080
+- ingest-relay run --connector /absolute/path/to/connector.yaml
+- ingest-relay serve --host 0.0.0.0 --port 8080

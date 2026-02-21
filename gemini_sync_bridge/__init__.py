@@ -1,4 +1,4 @@
-"""Gemini Sync Bridge package."""
+"""IngestRelay package."""
 
 __all__ = ["__version__"]
 

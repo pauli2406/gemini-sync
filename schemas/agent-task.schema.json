@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/example/gemini-sync-bridge/schemas/agent-task.schema.json",
+  "$id": "https://github.com/example/ingest-relay/schemas/agent-task.schema.json",
   "title": "Agent Task Contract",
   "type": "object",
   "additionalProperties": false,

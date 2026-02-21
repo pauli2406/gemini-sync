@@ -1,5 +1,5 @@
 apiVersion: v2
-name: gemini-sync-bridge
+name: ingest-relay
 description: Sync bridge for on-prem connectors to GCS and Gemini Enterprise
 type: application
 version: 0.1.0

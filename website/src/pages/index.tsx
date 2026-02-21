@@ -52,10 +52,10 @@ export default function Home(): ReactNode {
   return (
     <Layout
       title="Documentation"
-      description="Gemini Sync Bridge hosted documentation">
+      description="IngestRelay hosted documentation">
       <main className={styles.main}>
         <section className={styles.hero}>
-          <p className={styles.kicker}>Gemini Sync Bridge</p>
+          <p className={styles.kicker}>IngestRelay</p>
           <Heading as="h1" className={styles.title}>
             Diataxis Documentation For Operators And Contributors
           </Heading>

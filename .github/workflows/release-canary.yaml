@@ -109,5 +109,5 @@ jobs:
           TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
         run: |
           curl -X POST -H "Content-Type: application/json" \
-            -d '{"text":"Gemini Sync Bridge canary failed and rollback was triggered."}' \
+            -d '{"text":"IngestRelay canary failed and rollback was triggered."}' \
             "$TEAMS_WEBHOOK_URL"

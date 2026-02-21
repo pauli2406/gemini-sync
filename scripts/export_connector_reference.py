@@ -92,6 +92,8 @@ def _escape_cell(value: str) -> str:
         value.replace("|", "\\|")
         .replace("[", "\\[")
         .replace("]", "\\]")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
         .replace("\n", "<br>")
     )
 

@@ -1,5 +1,5 @@
 image:
-  repository: ghcr.io/example/gemini-sync-bridge
+  repository: ghcr.io/example/ingest-relay
   tag: latest
   pullPolicy: IfNotPresent
 
@@ -8,7 +8,7 @@ service:
   port: 8080
 
 env:
-  DATABASE_URL: postgresql+psycopg2://postgres:postgres@postgres:5432/gemini_sync_bridge
+  DATABASE_URL: postgresql+psycopg2://postgres:postgres@postgres:5432/ingest_relay
   GEMINI_INGESTION_DRY_RUN: "true"
 
 secrets: {}

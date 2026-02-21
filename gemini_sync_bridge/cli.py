@@ -10,7 +10,7 @@ from gemini_sync_bridge.services.pipeline import run_connector
 from gemini_sync_bridge.settings import get_settings
 from gemini_sync_bridge.utils.logging import configure_logging
 
-app = typer.Typer(help="Gemini Sync Bridge command line interface")
+app = typer.Typer(help="IngestRelay command line interface")
 
 
 @app.command("init-db")

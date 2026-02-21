@@ -17,7 +17,7 @@ def send_splunk_event(settings: Settings, event: dict[str, Any]) -> None:
     payload = {
         "time": datetime.now(tz=UTC).timestamp(),
         "event": event,
-        "source": "gemini-sync-bridge",
+        "source": "ingest-relay",
     }
     headers = {"Authorization": f"Splunk {settings.splunk_hec_token}"}
 

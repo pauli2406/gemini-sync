@@ -49,7 +49,7 @@ def test_build_proposed_file_changes_for_create_and_pause_resume() -> None:
             helm_values_path=helm_values,
         )
         assert "connectors/studio-kb.yaml" in create_changes
-        assert "infra/helm/gemini-sync-bridge/values.yaml" in create_changes
+        assert "infra/helm/ingest-relay/values.yaml" in create_changes
 
         # simulate apply of create result
         (connectors_dir / "studio-kb.yaml").write_text(
@@ -57,7 +57,7 @@ def test_build_proposed_file_changes_for_create_and_pause_resume() -> None:
             encoding="utf-8",
         )
         helm_values.write_text(
-            create_changes["infra/helm/gemini-sync-bridge/values.yaml"], encoding="utf-8"
+            create_changes["infra/helm/ingest-relay/values.yaml"], encoding="utf-8"
         )
 
         pause_changes = build_proposed_file_changes(
@@ -67,11 +67,11 @@ def test_build_proposed_file_changes_for_create_and_pause_resume() -> None:
             connectors_dir=connectors_dir,
             helm_values_path=helm_values,
         )
-        payload = yaml.safe_load(pause_changes["infra/helm/gemini-sync-bridge/values.yaml"])
+        payload = yaml.safe_load(pause_changes["infra/helm/ingest-relay/values.yaml"])
         assert payload["scheduleJobs"][0]["enabled"] is False
 
         helm_values.write_text(
-            pause_changes["infra/helm/gemini-sync-bridge/values.yaml"], encoding="utf-8"
+            pause_changes["infra/helm/ingest-relay/values.yaml"], encoding="utf-8"
         )
         resume_changes = build_proposed_file_changes(
             action="resume",
@@ -80,7 +80,7 @@ def test_build_proposed_file_changes_for_create_and_pause_resume() -> None:
             connectors_dir=connectors_dir,
             helm_values_path=helm_values,
         )
-        resumed = yaml.safe_load(resume_changes["infra/helm/gemini-sync-bridge/values.yaml"])
+        resumed = yaml.safe_load(resume_changes["infra/helm/ingest-relay/values.yaml"])
         assert resumed["scheduleJobs"][0]["enabled"] is True
 
 
@@ -119,7 +119,7 @@ def test_build_proposed_file_changes_for_delete_removes_connector_and_schedule()
             helm_values_path=helm_values,
         )
         assert delete_changes["connectors/to-delete.yaml"] is None
-        payload = yaml.safe_load(delete_changes["infra/helm/gemini-sync-bridge/values.yaml"])
+        payload = yaml.safe_load(delete_changes["infra/helm/ingest-relay/values.yaml"])
         assert payload["scheduleJobs"] == []
 
 
@@ -158,7 +158,7 @@ def test_edit_preserves_existing_advanced_fields_and_avoids_schedule_noise() -> 
                             "metadataFields": ["department", "role"],
                         },
                         "output": {
-                            "bucket": "gs://company-gemini-sync",
+                            "bucket": "gs://company-ingest-relay",
                             "prefix": "hr-employees",
                             "format": "ndjson",
                         },
@@ -231,7 +231,7 @@ def test_edit_preserves_existing_advanced_fields_and_avoids_schedule_noise() -> 
         )
 
         assert "connectors/hr-employees.yaml" in changes
-        assert "infra/helm/gemini-sync-bridge/values.yaml" not in changes
+        assert "infra/helm/ingest-relay/values.yaml" not in changes
 
         rendered = yaml.safe_load(changes["connectors/hr-employees.yaml"])
         assert rendered["spec"]["source"]["query"].startswith("SELECT employee_id")
@@ -275,7 +275,7 @@ def test_edit_mode_switch_prunes_incompatible_source_fields() -> None:
                             "contentTemplate": "{{ full_name }}",
                         },
                         "output": {
-                            "bucket": "gs://company-gemini-sync",
+                            "bucket": "gs://company-ingest-relay",
                             "prefix": "hr-employees",
                             "format": "ndjson",
                         },
@@ -326,7 +326,7 @@ def test_edit_mode_switch_prunes_incompatible_source_fields() -> None:
                     "contentTemplate": "{{ full_name }}",
                 },
                 "output": {
-                    "bucket": "gs://company-gemini-sync",
+                    "bucket": "gs://company-ingest-relay",
                     "prefix": "hr-employees",
                     "format": "ndjson",
                 },
@@ -401,7 +401,7 @@ def test_edit_sql_pull_prunes_rest_only_source_fields() -> None:
                             "contentTemplate": "{{ title }}",
                         },
                         "output": {
-                            "bucket": "gs://company-gemini-sync",
+                            "bucket": "gs://company-ingest-relay",
                             "prefix": "kb-rest",
                             "format": "ndjson",
                         },
@@ -517,7 +517,7 @@ def test_edit_rest_pull_prunes_query_and_forces_http_source_type() -> None:
                             "contentTemplate": "{{ full_name }}",
                         },
                         "output": {
-                            "bucket": "gs://company-gemini-sync",
+                            "bucket": "gs://company-ingest-relay",
                             "prefix": "hr-employees",
                             "format": "ndjson",
                         },
@@ -580,7 +580,7 @@ def test_edit_rest_pull_prunes_query_and_forces_http_source_type() -> None:
                     "contentTemplate": "{{ full_name }}",
                 },
                 "output": {
-                    "bucket": "gs://company-gemini-sync",
+                    "bucket": "gs://company-ingest-relay",
                     "prefix": "hr-employees",
                     "format": "ndjson",
                 },
@@ -652,7 +652,7 @@ def test_edit_rest_pull_sparse_draft_preserves_existing_oauth_fields() -> None:
                             "contentTemplate": "{{ title }}",
                         },
                         "output": {
-                            "bucket": "gs://company-gemini-sync",
+                            "bucket": "gs://company-ingest-relay",
                             "prefix": "kb-rest",
                             "format": "ndjson",
                         },
@@ -771,7 +771,7 @@ def test_edit_file_pull_prunes_rest_source_fields_and_sets_csv_defaults() -> Non
                             "contentTemplate": "{{ title }}",
                         },
                         "output": {
-                            "bucket": "gs://company-gemini-sync",
+                            "bucket": "gs://company-ingest-relay",
                             "prefix": "kb-rest",
                             "format": "ndjson",
                         },
@@ -822,7 +822,7 @@ def test_edit_file_pull_prunes_rest_source_fields_and_sets_csv_defaults() -> Non
                     "contentTemplate": "{{ title }}",
                 },
                 "output": {
-                    "bucket": "gs://company-gemini-sync",
+                    "bucket": "gs://company-ingest-relay",
                     "prefix": "kb-rest",
                     "format": "ndjson",
                 },

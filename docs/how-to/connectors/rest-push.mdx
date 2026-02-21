@@ -2,7 +2,7 @@
 title: REST Push
 ---
 
-Use `rest_push` when upstream systems send delta events to Gemini Sync Bridge.
+Use `rest_push` when upstream systems send delta events to IngestRelay.
 
 ## Minimal Example
 
@@ -21,7 +21,7 @@ spec:
     titleField: title
     contentTemplate: "{{ subject }} {{ body }}"
   output:
-    bucket: gs://company-gemini-sync
+    bucket: gs://company-ingest-relay
     prefix: support-push
     format: ndjson
   gemini:

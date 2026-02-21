@@ -1,11 +1,11 @@
-{{- define "gemini-sync-bridge.name" -}}
+{{- define "ingest-relay.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "gemini-sync-bridge.fullname" -}}
+{{- define "ingest-relay.fullname" -}}
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
-{{- printf "%s-%s" .Release.Name (include "gemini-sync-bridge.name" .) | trunc 63 | trimSuffix "-" -}}
+{{- printf "%s-%s" .Release.Name (include "ingest-relay.name" .) | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 {{- end -}}

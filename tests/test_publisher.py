@@ -77,7 +77,7 @@ def test_publish_artifacts_writes_latest_alias_and_state_pointer(monkeypatch) ->
 
     output = OutputConfig.model_validate(
         {
-            "bucket": "gs://company-gemini-sync",
+            "bucket": "gs://company-ingest-relay",
             "prefix": "oracle-qn-data-march-2025",
             "format": "ndjson",
             "publishLatestAlias": True,
@@ -96,37 +96,37 @@ def test_publish_artifacts_writes_latest_alias_and_state_pointer(monkeypatch) ->
 
     uploaded_uris = [uri for uri, _, _ in uploads]
     assert (
-        "gs://company-gemini-sync/connectors/oracle-qn-data-march-2025/latest/upserts.ndjson"
+        "gs://company-ingest-relay/connectors/oracle-qn-data-march-2025/latest/upserts.ndjson"
         in uploaded_uris
     )
     assert (
-        "gs://company-gemini-sync/connectors/oracle-qn-data-march-2025/latest/"
+        "gs://company-ingest-relay/connectors/oracle-qn-data-march-2025/latest/"
         "upserts.discovery.ndjson" in uploaded_uris
     )
     assert (
-        "gs://company-gemini-sync/connectors/oracle-qn-data-march-2025/latest/deletes.ndjson"
+        "gs://company-ingest-relay/connectors/oracle-qn-data-march-2025/latest/deletes.ndjson"
         in uploaded_uris
     )
     assert (
-        "gs://company-gemini-sync/connectors/oracle-qn-data-march-2025/latest/manifest.json"
+        "gs://company-ingest-relay/connectors/oracle-qn-data-march-2025/latest/manifest.json"
         in uploaded_uris
     )
 
     assert (
         manifest.manifest_path
-        == "gs://company-gemini-sync/connectors/oracle-qn-data-march-2025/runs/run-123/manifest.json"
+        == "gs://company-ingest-relay/connectors/oracle-qn-data-march-2025/runs/run-123/manifest.json"
     )
     state_payload = json.loads(
         next(
             data
             for uri, data, _ in uploads
             if uri
-            == "gs://company-gemini-sync/connectors/oracle-qn-data-march-2025/state/latest_success.json"
+            == "gs://company-ingest-relay/connectors/oracle-qn-data-march-2025/state/latest_success.json"
         )
     )
     assert (
         state_payload["manifest_path"]
-        == "gs://company-gemini-sync/connectors/oracle-qn-data-march-2025/latest/manifest.json"
+        == "gs://company-ingest-relay/connectors/oracle-qn-data-march-2025/latest/manifest.json"
     )
 
 
@@ -147,7 +147,7 @@ def test_publish_artifacts_skips_latest_alias_when_disabled(monkeypatch) -> None
 
     output = OutputConfig.model_validate(
         {
-            "bucket": "gs://company-gemini-sync",
+            "bucket": "gs://company-ingest-relay",
             "prefix": "oracle-qn-data-march-2025",
             "format": "ndjson",
         }
@@ -183,7 +183,7 @@ def test_publish_csv_artifacts_writes_all_fields_and_latest_alias(monkeypatch) -
 
     output = OutputConfig.model_validate(
         {
-            "bucket": "gs://company-gemini-sync",
+            "bucket": "gs://company-ingest-relay",
             "prefix": "oracle-qn-data-march-2025",
             "format": "csv",
             "publishLatestAlias": True,
@@ -204,7 +204,7 @@ def test_publish_csv_artifacts_writes_all_fields_and_latest_alias(monkeypatch) -
     )
 
     run_csv_uri = (
-        "gs://company-gemini-sync/connectors/oracle-qn-data-march-2025/runs/run-123/rows.csv"
+        "gs://company-ingest-relay/connectors/oracle-qn-data-march-2025/runs/run-123/rows.csv"
     )
     csv_payload = next(data for uri, data, _ in uploads if uri == run_csv_uri)
     reader = csv.DictReader(io.StringIO(csv_payload))
@@ -218,13 +218,13 @@ def test_publish_csv_artifacts_writes_all_fields_and_latest_alias(monkeypatch) -
 
     assert (
         manifest.csv_path
-        == "gs://company-gemini-sync/connectors/oracle-qn-data-march-2025/runs/run-123/rows.csv"
+        == "gs://company-ingest-relay/connectors/oracle-qn-data-march-2025/runs/run-123/rows.csv"
     )
     assert manifest.upserts_count == 2
 
     uploaded_uris = [uri for uri, _, _ in uploads]
     assert (
-        "gs://company-gemini-sync/connectors/oracle-qn-data-march-2025/latest/rows.csv"
+        "gs://company-ingest-relay/connectors/oracle-qn-data-march-2025/latest/rows.csv"
         in uploaded_uris
     )
     state_payload = json.loads(
@@ -232,12 +232,12 @@ def test_publish_csv_artifacts_writes_all_fields_and_latest_alias(monkeypatch) -
             data
             for uri, data, _ in uploads
             if uri
-            == "gs://company-gemini-sync/connectors/oracle-qn-data-march-2025/state/latest_success.json"
+            == "gs://company-ingest-relay/connectors/oracle-qn-data-march-2025/state/latest_success.json"
         )
     )
     assert (
         state_payload["csv_path"]
-        == "gs://company-gemini-sync/connectors/oracle-qn-data-march-2025/latest/rows.csv"
+        == "gs://company-ingest-relay/connectors/oracle-qn-data-march-2025/latest/rows.csv"
     )
 
 
@@ -258,7 +258,7 @@ def test_publish_csv_artifacts_skips_latest_alias_when_disabled(monkeypatch) -> 
 
     output = OutputConfig.model_validate(
         {
-            "bucket": "gs://company-gemini-sync",
+            "bucket": "gs://company-ingest-relay",
             "prefix": "oracle-qn-data-march-2025",
             "format": "csv",
         }

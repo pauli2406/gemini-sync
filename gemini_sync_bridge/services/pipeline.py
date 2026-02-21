@@ -356,7 +356,7 @@ def run_connector(connector_path: str, push_run_id: str | None = None) -> Pipeli
         )
         send_teams_alert(
             settings,
-            title=f"Gemini Sync Bridge failed: {connector_id}",
+            title=f"IngestRelay failed: {connector_id}",
             message=str(exc),
             facts={
                 "connector": connector_id,

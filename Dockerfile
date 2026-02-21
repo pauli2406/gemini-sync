@@ -12,4 +12,4 @@ RUN pip install --no-cache-dir .
 
 EXPOSE 8080
 
-CMD ["gemini-sync-bridge", "serve", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["ingest-relay", "serve", "--host", "0.0.0.0", "--port", "8080"]

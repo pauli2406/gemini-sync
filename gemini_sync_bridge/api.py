@@ -72,7 +72,7 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title="Gemini Sync Bridge", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="IngestRelay", version="0.1.0", lifespan=lifespan)
 SessionDep = Annotated[Session, Depends(get_session)]
 PACKAGE_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(PACKAGE_DIR / "templates"))

@@ -23,7 +23,7 @@ spec:
     - department
     - role
   output:
-    bucket: gs://company-gemini-sync
+    bucket: gs://company-ingest-relay
     prefix: oracle-employees
     format: ndjson
   gemini:

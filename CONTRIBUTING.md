@@ -14,9 +14,9 @@
 
 ## Agentic Workflow
 
-- Follow `/Users/marcelpochert/Programming/ai/gemini-sync/AGENTS.md`.
+- Follow `AGENTS.md`.
 - Use Red -> Green -> Refactor for code and scenario evals.
-- Update mapped docs per `/Users/marcelpochert/Programming/ai/gemini-sync/docs/doc_sync_map.yaml`.
+- Update mapped docs per `docs/doc_sync_map.yaml`.
 
 ## Local Verification Commands
 

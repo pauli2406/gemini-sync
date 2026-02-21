@@ -240,10 +240,10 @@ fields:
     example: "[department, role]"
   spec.output:
     description: Artifact publishing destination settings.
-    example: "{bucket: gs://company-gemini-sync, prefix: hr-employees, format: ndjson, publishLatestAlias: false}"
+    example: "{bucket: gs://company-ingest-relay, prefix: hr-employees, format: ndjson, publishLatestAlias: false}"
   spec.output.bucket:
     description: Object store URI prefix for artifacts.
-    example: gs://company-gemini-sync
+    example: gs://company-ingest-relay
     operationalNotes: Supports gs:// for cloud and file:// for local development.
   spec.output.prefix:
     description: Connector-specific output path segment under connectors/.
