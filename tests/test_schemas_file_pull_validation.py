@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from gemini_sync_bridge.schemas import ConnectorConfig, SourceConfig
+from ingest_relay.schemas import ConnectorConfig, SourceConfig
 
 
 def _base_connector_spec() -> dict:

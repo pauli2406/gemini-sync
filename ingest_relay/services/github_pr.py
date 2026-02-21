@@ -7,8 +7,8 @@ from typing import Any
 
 import httpx
 
-from gemini_sync_bridge.studio_schemas import ProposalAction, ProposalResponse
-from gemini_sync_bridge.utils.http_clients import create_httpx_client
+from ingest_relay.studio_schemas import ProposalAction, ProposalResponse
+from ingest_relay.utils.http_clients import create_httpx_client
 
 
 def build_branch_name(action: str, connector_id: str, timestamp: str | None = None) -> str:

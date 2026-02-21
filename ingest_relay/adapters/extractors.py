@@ -16,9 +16,9 @@ import httpx
 from sqlalchemy import create_engine, text
 from tenacity import retry, stop_after_attempt, wait_exponential
 
-from gemini_sync_bridge.schemas import SourceConfig
-from gemini_sync_bridge.utils.http_clients import create_httpx_client
-from gemini_sync_bridge.utils.secrets import resolve_secret
+from ingest_relay.schemas import SourceConfig
+from ingest_relay.utils.http_clients import create_httpx_client
+from ingest_relay.utils.secrets import resolve_secret
 
 
 class ExtractionError(RuntimeError):

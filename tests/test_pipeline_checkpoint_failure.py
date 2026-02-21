@@ -6,10 +6,10 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import close_all_sessions, sessionmaker
 
-from gemini_sync_bridge.adapters.extractors import PullResult
-from gemini_sync_bridge.models import Base, ConnectorCheckpoint
-from gemini_sync_bridge.schemas import CanonicalDocument, ConnectorConfig, RunManifest
-from gemini_sync_bridge.services import pipeline
+from ingest_relay.adapters.extractors import PullResult
+from ingest_relay.models import Base, ConnectorCheckpoint
+from ingest_relay.schemas import CanonicalDocument, ConnectorConfig, RunManifest
+from ingest_relay.services import pipeline
 
 
 class FailingGeminiIngestionClient:

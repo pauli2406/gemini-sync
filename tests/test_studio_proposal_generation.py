@@ -5,7 +5,7 @@ from pathlib import Path
 
 import yaml
 
-from gemini_sync_bridge.services.studio import build_proposed_file_changes
+from ingest_relay.services.studio import build_proposed_file_changes
 
 
 def _base_draft(name: str) -> dict:

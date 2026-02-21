@@ -6,11 +6,11 @@ import io
 import json
 from datetime import UTC, datetime
 
-from gemini_sync_bridge.adapters.object_store import ObjectLocation
-from gemini_sync_bridge.schemas import CanonicalDocument, OutputConfig
-from gemini_sync_bridge.services import publisher
-from gemini_sync_bridge.services.publisher import _canonical_ndjson, _discovery_document_ndjson
-from gemini_sync_bridge.utils.doc_ids import to_discovery_doc_id
+from ingest_relay.adapters.object_store import ObjectLocation
+from ingest_relay.schemas import CanonicalDocument, OutputConfig
+from ingest_relay.services import publisher
+from ingest_relay.services.publisher import _canonical_ndjson, _discovery_document_ndjson
+from ingest_relay.utils.doc_ids import to_discovery_doc_id
 
 
 def _sample_doc(*, content: str = "Engineering Manager profile") -> CanonicalDocument:

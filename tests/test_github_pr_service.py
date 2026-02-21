@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from gemini_sync_bridge.services.github_pr import (
+from ingest_relay.services.github_pr import (
     GitHubPRService,
     build_branch_name,
     create_proposal_result,

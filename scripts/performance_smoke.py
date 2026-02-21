@@ -5,8 +5,8 @@ import argparse
 import json
 import time
 
-from gemini_sync_bridge.schemas import MappingConfig
-from gemini_sync_bridge.services.normalizer import normalize_records
+from ingest_relay.schemas import MappingConfig
+from ingest_relay.services.normalizer import normalize_records
 
 
 def main() -> int:

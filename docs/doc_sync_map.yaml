@@ -10,7 +10,7 @@ exempt_sources:
 rules:
   - name: runtime_and_api
     sources:
-      - "gemini_sync_bridge/**"
+      - "ingest_relay/**"
     docs_any_of:
       - "README.md"
       - "docs/start-here.mdx"

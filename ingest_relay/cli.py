@@ -5,10 +5,10 @@ import json
 import typer
 import uvicorn
 
-from gemini_sync_bridge.init_db import init_db
-from gemini_sync_bridge.services.pipeline import run_connector
-from gemini_sync_bridge.settings import get_settings
-from gemini_sync_bridge.utils.logging import configure_logging
+from ingest_relay.init_db import init_db
+from ingest_relay.services.pipeline import run_connector
+from ingest_relay.settings import get_settings
+from ingest_relay.utils.logging import configure_logging
 
 app = typer.Typer(help="IngestRelay command line interface")
 
@@ -39,7 +39,7 @@ def serve_command(
 ) -> None:
     settings = get_settings()
     configure_logging(settings.log_level)
-    uvicorn.run("gemini_sync_bridge.api:app", host=host, port=port, reload=False)
+    uvicorn.run("ingest_relay.api:app", host=host, port=port, reload=False)
 
 
 if __name__ == "__main__":

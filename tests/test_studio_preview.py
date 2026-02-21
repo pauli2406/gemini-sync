@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from gemini_sync_bridge.services.studio import preview_connector_draft
+from ingest_relay.services.studio import preview_connector_draft
 
 
 def test_preview_connector_draft_renders_sample_document() -> None:

@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import httpx
 
-from gemini_sync_bridge.adapters import extractors
-from gemini_sync_bridge.schemas import SourceConfig
+from ingest_relay.adapters import extractors
+from ingest_relay.schemas import SourceConfig
 
 
 def test_extract_rest_rows_paginates_and_tracks_watermark(monkeypatch) -> None:

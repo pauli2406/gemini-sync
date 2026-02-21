@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from gemini_sync_bridge.schemas import CanonicalDocument
-from gemini_sync_bridge.services.pipeline import _split_push_docs
+from ingest_relay.schemas import CanonicalDocument
+from ingest_relay.services.pipeline import _split_push_docs
 
 
 def test_split_push_docs_respects_operation() -> None:

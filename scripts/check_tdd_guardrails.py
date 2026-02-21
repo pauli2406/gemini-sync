@@ -5,7 +5,7 @@ import argparse
 import json
 import sys
 
-from gemini_sync_bridge.quality_gates import changed_files, evaluate_tdd_edd_guardrails
+from ingest_relay.quality_gates import changed_files, evaluate_tdd_edd_guardrails
 
 
 def main() -> int:

@@ -3,7 +3,7 @@ FROM python:3.11-slim
 WORKDIR /app
 
 COPY pyproject.toml README.md /app/
-COPY gemini_sync_bridge /app/gemini_sync_bridge
+COPY ingest_relay /app/ingest_relay
 COPY connectors /app/connectors
 COPY schemas /app/schemas
 COPY scripts /app/scripts

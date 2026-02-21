@@ -41,7 +41,7 @@ jobs:
           python scripts/check_tdd_guardrails.py
           python scripts/check_docs_drift.py
           python scripts/check_security_policy.py
-          pytest --cov=gemini_sync_bridge --cov-report=xml --cov-fail-under=60
+          pytest --cov=ingest_relay --cov-report=xml --cov-fail-under=60
 
       - name: Build release artifacts
         run: python -m build

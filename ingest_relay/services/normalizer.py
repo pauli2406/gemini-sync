@@ -7,8 +7,8 @@ from typing import Any
 
 from jinja2 import StrictUndefined, Template
 
-from gemini_sync_bridge.schemas import CanonicalDocument, MappingConfig
-from gemini_sync_bridge.security import validate_prompt_injection_safe
+from ingest_relay.schemas import CanonicalDocument, MappingConfig
+from ingest_relay.security import validate_prompt_injection_safe
 
 
 class NormalizationError(RuntimeError):

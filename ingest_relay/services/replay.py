@@ -4,7 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 
-from gemini_sync_bridge.schemas import CanonicalDocument
+from ingest_relay.schemas import CanonicalDocument
 
 
 class FaultInjectionError(RuntimeError):

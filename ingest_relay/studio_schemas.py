@@ -5,7 +5,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-from gemini_sync_bridge.schemas import CanonicalDocument
+from ingest_relay.schemas import CanonicalDocument
 
 ProposalAction = Literal["create", "edit", "clone", "delete", "pause", "resume"]
 

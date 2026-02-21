@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import sqlite3
 
-from gemini_sync_bridge.adapters import extractors
-from gemini_sync_bridge.schemas import SourceConfig
+from ingest_relay.adapters import extractors
+from ingest_relay.schemas import SourceConfig
 
 
 def test_extract_sql_rows_returns_rows_and_max_watermark(tmp_path, monkeypatch) -> None:

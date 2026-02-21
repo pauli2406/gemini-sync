@@ -10,21 +10,21 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from gemini_sync_bridge.adapters.extractors import (
+from ingest_relay.adapters.extractors import (
     extract_file_rows,
     extract_rest_rows,
     extract_sql_rows,
 )
-from gemini_sync_bridge.connector_loader import load_connector_config
-from gemini_sync_bridge.db import SessionLocal
-from gemini_sync_bridge.models import ConnectorCheckpoint, PushBatch, PushEvent, RunState
-from gemini_sync_bridge.schemas import CanonicalDocument
-from gemini_sync_bridge.services.diff_engine import apply_record_state, compute_diffs
-from gemini_sync_bridge.services.gemini_ingestion import GeminiIngestionClient
-from gemini_sync_bridge.services.normalizer import normalize_records
-from gemini_sync_bridge.services.observability import send_splunk_event, send_teams_alert
-from gemini_sync_bridge.services.publisher import publish_artifacts, publish_csv_artifacts
-from gemini_sync_bridge.settings import get_settings
+from ingest_relay.connector_loader import load_connector_config
+from ingest_relay.db import SessionLocal
+from ingest_relay.models import ConnectorCheckpoint, PushBatch, PushEvent, RunState
+from ingest_relay.schemas import CanonicalDocument
+from ingest_relay.services.diff_engine import apply_record_state, compute_diffs
+from ingest_relay.services.gemini_ingestion import GeminiIngestionClient
+from ingest_relay.services.normalizer import normalize_records
+from ingest_relay.services.observability import send_splunk_event, send_teams_alert
+from ingest_relay.services.publisher import publish_artifacts, publish_csv_artifacts
+from ingest_relay.settings import get_settings
 
 logger = logging.getLogger(__name__)
 

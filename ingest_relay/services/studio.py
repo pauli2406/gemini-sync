@@ -13,12 +13,12 @@ from jinja2 import Environment, StrictUndefined, Template, TemplateError, meta
 from sqlalchemy import desc, select
 from sqlalchemy.orm import Session
 
-from gemini_sync_bridge.models import ManualRunRequest, ProposalHistory, RunState
-from gemini_sync_bridge.schemas import CanonicalDocument, ConnectorConfig
-from gemini_sync_bridge.services.github_pr import GitHubPRService, build_branch_name
-from gemini_sync_bridge.services.secrets_registry import ManagedSecretsRegistry
-from gemini_sync_bridge.settings import get_settings
-from gemini_sync_bridge.studio_schemas import (
+from ingest_relay.models import ManualRunRequest, ProposalHistory, RunState
+from ingest_relay.schemas import CanonicalDocument, ConnectorConfig
+from ingest_relay.services.github_pr import GitHubPRService, build_branch_name
+from ingest_relay.services.secrets_registry import ManagedSecretsRegistry
+from ingest_relay.settings import get_settings
+from ingest_relay.studio_schemas import (
     CatalogItem,
     CatalogResponse,
     ConnectorDraft,
@@ -30,7 +30,7 @@ from gemini_sync_bridge.studio_schemas import (
     ProposalResponse,
     RunNowResponse,
 )
-from gemini_sync_bridge.utils.paths import configured_connectors_dir
+from ingest_relay.utils.paths import configured_connectors_dir
 
 
 def _repo_root() -> Path:

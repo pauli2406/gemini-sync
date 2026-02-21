@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from gemini_sync_bridge.models import RecordState
-from gemini_sync_bridge.schemas import CanonicalDocument
-from gemini_sync_bridge.services.diff_engine import compute_diffs
+from ingest_relay.models import RecordState
+from ingest_relay.schemas import CanonicalDocument
+from ingest_relay.services.diff_engine import compute_diffs
 
 
 def test_compute_diffs_detects_updates_and_deletes(db_session_factory) -> None:

@@ -30,7 +30,7 @@ tiers:
   tier_2:
     description: runtime, API, and operational logic
     patterns:
-      - "gemini_sync_bridge/**"
+      - "ingest_relay/**"
       - "scripts/**"
     merge:
       auto_merge: true

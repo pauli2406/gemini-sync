@@ -2,51 +2,41 @@
 
 ## Red Phase Evidence
 
-- Failing-first subset executed before production renames:
+- Tests were switched to `ingest_relay` imports before the package directory rename.
+- Failing-first command:
 
 ```bash
-./.venv/bin/pytest -q tests/test_openapi_scripts.py::test_export_openapi_writes_expected_file tests/test_github_pr_service.py::test_create_proposal_result_uses_repo_when_present tests/test_studio_proposal_generation.py::test_build_proposed_file_changes_for_create_and_pause_resume tests/test_project_identity.py
+./.venv/bin/pytest -q tests/test_project_identity.py tests/test_quality_gate_tdd.py tests/test_quality_gate_docs.py
 ```
 
-- Result: expected failures proving missing implementation:
-  - OpenAPI title mismatch (`Gemini Sync Bridge` vs `IngestRelay`)
-  - Studio Helm values path mismatch (`infra/helm/gemini-sync-bridge/values.yaml`)
-  - Pyproject package/script identity mismatch
-  - Splunk source mismatch (`gemini-sync-bridge` vs `ingest-relay`)
+- Expected failure observed:
+  - `ModuleNotFoundError: No module named 'ingest_relay'` while loading `tests/conftest.py`.
 
 ## Green Phase Evidence
 
-- Focused rename subset:
+- After `git mv gemini_sync_bridge ingest_relay` and full import/path updates:
 
 ```bash
-./.venv/bin/pytest -q tests/test_openapi_scripts.py::test_export_openapi_writes_expected_file tests/test_github_pr_service.py::test_create_proposal_result_uses_repo_when_present tests/test_studio_proposal_generation.py::test_build_proposed_file_changes_for_create_and_pause_resume tests/test_project_identity.py
+./.venv/bin/pytest -q tests/test_project_identity.py tests/test_quality_gate_tdd.py tests/test_quality_gate_docs.py
 ```
 
-- Result: `5 passed`
+- Result: `11 passed`
 
-- Connector reference regression coverage:
+- Full coverage run:
 
 ```bash
-./.venv/bin/pytest -q tests/test_connector_reference_scripts.py
+./.venv/bin/pytest --cov=ingest_relay --cov-report=xml --cov-fail-under=60
 ```
 
-- Result: `5 passed`
+- Result: `194 passed`, total coverage `87.20%`
 
-- Full test + coverage gate:
-
-```bash
-./.venv/bin/pytest --cov=gemini_sync_bridge --cov-report=xml --cov-fail-under=60
-```
-
-- Result: `194 passed`, coverage `87.20%`
-
-- Diff coverage gate:
+- Diff coverage:
 
 ```bash
 ./.venv/bin/diff-cover coverage.xml --compare-branch=origin/main --fail-under=92
 ```
 
-- Result: pass (`100%` diff coverage)
+- Result: pass (`98%` diff coverage)
 
 ## Commands
 
@@ -55,16 +45,13 @@
 ./.venv/bin/python scripts/check_connector_examples_allowlist_drift.py
 ./.venv/bin/python scripts/check_connector_examples_only.py
 ./.venv/bin/ruff check .
+./.venv/bin/python scripts/check_tdd_guardrails.py
+./.venv/bin/python scripts/check_docs_drift.py
 ./.venv/bin/python scripts/check_openapi_drift.py
 ./.venv/bin/python scripts/check_connector_reference_drift.py
 ./.venv/bin/python scripts/check_security_policy.py
 PATH=.venv/bin:$PATH ./.venv/bin/python scripts/run_dependency_audit.py
-
-# Local working-tree mode for drift guards (explicit changed-file args)
-./.venv/bin/python scripts/check_tdd_guardrails.py --changed-file <...>
-./.venv/bin/python scripts/check_docs_drift.py --changed-file <...>
-
-./.venv/bin/pytest --cov=gemini_sync_bridge --cov-report=xml --cov-fail-under=60
+./.venv/bin/pytest --cov=ingest_relay --cov-report=xml --cov-fail-under=60
 ./.venv/bin/diff-cover coverage.xml --compare-branch=origin/main --fail-under=92
 ./.venv/bin/python scripts/run_scenario_evals.py --registry evals/eval_registry.yaml --baseline evals/baseline.json
 npm --prefix website ci
@@ -76,4 +63,5 @@ npm --prefix website run build
 - Security policy: pass
 - Dependency audit: `No known vulnerabilities found`
 - Scenario eval registry: `22/22 passed`, critical pass rate `100%`
-- Docs build: pass
+- Docs site build: pass
+- Active-file `gemini_sync_bridge` refs: `0` (excluding intentional `.agent/tasks/*` history)

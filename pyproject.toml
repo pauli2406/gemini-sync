@@ -44,13 +44,13 @@ dev = [
 ]
 
 [project.scripts]
-ingest-relay = "gemini_sync_bridge.cli:app"
+ingest-relay = "ingest_relay.cli:app"
 
 [tool.hatch.build.targets.wheel]
-packages = ["gemini_sync_bridge"]
+packages = ["ingest_relay"]
 include = [
-  "gemini_sync_bridge/templates/**",
-  "gemini_sync_bridge/static/**",
+  "ingest_relay/templates/**",
+  "ingest_relay/static/**",
 ]
 
 [tool.pytest.ini_options]

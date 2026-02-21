@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 
-from gemini_sync_bridge.utils.doc_ids import to_discovery_doc_id
+from ingest_relay.utils.doc_ids import to_discovery_doc_id
 
 
 def test_to_discovery_doc_id_keeps_already_valid_ids() -> None:

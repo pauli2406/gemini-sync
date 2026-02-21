@@ -6,7 +6,7 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from gemini_sync_bridge.models import ConnectorCheckpoint, RunState
+from ingest_relay.models import ConnectorCheckpoint, RunState
 
 
 @dataclass

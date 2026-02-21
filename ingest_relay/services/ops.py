@@ -8,8 +8,8 @@ import yaml
 from sqlalchemy import desc, func, select
 from sqlalchemy.orm import Session
 
-from gemini_sync_bridge.models import ConnectorCheckpoint, PushBatch, RunState
-from gemini_sync_bridge.ops_schemas import (
+from ingest_relay.models import ConnectorCheckpoint, PushBatch, RunState
+from ingest_relay.ops_schemas import (
     ConnectorDetail,
     ConnectorHealthRow,
     OpsSnapshot,
@@ -19,9 +19,9 @@ from gemini_sync_bridge.ops_schemas import (
     RunRow,
     RunsPage,
 )
-from gemini_sync_bridge.services.slo import compute_slo_metrics
-from gemini_sync_bridge.settings import get_settings
-from gemini_sync_bridge.utils.paths import configured_connectors_dir
+from ingest_relay.services.slo import compute_slo_metrics
+from ingest_relay.settings import get_settings
+from ingest_relay.utils.paths import configured_connectors_dir
 
 
 def _connectors_dir() -> Path:

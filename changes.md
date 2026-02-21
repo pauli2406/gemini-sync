@@ -2,54 +2,37 @@
 
 ## Files Changed
 
-- Identity and runtime branding:
-  - `pyproject.toml`
-  - `gemini_sync_bridge/cli.py`
-  - `gemini_sync_bridge/__init__.py`
-  - `gemini_sync_bridge/api.py`
-  - `gemini_sync_bridge/services/pipeline.py`
-  - `gemini_sync_bridge/services/observability.py`
-  - `gemini_sync_bridge/templates/ops/dashboard.html`
-- Helm/infra migration:
-  - moved `infra/helm/gemini-sync-bridge/**` -> `infra/helm/ingest-relay/**`
-  - `gemini_sync_bridge/services/studio.py`
-  - `infra/k8s/kestra-postgres.yaml`
-  - `docker-compose.yml`
-  - `.env.example`
-  - `gemini_sync_bridge/settings.py`
-- Docs/site/repo references:
-  - `README.md`, `AGENTS.md`, `llm.txt`, `CONTRIBUTING.md`
-  - `docs/**` (commands, branding, examples, links)
-  - `website/docusaurus.config.ts`, `website/src/pages/index.tsx`
-  - `schemas/connector.schema.json`, `schemas/agent-task.schema.json`
-  - regenerated `website/static/openapi.json`
-  - regenerated `docs/reference/connector-fields.md`
-- Connector examples and tests:
-  - `connectors/*.yaml`, `schemas/connector.docs-meta.yaml`
-  - `tests/test_openapi_scripts.py`
-  - `tests/test_github_pr_service.py`
-  - `tests/test_outbound_proxy_support.py`
-  - `tests/test_studio_proposal_generation.py`
-  - `tests/test_publisher.py`
-  - added `tests/test_project_identity.py`
-  - updated `tests/test_connector_reference_scripts.py`
-- Eval and gate updates:
-  - added `evals/scenarios/ingest-relay-branding-contract.yaml`
-  - updated `evals/eval_registry.yaml`
-  - updated `scripts/run_dependency_audit.py`
-  - updated `scripts/export_connector_reference.py` (MDX-safe escaping)
+- Package/module hard cutover:
+  - renamed `gemini_sync_bridge/` -> `ingest_relay/`
+  - updated imports and dotted runtime references across runtime, scripts, and tests
+- Packaging/runtime entrypoints:
+  - `pyproject.toml` (`ingest_relay.cli:app`, wheel package/include paths)
+  - `ingest_relay/cli.py` (`uvicorn.run("ingest_relay.api:app", ...)`)
+  - `Dockerfile` (`COPY ingest_relay /app/ingest_relay`)
+- Governance/gate mappings:
+  - `ingest_relay/quality_gates.py`
+  - `.agent/risk_policy.yaml`
+  - `docs/doc_sync_map.yaml`
+- CI/docs workflow and coverage references:
+  - `.github/workflows/ci.yaml`
+  - `.github/workflows/release-canary.yaml`
+  - `.github/workflows/docs-deploy-vercel.yaml`
+  - `.github/pull_request_template.md`
+  - `README.md`, `CONTRIBUTING.md`, `llm.txt`, `docs/contributing/testing-ci.mdx`, `test_evidence.md`
+- Active documentation/code path updates:
+  - `docs/reference/api-reference.mdx`
+  - `runtime/README.md`
+  - `docs_evidence.md`, `task.md`, `changes.md`
 
 ## Behavior Changes
 
-- CLI command name changes from `gemini-sync-bridge` to `ingest-relay`.
-- Python distribution name changes from `gemini-sync-bridge` to `ingest-relay`.
-- API/OpenAPI title changes to `IngestRelay`.
-- Splunk source tag changes to `ingest-relay`.
-- Studio proposal changes target `infra/helm/ingest-relay/values.yaml`.
-- Operational defaults use `ingest_relay` DB identifiers and `ingest-relay` namespaces/slugs.
+- Python import namespace is now `ingest_relay` (hard cutover).
+- CLI package entrypoint now resolves to `ingest_relay.cli:app`.
+- CI coverage target now measures `ingest_relay`.
+- Docs deploy workflow now tracks `ingest_relay/api.py` for OpenAPI/docs-triggered deploys.
 
 ## Non-Functional Changes
 
-- Full docs/site hard-cutover to `IngestRelay` naming and new GitHub slug `pauli2406/ingest-relay`.
-- Added regression test coverage for project identity and connector-reference escaping.
-- Preserved module/import path `gemini_sync_bridge` as an intentional compatibility boundary.
+- Historical records under `.agent/tasks/*` intentionally left unchanged.
+- Existing stage-1 product branding (`IngestRelay`, `ingest-relay`) preserved.
+- OpenAPI artifact regenerated and connector reference drift revalidated post-cutover.

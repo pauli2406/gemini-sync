@@ -5,10 +5,10 @@ from typing import Any
 
 import httpx
 
-from gemini_sync_bridge.adapters import extractors
-from gemini_sync_bridge.schemas import SourceConfig
-from gemini_sync_bridge.services import gemini_ingestion, github_pr, observability
-from gemini_sync_bridge.utils.http_clients import create_httpx_client
+from ingest_relay.adapters import extractors
+from ingest_relay.schemas import SourceConfig
+from ingest_relay.services import gemini_ingestion, github_pr, observability
+from ingest_relay.utils.http_clients import create_httpx_client
 
 
 class _NoopContextClient:

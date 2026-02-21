@@ -5,8 +5,8 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 
-from gemini_sync_bridge import cli
-from gemini_sync_bridge.services import observability
+from ingest_relay import cli
+from ingest_relay.services import observability
 
 
 class _RecorderClient:
@@ -37,7 +37,7 @@ def test_pyproject_uses_ingest_relay_identity() -> None:
 
     assert project["name"] == "ingest-relay"
     assert "ingest-relay" in scripts
-    assert scripts["ingest-relay"] == "gemini_sync_bridge.cli:app"
+    assert scripts["ingest-relay"] == "ingest_relay.cli:app"
     assert "gemini-sync-bridge" not in scripts
 
 

@@ -1,35 +1,35 @@
 # Task
 
-- Task ID: rename-ingestrelay-hard-cutover
-- Title: Hard-cutover rename from gemini-sync to IngestRelay
+- Task ID: stage2-module-hard-cutover
+- Title: Full Python module rename from gemini_sync_bridge to ingest_relay
 - Owner Role: planner
 - Risk Tier: tier_3
 
 ## Intent
 
-Execute a full hard-cutover rename to `IngestRelay` across runtime branding, package/CLI identity, infra chart pathing, docs/site references, and operational defaults while keeping Python module path `gemini_sync_bridge` unchanged.
+Complete stage 2 of the IngestRelay rename by hard-cutover renaming the Python package directory and namespace from `gemini_sync_bridge` to `ingest_relay`, including imports, packaging metadata, workflow paths, coverage flags, and governance gate patterns.
 
 ## Acceptance Criteria
 
-1. Package and CLI identity are renamed to `ingest-relay` in `pyproject.toml`.
-2. User-facing runtime/API/docs/UI branding is renamed to `IngestRelay`.
-3. Helm chart path and template identifiers move from `infra/helm/gemini-sync-bridge` to `infra/helm/ingest-relay` and runtime references are updated.
-4. Operational defaults/examples use `ingest_relay`/`ingest-relay` (DB names, namespaces, image repo, sample buckets).
-5. Docs/site/github links/command examples are updated to `ingest-relay` and `pauli2406/ingest-relay`.
-6. New rename eval scenario is registered and passing.
-7. Required local gates pass and required handoff artifacts are updated.
+1. Package directory is renamed to `ingest_relay/` and no active runtime/tests/scripts import `gemini_sync_bridge`.
+2. `pyproject.toml` console script points to `ingest_relay.cli:app` and wheel package/include paths use `ingest_relay/**`.
+3. Uvicorn app path in CLI uses `ingest_relay.api:app`.
+4. CI/docs/workflows use `--cov=ingest_relay` and docs deploy trigger path `ingest_relay/api.py`.
+5. Governance patterns are updated from `gemini_sync_bridge/**` to `ingest_relay/**` in gate/policy mapping files.
+6. Red phase evidence captures expected failure before package move; full gate suite is green after cutover.
+7. Historical `.agent/tasks/*` files remain unchanged.
 
 ## Specialist Role Mapping
 
 1. Planner Agent
-   - Defined cutover scope, canonical rename map, and acceptance criteria.
+   - Sequenced hard-cutover namespace migration and governed scope (active files only).
 2. Implementer Agent
-   - Applied code/config/infra/docs/site renames and moved Helm chart directory.
+   - Renamed package directory, updated imports/references, and migrated packaging/workflow paths.
 3. Test/Eval Agent
-   - Performed failing-first test updates, added `tests/test_project_identity.py`, added `evals/scenarios/ingest-relay-branding-contract.yaml`, and validated green gates.
+   - Updated tests first, captured failing-first import error, then validated green test/eval gates.
 4. Docs Agent
-   - Updated README/docs/website content and docs consistency tokens.
+   - Updated active docs and references to `ingest_relay` paths and coverage commands.
 5. Security Agent
-   - Ran security policy checks and dependency audit; fixed audit transition exclusion.
+   - Re-ran security policy and dependency audit checks after namespace migration.
 6. Release Agent
-   - Classified as Tier 3, validated full gate outcomes, and documented merge/rollback constraints.
+   - Maintained Tier 3 classification and verified all required gates for release readiness.

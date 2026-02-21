@@ -25,18 +25,18 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
-from gemini_sync_bridge.db import SessionLocal, get_session
-from gemini_sync_bridge.models import IdempotencyKey, ManualRunRequest, PushBatch, PushEvent
-from gemini_sync_bridge.ops_schemas import ConnectorDetail, OpsSnapshot, RunDetail
-from gemini_sync_bridge.schemas import CanonicalDocument, PushResponse
-from gemini_sync_bridge.security import PromptInjectionDetectedError, validate_prompt_injection_safe
-from gemini_sync_bridge.services.ops import (
+from ingest_relay.db import SessionLocal, get_session
+from ingest_relay.models import IdempotencyKey, ManualRunRequest, PushBatch, PushEvent
+from ingest_relay.ops_schemas import ConnectorDetail, OpsSnapshot, RunDetail
+from ingest_relay.schemas import CanonicalDocument, PushResponse
+from ingest_relay.security import PromptInjectionDetectedError, validate_prompt_injection_safe
+from ingest_relay.services.ops import (
     build_connector_detail,
     build_ops_snapshot,
     build_run_detail,
 )
-from gemini_sync_bridge.services.pipeline import run_connector
-from gemini_sync_bridge.services.studio import (
+from ingest_relay.services.pipeline import run_connector
+from ingest_relay.services.studio import (
     build_catalog,
     enqueue_manual_run,
     get_connector_editor,
@@ -46,8 +46,8 @@ from gemini_sync_bridge.services.studio import (
     upsert_secret,
     validate_connector_draft,
 )
-from gemini_sync_bridge.settings import get_settings
-from gemini_sync_bridge.studio_schemas import (
+from ingest_relay.settings import get_settings
+from ingest_relay.studio_schemas import (
     CatalogResponse,
     ConnectorEditorResponse,
     DraftValidationResponse,
@@ -61,8 +61,8 @@ from gemini_sync_bridge.studio_schemas import (
     UpsertSecretRequest,
     ValidateDraftRequest,
 )
-from gemini_sync_bridge.utils.logging import configure_logging
-from gemini_sync_bridge.utils.paths import configured_connectors_dir
+from ingest_relay.utils.logging import configure_logging
+from ingest_relay.utils.paths import configured_connectors_dir
 
 
 @asynccontextmanager

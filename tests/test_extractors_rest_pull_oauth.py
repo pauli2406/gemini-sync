@@ -3,8 +3,8 @@ from __future__ import annotations
 import httpx
 import pytest
 
-from gemini_sync_bridge.adapters import extractors
-from gemini_sync_bridge.schemas import SourceConfig
+from ingest_relay.adapters import extractors
+from ingest_relay.schemas import SourceConfig
 
 
 def _response(method: str, url: str, status: int, payload: dict | list) -> httpx.Response:

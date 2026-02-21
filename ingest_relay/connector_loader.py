@@ -4,7 +4,7 @@ from pathlib import Path
 
 import yaml
 
-from gemini_sync_bridge.schemas import ConnectorConfig
+from ingest_relay.schemas import ConnectorConfig
 
 
 def load_connector_config(path: str | Path) -> ConnectorConfig:

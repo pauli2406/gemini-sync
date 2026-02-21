@@ -17,7 +17,7 @@ class GateResult:
 
 
 PRODUCTION_IMPACT_PATTERNS = [
-    "gemini_sync_bridge/**",
+    "ingest_relay/**",
     "connectors/**",
     "schemas/**",
     "flows/**",
@@ -28,7 +28,7 @@ PRODUCTION_IMPACT_PATTERNS = [
 ]
 
 BEHAVIOR_IMPACT_PATTERNS = [
-    "gemini_sync_bridge/**",
+    "ingest_relay/**",
     "connectors/**",
     "schemas/**",
     "flows/**",

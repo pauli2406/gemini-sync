@@ -8,8 +8,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from gemini_sync_bridge import api
-from gemini_sync_bridge.models import Base, ManualRunRequest
+from ingest_relay import api
+from ingest_relay.models import Base, ManualRunRequest
 
 
 def _session_factory():

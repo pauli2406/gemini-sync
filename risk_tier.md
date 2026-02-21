@@ -2,35 +2,34 @@
 
 - Assigned Tier: `tier_3`
 - Rationale:
-  - Infrastructure-critical paths changed in `infra/**` (Helm chart directory rename, template identifier rename, values defaults, k8s namespace/db defaults).
-  - Release-facing messaging changed in `.github/workflows/release-canary.yaml`.
-  - Runtime/API/UI branding and operational defaults were changed repository-wide.
+  - `.agent/risk_policy.yaml` was modified (Tier 3 pattern includes `.agent/**`).
+  - Full package namespace hard-cutover impacted runtime imports, scripts, tests, CI workflows, and policy mappings.
+  - Existing branch already includes infrastructure/release-sensitive changes from stage 1.
 
 ## Required Gates
 
 - Connector schema validation
-- Connector examples allowlist drift gate
-- Examples-only connector change gate
+- Connector examples allowlist + examples-only guards
 - Lint (`ruff check .`)
 - TDD/EDD guardrails
 - Docs drift + consistency
-- OpenAPI drift gate
-- Connector reference drift gate
-- Tests + coverage threshold
-- Diff coverage threshold
-- Security policy validation
+- OpenAPI drift check
+- Connector reference drift check
+- Security policy check
 - Dependency vulnerability audit
+- Pytest coverage gate
+- Diff coverage gate
 - Scenario eval thresholds
 - Docs site build
 
 ## Merge Constraints
 
 - Tier 3 is never auto-merge.
-- Requires reviewer bot plus at least one human reviewer.
-- Canary/release checks must be green before rollout.
+- Requires reviewer bot + one human reviewer minimum.
+- Release/canary checks must remain green.
 
 ## Rollout / Rollback
 
-1. Merge only after all Tier 3 gates are green.
-2. Validate canary signals and SLO gates before broad rollout.
-3. Roll back by reverting this rename commit set if runtime, docs, or deployment naming regressions are detected.
+1. Merge only after full gate suite remains green.
+2. Validate canary and SLO gates before wider rollout.
+3. Roll back via revert if namespace/path regressions appear in runtime, workflows, or docs deployment.

@@ -7,9 +7,9 @@ import google.auth
 from google.auth.transport.requests import AuthorizedSession
 from tenacity import retry, stop_after_attempt, wait_exponential
 
-from gemini_sync_bridge.schemas import CanonicalDocument, GeminiConfig, RunManifest
-from gemini_sync_bridge.settings import Settings
-from gemini_sync_bridge.utils.doc_ids import to_discovery_doc_id
+from ingest_relay.schemas import CanonicalDocument, GeminiConfig, RunManifest
+from ingest_relay.settings import Settings
+from ingest_relay.utils.doc_ids import to_discovery_doc_id
 
 
 class GeminiIngestionError(RuntimeError):

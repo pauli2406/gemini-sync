@@ -3,7 +3,7 @@ from collections.abc import Generator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from gemini_sync_bridge.settings import get_settings
+from ingest_relay.settings import get_settings
 
 settings = get_settings()
 engine = create_engine(settings.database_url, future=True)

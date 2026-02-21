@@ -1,5 +1,5 @@
-from gemini_sync_bridge.db import engine
-from gemini_sync_bridge.models import Base
+from ingest_relay.db import engine
+from ingest_relay.models import Base
 
 
 def init_db() -> None:

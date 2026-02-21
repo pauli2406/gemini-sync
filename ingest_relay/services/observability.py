@@ -4,8 +4,8 @@ import logging
 from datetime import UTC, datetime
 from typing import Any
 
-from gemini_sync_bridge.settings import Settings
-from gemini_sync_bridge.utils.http_clients import create_httpx_client
+from ingest_relay.settings import Settings
+from ingest_relay.utils.http_clients import create_httpx_client
 
 logger = logging.getLogger(__name__)
 

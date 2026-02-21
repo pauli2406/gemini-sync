@@ -3,8 +3,8 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from types import SimpleNamespace
 
-from gemini_sync_bridge.models import RunState
-from gemini_sync_bridge.services import ops
+from ingest_relay.models import RunState
+from ingest_relay.services import ops
 
 
 def test_ops_snapshot_contract_and_cache_headers(client, db_session_factory) -> None:

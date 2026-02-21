@@ -7,9 +7,9 @@ import json
 from datetime import UTC, datetime
 from typing import Any
 
-from gemini_sync_bridge.adapters.object_store import GCSObjectStore, LocalObjectStore, ObjectStore
-from gemini_sync_bridge.schemas import CanonicalDocument, OutputConfig, RunManifest
-from gemini_sync_bridge.utils.doc_ids import to_discovery_doc_id
+from ingest_relay.adapters.object_store import GCSObjectStore, LocalObjectStore, ObjectStore
+from ingest_relay.schemas import CanonicalDocument, OutputConfig, RunManifest
+from ingest_relay.utils.doc_ids import to_discovery_doc_id
 
 
 def _canonical_ndjson(docs: list[CanonicalDocument]) -> str:

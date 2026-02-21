@@ -7,8 +7,8 @@ from datetime import UTC, datetime
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from gemini_sync_bridge.models import ManagedSecret
-from gemini_sync_bridge.studio_schemas import ManagedSecretMetadata
+from ingest_relay.models import ManagedSecret
+from ingest_relay.studio_schemas import ManagedSecretMetadata
 
 
 class SecretEncryptionError(RuntimeError):

@@ -5,7 +5,7 @@ import argparse
 import json
 import sys
 
-from gemini_sync_bridge.quality_gates import (
+from ingest_relay.quality_gates import (
     changed_files,
     evaluate_docs_drift,
     load_doc_sync_map,

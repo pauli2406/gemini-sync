@@ -2,7 +2,7 @@
 
 Runtime implementation lives in the Python package:
 
-- `gemini_sync_bridge/`
+- `ingest_relay/`
 
 The package includes:
 

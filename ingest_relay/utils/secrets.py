@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import os
 
-from gemini_sync_bridge.db import SessionLocal
-from gemini_sync_bridge.services.secrets_registry import ManagedSecretsRegistry
-from gemini_sync_bridge.settings import get_settings
+from ingest_relay.db import SessionLocal
+from ingest_relay.services.secrets_registry import ManagedSecretsRegistry
+from ingest_relay.settings import get_settings
 
 
 class SecretResolutionError(RuntimeError):

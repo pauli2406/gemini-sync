@@ -8,7 +8,7 @@ from pathlib import Path
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from gemini_sync_bridge.services.slo import compute_slo_metrics
+from ingest_relay.services.slo import compute_slo_metrics
 
 
 def main() -> int:

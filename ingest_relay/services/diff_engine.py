@@ -6,8 +6,8 @@ from datetime import UTC, datetime
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
-from gemini_sync_bridge.models import RecordState
-from gemini_sync_bridge.schemas import CanonicalDocument, DeletePolicy
+from ingest_relay.models import RecordState
+from ingest_relay.schemas import CanonicalDocument, DeletePolicy
 
 
 def _delete_checksum(doc_id: str) -> str:
