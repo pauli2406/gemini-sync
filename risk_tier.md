@@ -2,9 +2,9 @@
 
 - Assigned Tier: `tier_0`
 - Rationale:
-  - Change scope is documentation only (remove one how-to page and clean links/index entries).
+  - Change scope is docs plus docs-deploy workflow command adjustment.
   - No runtime code, API, deployment config, or security policy behavior changed.
-  - Validation focused on docs consistency and successful docs site build.
+  - Validation focused on docs consistency, successful docs site build, and removal of failing local Vercel build path.
 
 ## Required Gates
 

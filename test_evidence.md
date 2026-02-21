@@ -13,6 +13,9 @@
   - Result: pass.
 - `npm --prefix website run build`
   - Result: pass; static docs build generated successfully.
+- `cd website && vercel build --yes`
+  - Result before workflow fix: fails reproducibly with `Error: spawn sh ENOENT`.
+- Workflow update removes local `vercel build` usage and deploys with `vercel deploy` directly.
 
 ## Commands
 
@@ -20,4 +23,5 @@
 ./.venv/bin/python scripts/check_docs_drift.py
 rg -n "migrate-custom-connectors|Migrate Custom Connectors" docs website llm.txt
 npm --prefix website run build
+cd website && vercel build --yes
 ```

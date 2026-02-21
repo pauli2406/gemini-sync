@@ -1,13 +1,13 @@
 # Task
 
 - Task ID: docs-remove-migrate-custom-connectors
-- Title: Remove unpublished "Migrate Custom Connectors" documentation
+- Title: Remove unpublished migration docs and fix Vercel preview workflow
 - Owner Role: planner
 - Risk Tier: tier_0
 
 ## Intent
 
-Remove the standalone migration guide and all references to it, because version 1 is not published and there are no users who need migration instructions yet.
+Remove the standalone migration guide and all references to it, because version 1 is not published and there are no users who need migration instructions yet. Also fix docs preview/prod deployment workflow to avoid local `vercel build` failures (`spawn sh ENOENT`) in CI.
 
 ## Acceptance Criteria
 
@@ -15,15 +15,16 @@ Remove the standalone migration guide and all references to it, because version 
 2. No docs navigation or cross-links reference `/docs/how-to/migrate-custom-connectors`.
 3. Docs mapping/index files do not reference the removed page.
 4. Docs site build passes after removal.
+5. Vercel preview/production jobs avoid `vercel build` and deploy successfully via `vercel deploy`.
 
 ## Specialist Role Mapping
 
 1. Planner Agent
    - Scoped this as a Tier 0 docs-only removal and defined acceptance criteria around link/navigation cleanup.
 2. Implementer Agent
-   - Removed the migration page and updated docs content, sidebars, and doc maps.
+   - Removed the migration page and updated docs content, sidebars, and doc maps; patched docs deploy workflow commands.
 3. Test/Eval Agent
-   - Verified no dangling references remain and docs build stays green.
+   - Verified no dangling references remain, docs build stays green, and the failing `vercel build` command path is no longer used.
 4. Docs Agent
    - Updated start pages and related guides to remove migration-specific links.
 5. Security Agent
