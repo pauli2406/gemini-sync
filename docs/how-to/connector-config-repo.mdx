@@ -4,8 +4,6 @@ title: Connector Config Repository
 
 This guide covers the full setup and day-to-day use of a dedicated **connector-config repository** — a separate git repo that holds your connector YAML files, tests, and evals, keeping them independent from the `ingest-relay` runtime repo.
 
-If you currently store connectors inside the runtime repo and want to move them out, see [Migrate Custom Connectors](/docs/how-to/migrate-custom-connectors) first, then return here for the ongoing workflow.
-
 ## Why a Separate Repo?
 
 | Runtime repo (`ingest-relay`) | Connector-config repo (`my-connectors`) |
@@ -205,7 +203,6 @@ Use the templates from the runtime repo's `.agent/templates/` as the starting po
 ## Related
 
 - [Connector Authoring](/docs/how-to/connector-authoring) — field-by-field YAML authoring guide
-- [Migrate Custom Connectors](/docs/how-to/migrate-custom-connectors) — moving connectors out of the runtime repo
 - [File Pull](/docs/how-to/connectors/file-pull) — `file_pull` mode reference including `source.path` behaviour
 - [Connector Fields](/docs/reference/connector-fields) — full field reference table
 - [Connector Model](/docs/concepts/connector-model) — conceptual overview of the storage model

@@ -28,7 +28,6 @@ Canonical Docs Map
 - How-to:
   - docs/how-to/connector-authoring.mdx
   - docs/how-to/connector-studio.mdx
-  - docs/how-to/migrate-custom-connectors.mdx
   - docs/how-to/operate-runs.mdx
   - docs/how-to/troubleshooting.mdx
   - docs/how-to/load-testing.mdx

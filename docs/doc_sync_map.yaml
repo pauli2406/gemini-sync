@@ -16,7 +16,6 @@ rules:
       - "docs/start-here.mdx"
       - "docs/tutorials/getting-started-local.mdx"
       - "docs/tutorials/gcp-onboarding.mdx"
-      - "docs/how-to/migrate-custom-connectors.mdx"
       - "docs/how-to/operate-runs.mdx"
       - "docs/concepts/architecture.mdx"
       - "docs/reference/api-reference.mdx"
@@ -41,7 +40,6 @@ rules:
       - "docs/reference/providers/file.mdx"
       - "docs/reference/providers/future.mdx"
       - "docs/reference/connector-fields.md"
-      - "docs/how-to/migrate-custom-connectors.mdx"
       - "docs/tutorials/gcp-onboarding.mdx"
 
   - name: orchestrator_and_deploy
@@ -72,7 +70,6 @@ rules:
       - "README.md"
       - "AGENTS.md"
       - "docs/start-here.mdx"
-      - "docs/how-to/migrate-custom-connectors.mdx"
       - "docs/how-to/connector-authoring.mdx"
       - "docs/reference/connector-fields.md"
       - "docs/contributing/testing-ci.mdx"
